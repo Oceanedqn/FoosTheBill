@@ -2,7 +2,7 @@ import { Controller, Get, Post, Param, Body, Put, Delete, HttpStatus, NotFoundEx
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { AllExceptionsFilter } from 'src/common/filters/http-exceptions.filter';
+import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
 
 @Controller('users')
 @UseFilters(new AllExceptionsFilter())
