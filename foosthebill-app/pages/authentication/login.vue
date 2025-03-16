@@ -10,13 +10,13 @@
             <form @submit.prevent="handleLogin" class="w-full">
                 <div class="mb-4">
                     <label for="email" class="block text-sm font-medium">{{ $t('email') }}</label>
-                    <input v-model="credentials.email" type="email" id="email" placeholder="Email" required
+                    <input v-model="credentials.email" type="email" id="email" :placeholder="$t('email')" required
                         class="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300">
                 </div>
                 <div class="mb-4">
                     <label for="password" class="block text-sm font-medium">{{ $t('password') }}</label>
-                    <input v-model="credentials.password" type="password" id="password" placeholder="Password" required
-                        class="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300">
+                    <input v-model="credentials.password" type="password" id="password" :placeholder="$t('password')"
+                        required class="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300">
                 </div>
                 <button type="submit" class="w-full py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">{{
                     $t('login') }}</button>
