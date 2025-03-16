@@ -15,15 +15,10 @@ import { Ranking } from './rankings/ranking.entity';
 import { MatchResult } from './match-results/match-result.entity';
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
-
-// Check if value is defined in environment variables
-const getEnv = (key: string): string => {
-  const value = process.env[key];
-  if (!value) {
-    throw new Error(`Missing environment variable: ${key}`);
-  }
-  return value;
-};
+import { AuthController } from './auth/auth.controller';
+import { AuthService } from './auth/auth.service';
+import { AuthModule } from './auth/auth.module';
+import { getEnv } from './utils/env.utils';
 
 @Module({
   providers: [
@@ -31,6 +26,7 @@ const getEnv = (key: string): string => {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
     },
+    AuthService,
   ],
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -57,7 +53,9 @@ const getEnv = (key: string): string => {
     MatchesModule,
     RankingsModule,
     MatchResultsModule,
+    AuthModule,
   ],
+  controllers: [AuthController],
 })
 
 export class AppModule { }

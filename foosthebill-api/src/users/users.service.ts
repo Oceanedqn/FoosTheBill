@@ -57,15 +57,26 @@ export class UsersService {
 
     // Find one user
     async findOne(id: string): Promise<UserResponseDTO> {
+        const user = await this.userRepository.findOne({ where: { id } });
+
+        if (!user) {
+            throw new NotFoundException(`L'utilisateur n'a pas été trouvé`);
+        }
+
+        const { password, ...userWithoutPassword } = user;
+        return userWithoutPassword as UserResponseDTO;
+    }
+
+    // TODO : Add a method to find a user by email
+    async findUserByEmail(email: string): Promise<User> {
         try {
-            const user = await this.userRepository.findOne({ where: { id } });
+            const user = await this.userRepository.findOne({ where: { email } });
 
             if (!user) {
-                throw new NotFoundException(`User with id ${id} not found`);
+                throw new NotFoundException(`User with email ${email} not found`);
             }
 
-            const { password, ...userWithoutPassword } = user;
-            return userWithoutPassword as UserResponseDTO;
+            return user;
         } catch (error) {
             if (error instanceof NotFoundException) {
                 throw error;
@@ -79,7 +90,7 @@ export class UsersService {
     async update(id: string, updateUserDto: UpdateUserDto): Promise<void> {
         const existingUser = await this.userRepository.findOne({ where: { id } });
         if (!existingUser) {
-            throw new NotFoundException(`User with id ${id} not found`);
+            throw new NotFoundException(`L'utilisateur n'a pas été trouvé`);
         }
         try {
             await this.userRepository.update(id, updateUserDto);
@@ -92,7 +103,7 @@ export class UsersService {
     async updatePassword(id: string, newPassword: string): Promise<void> {
         const existingUser = await this.userRepository.findOne({ where: { id } });
         if (!existingUser) {
-            throw new NotFoundException(`User with id ${id} not found`);
+            throw new NotFoundException(`L'utilisateur n'a pas été trouvé`);
         }
         try {
             const hashedPassword = await this.hashPassword(newPassword);
@@ -104,14 +115,10 @@ export class UsersService {
 
     // Delete user
     async remove(id: string): Promise<void> {
-        const existingUser = await this.findOne(id);  // Vérification via la méthode findOne
-        if (!existingUser) {
-            throw new NotFoundException(`User with id ${id} not found`);
+        const user = await this.findOne(id);  // Vérifie si l'utilisateur existe
+        if (!user) {
+            throw new NotFoundException(`L'utilisateur n'a pas été trouvé`);
         }
-        try {
-            await this.userRepository.delete(id);
-        } catch (error) {
-            throw new InternalServerErrorException('Error deleting user', error.message);
-        }
+        await this.userRepository.delete(id);  // Supprime l'utilisateur si trouvé
     }
 }
