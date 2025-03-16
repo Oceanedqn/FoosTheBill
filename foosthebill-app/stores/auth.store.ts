@@ -37,7 +37,7 @@ export const useAuthStore = defineStore('auth', {
     logout(router: any) {
       this.accessToken = null; // Remove the authentication token
       localStorage.removeItem('accessToken'); // Remove the token from localStorage
-      router.push('authentication');
+      router.push('authentication/login');
     },
 
     async register(credentials: { name: string, firstname: string, email: string, password: string }, router: any) {
