@@ -1,34 +1,38 @@
 <template>
     <header class="bg-background-alternatif text-white p-4 shadow-md">
         <div class="flex w-full justify-between items-center">
-            <!-- Texte Okeah à gauche -->
-            <div class="text-xl font-bold text-primary">Okeah</div>
-
-            <!-- Liens de navigation à droite -->
-            <nav class="flex space-x-4 items-center text-primary">
-                <NuxtLink :to="`/${$i18n.locale}/`">{{ $t('home') }}</NuxtLink>
-                <!-- <NuxtLink :to="`/${$i18n.locale}/food-rate`">Food rate</NuxtLink>
-                <NuxtLink :to="`/${$i18n.locale}/blog`">Blog</NuxtLink> -->
+            <div class="flex space-x-2">
+                <div class=" text-xl font-bold text-primary">Foos the bill</div>
                 <ThemeSwitcher />
-                <LanguageSwitcher />
+            </div>
+
+            <nav class="flex space-x-4 items-center text-primary">
+                <NuxtLink :to="localePath('/')">{{ $t('home') }}</NuxtLink>
+
+
+            </nav>
+            <nav class="flex space-x-4 items-center text-primary">
+                <button class="cursor-pointer text-secondary hover:text-secondary-dark" @click="logout">
+                    {{ $t('logout') }} <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
             </nav>
         </div>
     </header>
 </template>
 
-<script>
-export default {
-    data() {
-        return {
-            themeClass: 'vintage-theme',
-        };
-    },
-    mounted() {
-        // Applique la classe du thème au body pour activer le thème
-        document.body.classList.add(this.themeClass);
-    },
-    beforeDestroy() {
-        document.body.classList.remove(this.themeClass);
-    }
-};
+<script setup>
+
+// Using the setup() API
+const localePath = useLocalePath();
+const authStore = useAuthStore();
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+async function logout() {
+    authStore.logout(router);
+}
+
+// Apply the theme class when the component is mounted
+
 </script>

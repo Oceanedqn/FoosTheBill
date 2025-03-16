@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, InternalServerErrorException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './user.entity';
+import { Role, User } from './user.entity';
 import * as bcrypt from 'bcrypt';
 import { UserResponseDTO } from './dto/user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -28,6 +28,8 @@ export class UsersService {
                 throw new ConflictException('User with this email already exists');
             }
 
+            createUserDto.role = Role.PARTICIPANT;
+            createUserDto.creation_date = new Date();
             createUserDto.password = await this.hashPassword(createUserDto.password);
 
             const createdUser = await this.userRepository.save(createUserDto);

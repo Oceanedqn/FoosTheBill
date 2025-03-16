@@ -2,23 +2,30 @@
   <div class="flex flex-col min-h-screen">
     <NuxtLoadingIndicator />
     <NuxtRouteAnnouncer />
-    <Header />
-    <div class="w-full max-w-6xl mx-auto mt-2 p-6 bg-white shadow-lg rounded-lg flex-grow">
-      <NuxtPage />
-    </div>
+
+    <template v-if="isAuthenticated">
+      <Header />
+      <div class="w-full max-w-6xl mx-auto mt-2 p-6 bg-white shadow-lg rounded-lg flex-grow">
+        <NuxtPage />
+      </div>
+    </template>
+    <template v-else>
+      <div class="w-full max-w-6xl mx-auto flex-grow">
+        <NuxtPage />
+      </div>
+    </template>
+
   </div>
 </template>
 
+<script setup>
+import { computed } from 'vue'
+import { useAuthStore } from '~/stores/auth.store'
 
-<style>
-.page-enter-active,
-.page-leave-active {
-  transition: all 0.4s;
-}
+const authStore = useAuthStore()
 
-.page-enter-from,
-.page-leave-to {
-  opacity: 0;
-  filter: blur(1rem);
-}
-</style>
+// Verify if the user is authenticated
+const isAuthenticated = computed(() => authStore.isLoggedIn)
+</script>
+
+<style></style>

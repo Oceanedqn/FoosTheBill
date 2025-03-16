@@ -3,5 +3,20 @@
   "home": "Accueil",
   "change_language": "Changer la langue",
   "close": "Fermer",
-  "choice_theme": "Choisir un thème"
+  "choice_theme": "Choisir un thème",
+  "connection": "Connexion",
+  "email": "Email",
+  "password": "Mot de passe",
+  "login": "Se connecter",
+  "create_account": "Créer un compte",
+  "no_account": "Pas de compte ?",
+
+  "inscription": "Inscription",
+  "name": "Nom",
+  "firstname": "Prénom",
+  "register": "S'inscrire",
+  "already_account": "Déjà un compte ?",
+
+   "logout": "Deconnexion"
+
 }
