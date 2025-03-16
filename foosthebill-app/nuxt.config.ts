@@ -8,10 +8,6 @@ export default defineNuxtConfig({
     strict: true // Active strict verification
   },
 
-  app: {
-    pageTransition: { name: 'page', mode: 'out-in' }
-  },
-
   css: ['~/assets/css/main.css', '@/assets/css/themes.css', '@fortawesome/fontawesome-free/css/all.css'],
 
   vite: {
@@ -19,12 +15,16 @@ export default defineNuxtConfig({
       tailwindcss(),
     ],
   },
-  modules: ['@nuxtjs/i18n'],
+  modules: ['@nuxtjs/i18n', 'nuxt-auth-utils', '@pinia/nuxt'],
+  plugins: [
+    '~/plugins/auth.plugin.ts'
+  ],
   i18n: {
     lazy: true,
     langDir: 'locales/',
-    strategy: 'prefix_and_default',
+    strategy: 'no_prefix',
     defaultLocale: "fr",
+    detectBrowserLanguage: false,
     locales: [
       {
         code: 'fr',

@@ -3,5 +3,19 @@
   "home": "Home",
   "change_language": "Change Language",
   "close": "Close",
-  "choice_theme": "Choose a theme"
+  "choice_theme": "Choose a theme",
+  "connection": "Connection",
+  "email": "Email",
+  "password": "Password",
+  "login": "Login",
+  "create_account": "Create an account",
+  
+  "no_account": "No account ?",
+  "inscription": "Inscription",
+  "name": "Name",
+  "firstname": "First name",
+  "register": "Register",
+  "already_account": "Already an account ?",
+
+  "logout": "Logout"
 }
