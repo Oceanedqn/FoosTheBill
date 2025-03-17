@@ -18,8 +18,9 @@
                     <input v-model="credentials.password" type="password" id="password" :placeholder="$t('password')"
                         required class="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300">
                 </div>
-                <button type="submit" class="w-full py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">{{
-                    $t('login') }}</button>
+                <button type="submit"
+                    class="w-full py-2 bg-primary cursor-pointer text-white rounded-lg hover:bg-primary-dark">{{
+                        $t('login') }}</button>
             </form>
             <p class="mt-4 text-sm">
                 {{ $t('no_account') }}

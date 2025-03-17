@@ -6,5 +6,20 @@ export class UserResponseDTO {
     firstname: string;
     email: string;
     role: Role;
+}
+
+export class UpdateUserDto {
+    name?: string;
+    firstname?: string;
+    email?: string;
+    role?: Role;
+}
+
+export class CreateUserDto {
+    name: string;
+    firstname: string;
+    email: string;
+    password: string;
+    role: Role;
     creation_date: Date;
 }

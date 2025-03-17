@@ -28,13 +28,14 @@
                     <input v-model="credentials.password" type="password" id="password" :placeholder="$t('password')"
                         required class="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300">
                 </div>
-                <button type="submit" class="w-full py-2 bg-secondary text-white rounded-lg hover:bg-secondary-dark">{{
-                    $t('register') }}</button>
+                <button type="submit"
+                    class="w-full py-2 bg-secondary cursor-pointer text-white rounded-lg hover:bg-secondary-dark">{{
+                        $t('register') }}</button>
             </form>
             <p class="mt-4 text-sm">
                 {{ $t('already_account') }}
                 <button @click="redirectToLogin" class="text-secondary cursor-pointer hover:text-primary">{{ $t('login')
-                    }}</button>
+                }}</button>
             </p>
         </div>
     </div>

@@ -17,5 +17,18 @@
   "register": "Register",
   "already_account": "Already an account ?",
 
-  "logout": "Logout"
+  "logout": "Logout",
+
+  "tournament": "Tournament",
+  "search_tournament": "Search a tournament",
+  "search": "Search",
+  "create": "Create",
+  "tournaments_list": "Tournaments list",
+  "start_date": "Start date",
+  "join": "Join",
+  "create_tournament":"Create a tournament",
+  "description":"Description",
+  "cancel": "Cancel"
+
+
 }
