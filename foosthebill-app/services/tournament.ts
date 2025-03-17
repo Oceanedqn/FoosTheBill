@@ -28,4 +28,21 @@ export const createTournament = async (newTournament: CreateTournament): Promise
 };
 
 
+export const getTournaments = async (token: string): Promise<Tournament> => {
+    try {
+        const response = await $fetch(`${API_URL}/tournaments`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        }) as Tournament;
+
+        return response;
+    } catch (error) {
+        throw new Error('Get user failed');
+    }
+}
+
+
 
