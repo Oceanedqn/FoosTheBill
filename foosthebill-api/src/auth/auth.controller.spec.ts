@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
-import { AuthGuard } from './guards/auth.guard';
+import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -32,6 +32,7 @@ describe('AuthController', () => {
         { provide: AuthService, useValue: mockAuthService },
         { provide: UsersService, useValue: mockUsersService },
         { provide: JwtService, useValue: mockJwtService },
+        { provide: AllExceptionsFilter, useValue: new AllExceptionsFilter() },
       ],
     }).compile();
 
@@ -55,7 +56,11 @@ describe('AuthController', () => {
 
       const result = await controller.login(mockInput);
 
-      expect(result).toEqual(mockAuthResult);
+      expect(result).toEqual({
+        statusCode: 200,
+        message: 'Connexion réussie',
+        data: mockAuthResult,
+      });
       expect(mockAuthService.authenticate).toHaveBeenCalledWith(mockInput);
     });
 
@@ -71,13 +76,26 @@ describe('AuthController', () => {
 
   describe('getUserInfo', () => {
     it('should return user information if authenticated', async () => {
-      // Create a mock of request.user to test the AuthGuard.
       const mockRequest = { user: { id: '1', email: 'test@test.com' } };
 
-      // Simulate calling the protected route with an AuthGuard.
+      // Simule la récupération de l'utilisateur authentifié
       const result = await controller.getUserInfo(mockRequest);
 
-      expect(result).toEqual(mockRequest.user);
+      expect(result).toEqual({
+        statusCode: 200,
+        message: 'Utilisateur récupéré avec succès',
+        data: mockRequest.user,
+      });
+    });
+
+    it('should throw UnauthorizedException if not authenticated', async () => {
+      // Simule une requête sans utilisateur (non authentifiée)
+      const mockRequest = {}; // Pas de user ici, ce qui simule un utilisateur non authentifié.
+
+      // S'attendre à ce que l'exception soit levée
+      await expect(controller.getUserInfo(mockRequest)).rejects.toThrow(UnauthorizedException);
+      await expect(controller.getUserInfo(mockRequest)).rejects.toThrow('User not authenticated');
     });
   });
+
 });

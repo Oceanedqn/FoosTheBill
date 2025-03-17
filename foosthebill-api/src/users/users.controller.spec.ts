@@ -2,10 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { NotFoundException, ConflictException, UnauthorizedException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from './user.entity';
 import { JwtService } from '@nestjs/jwt';
+import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 
 describe('UsersController', () => {
     let controller: UsersController;
@@ -63,7 +62,7 @@ describe('UsersController', () => {
 
             const response = await controller.create(createUserDto);
             expect(response.statusCode).toBe(201);
-            expect(response.message).toBe('Utilisateur créé avec succès');
+            expect(response.message).toBe('User created successfully');
             expect(response.data).toEqual(result);
         });
 
@@ -160,7 +159,7 @@ describe('UsersController', () => {
                 await controller.findOne('2');
             } catch (error) {
                 expect(error.response.statusCode).toBe(404);
-                expect(error.response.message).toBe("Erreur lors de la récupération de l'utilisateur");
+                expect(error.response.message).toBe("Error retrieving user");
             }
         });
     });
@@ -223,7 +222,7 @@ describe('UsersController', () => {
                 await controller.update('1', updateUserDto);
             } catch (error) {
                 expect(error.response.statusCode).toBe(404);
-                expect(error.response.message).toBe('Erreur lors de la mise à jour de l\'utilisateur');
+                expect(error.response.message).toBe('Error updating user');
             }
         });
     });
@@ -267,7 +266,7 @@ describe('UsersController', () => {
                 await controller.updatePassword('1', 'newpassword');
             } catch (error) {
                 expect(error.response.statusCode).toBe(404);
-                expect(error.response.message).toBe('Erreur lors de la mise à jour du mot de passe');
+                expect(error.response.message).toBe('Error updating password');
             }
         });
     });
@@ -305,7 +304,7 @@ describe('UsersController', () => {
                 await controller.remove('1');
             } catch (error) {
                 expect(error.response.statusCode).toBe(404);
-                expect(error.response.message).toBe('Erreur lors de la suppression de l\'utilisateur');
+                expect(error.response.message).toBe('Error deleting user');
             }
         });
 

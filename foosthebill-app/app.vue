@@ -26,6 +26,7 @@ const authStore = useAuthStore()
 
 // Verify if the user is authenticated
 const isAuthenticated = computed(() => authStore.isLoggedIn)
+
 </script>
 
 <style></style>

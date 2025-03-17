@@ -17,6 +17,17 @@
   "register": "S'inscrire",
   "already_account": "Déjà un compte ?",
 
-   "logout": "Deconnexion"
+  "logout": "Deconnexion",
+
+  "tournament": "Tournois",
+  "search_tournament": "Rechercher un tournoi",
+  "search": "Rechercher",
+  "create": "Créer",
+  "tournaments_list": "Liste des tournois",
+  "start_date": "Date de début",
+  "join": "Rejoindre",
+  "create_tournament":"Créer un tournoi",
+  "description":"Description",
+  "cancel": "Retour"
 
 }

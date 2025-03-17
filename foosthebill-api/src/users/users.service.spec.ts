@@ -6,8 +6,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException, ConflictException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Role } from './user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 
 describe('UsersService', () => {
     let service: UsersService;
@@ -73,7 +72,6 @@ describe('UsersService', () => {
                 firstname: mockUser.firstname,
                 email: mockUser.email,
                 role: mockUser.role,
-                creation_date: mockUser.creation_date,
             });
         });
 
@@ -105,7 +103,6 @@ describe('UsersService', () => {
                     firstname: mockUser.firstname,
                     email: mockUser.email,
                     role: mockUser.role,
-                    creation_date: mockUser.creation_date,
                 },
             ]);
         });
@@ -122,7 +119,6 @@ describe('UsersService', () => {
                 firstname: mockUser.firstname,
                 email: mockUser.email,
                 role: mockUser.role,
-                creation_date: mockUser.creation_date,
             });
         });
 

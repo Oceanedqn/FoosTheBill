@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia';
-import { login, register } from '~/services/auth'; // Import the login function from the API
-import type { AuthResponse } from '~/types/AuthResponse';
-import type { RegisterResponse } from '~/types/RegisterResponse';
+import type { AuthResponse, UserResponse } from '~/models/Response';
+import type { User } from '~/models/User';
+import { getUserInfo, login, register } from '~/services/auth';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: null as { email: string } | null, // User information
-    accessToken: null as string | null, // The authentication token
+    user: null as User | null,
+    accessToken: null as string | null,
   }),
 
   getters: {
@@ -19,30 +19,31 @@ export const useAuthStore = defineStore('auth', {
       try {
         const response: AuthResponse = await login(credentials);
 
-        if (!response || !response.accessToken) {
+        if (!response || !response.data.accessToken) {
           throw new Error('Invalid credentials');
         }
 
-        this.accessToken = response.accessToken;
+        this.accessToken = response.data.accessToken;
         localStorage.setItem('accessToken', this.accessToken);
 
         router.push('/');
       } catch (error) {
         console.error('Login failed:', error);
-        throw error; // You can handle the errors more specifically if necessary
+        throw error;
       }
     },
 
     // Logout function
     logout(router: any) {
-      this.accessToken = null; // Remove the authentication token
+      this.accessToken = null;
+      this.user = null
       localStorage.removeItem('accessToken'); // Remove the token from localStorage
       router.push('authentication/login');
     },
 
     async register(credentials: { name: string, firstname: string, email: string, password: string }, router: any) {
       try {
-        const response: RegisterResponse = await register(credentials);
+        const response: UserResponse = await register(credentials);
 
         if (!response) {
           throw new Error('Invalid credentials');
@@ -55,11 +56,13 @@ export const useAuthStore = defineStore('auth', {
     },
 
     // Initialize user state by retrieving data from localStorage
-    initialize() {
-      if (import.meta.client) {  // Replacing process.client with import.meta.client
+    async initialize() {
+      if (import.meta.client) {
         const storedToken = localStorage.getItem('accessToken');
+
         if (storedToken) {
           this.accessToken = storedToken;
+          await this.fetchUserInfo();
         }
       }
     },
@@ -67,9 +70,19 @@ export const useAuthStore = defineStore('auth', {
     // Fetch user info (if the API returns it with the token)
     async fetchUserInfo() {
       if (this.accessToken) {
-        // You can make an API call to get the user information with the token
-        // For example, you could call a function like `getUserInfo(this.accessToken)` from your API
-        // You can also add a `user` store or handle this here depending on your preference.
+        try {
+          const response: UserResponse = await getUserInfo(this.accessToken);
+
+          if (!response || !response.data) {
+            throw new Error('Invalid credentials');
+          }
+
+          this.user = response.data
+
+        } catch (error) {
+          console.error('Erreur lors de la récupération des informations utilisateur', error);
+          throw error;
+        }
       }
     },
   },
