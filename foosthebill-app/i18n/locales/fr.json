@@ -28,6 +28,7 @@
   "join": "Rejoindre",
   "create_tournament":"Créer un tournoi",
   "description":"Description",
-  "cancel": "Retour"
+  "cancel": "Retour",
+  "no_tournament": "Aucun tournoi pour le moment"
 
 }

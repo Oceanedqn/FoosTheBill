@@ -28,7 +28,8 @@
   "join": "Join",
   "create_tournament":"Create a tournament",
   "description":"Description",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "no_tournament": "No tournament for the moment"
 
 
 }

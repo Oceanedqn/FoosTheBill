@@ -30,6 +30,10 @@
 
         <h2 class="text-2xl font-bold text-title-text mb-2">{{ $t('tournaments_list') }}</h2>
 
+        <div v-if="filteredTournaments.length === 0">
+            {{ $t('no_tournament') }}
+        </div>
+
         <!-- Tournament Cards -->
         <div class="relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-6xl">
             <div v-for="tournament in filteredTournaments" :key="tournament.id"
@@ -149,40 +153,44 @@ const fetchTournaments = async () => {
     if (token) {
         try {
             const response = await getTournaments(token);
-            tournaments.value = response.data; // Store all tournaments
-            filteredTournaments.value = [...tournaments.value]; // Initialize filteredTournaments
+            tournaments.value = response.data;
+            filteredTournaments.value = [...tournaments.value];
         } catch (error) {
             console.error('Error fetching tournaments:', error);
         }
-    } else {
-        console.log('User is not authenticated');
     }
 };
 
-// Function to handle joining a tournament
+// Handle when the user tries to join a tournament
 const joinTournament = (tournamentId) => {
     console.log(`Joining tournament with id: ${tournamentId}`);
     router.push(`/tournaments/${tournamentId}`);
 };
 
-// Fetch tournaments when the component is mounted
+// Fetch tournaments and user info when the page is mounted
 onMounted(async () => {
     await authStore.initialize();
+
+    // If the user is not authenticated, redirect to login
+    if (!authStore.isLoggedIn) {
+        router.push('/authentication/login');
+        return;
+    }
+
     isAdmin.value = authStore.user?.role === Role.ADMIN;
     await fetchTournaments();
 });
 
-// Watch for changes in the authentication state
+// Watch for changes in authentication state (like token update)
 watch(() => authStore.accessToken, async (newToken) => {
     if (newToken) {
         await fetchTournaments();
     }
 });
 
-// Function to filter tournaments based on the search query
+// Filter tournaments based on search input
 const filterTournaments = () => {
     if (searchQuery.value.trim() === '') {
-        // When search is empty, reset the filtered tournaments
         filteredTournaments.value = [...tournaments.value];
     } else {
         filteredTournaments.value = tournaments.value.filter(tournament =>
@@ -191,6 +199,7 @@ const filterTournaments = () => {
     }
 };
 
+// Handle creating a tournament
 const handleCreateTournament = async () => {
     try {
         await createTournament(newTournament);
@@ -203,12 +212,10 @@ const handleCreateTournament = async () => {
     }
 };
 
-// Function to open the create tournament modal
+// Modal controls
 const openModal = () => {
     isModalOpen.value = true;
 };
-
-// Function to close the modal
 const closeModal = () => {
     isModalOpen.value = false;
 };

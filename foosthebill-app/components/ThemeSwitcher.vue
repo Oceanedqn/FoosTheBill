@@ -1,10 +1,10 @@
 <template>
     <div>
         <!-- Icône de sélection du thème -->
-        <button @click="openModal" class="text-2xl">
-            <i class="fas fa-palette text-primary cursor-pointer hover:text-primary-light"></i>
+        <button class="cursor-pointer text-white hover:bg-primary-dark rounded-4xl bg-primary p-1 px-3"
+            @click="openModal">
+            <i class="fa-solid fa-palette"></i>
         </button>
-
         <!-- Modal d'options de thèmes -->
         <div v-if="isModalOpen" class="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
             <div class="bg-white p-6 rounded-lg relative z-50 w-11/12 sm:w-1/2 md:w-1/3 lg:w-1/4">

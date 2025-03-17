@@ -10,7 +10,6 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
 import type { NavigationGuardNext } from 'vue-router';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
@@ -19,10 +18,6 @@ import { useAuthStore } from '~/stores/auth.store';
 const authStore = useAuthStore();
 const router = useRouter();
 const { user } = storeToRefs(authStore);
-
-onMounted(() => {
-    authStore.initialize();
-});
 
 definePageMeta({
     middleware: ['authenticated'],

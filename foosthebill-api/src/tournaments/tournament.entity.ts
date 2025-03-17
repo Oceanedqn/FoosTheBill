@@ -1,6 +1,5 @@
 // src/tournaments/tournament.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
-import { UserResponseDTO } from 'src/users/dto/user.dto';
 import { User } from 'src/users/user.entity';
 
 @Entity()
@@ -22,6 +21,6 @@ export class Tournament {
 
     @ManyToOne(() => User)
     @JoinColumn({ name: 'admin_id' })
-    admin_id: string;
+    admin: User;
 
 }

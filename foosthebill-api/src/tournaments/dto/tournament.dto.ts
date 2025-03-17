@@ -1,11 +1,11 @@
-import { UserResponseDTO } from "src/users/dto/user.dto";
+import { UserResponseDto } from "src/users/dto/user.dto";
 
 export class TournamentResponseDto {
     id: string;
     name: string;
     description: string;
     start_date: Date;
-    admin: UserResponseDTO
+    admin: UserResponseDto
 }
 
 export class CreateTournamentDto {
