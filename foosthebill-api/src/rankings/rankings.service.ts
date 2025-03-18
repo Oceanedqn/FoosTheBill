@@ -26,7 +26,7 @@ export class RankingsService {
         }
     }
 
-    async findOne(id: number): Promise<Ranking> {
+    async findOne(id: string): Promise<Ranking> {
         try {
             const ranking = await this.rankingsRepository.findOne({ where: { id } });
             if (!ranking) {
@@ -41,7 +41,7 @@ export class RankingsService {
         }
     }
 
-    async update(id: number, ranking: Ranking): Promise<void> {
+    async update(id: string, ranking: Ranking): Promise<void> {
         try {
             const existingRanking = await this.findOne(id);
             if (!existingRanking) {
@@ -53,7 +53,7 @@ export class RankingsService {
         }
     }
 
-    async remove(id: number): Promise<void> {
+    async remove(id: string): Promise<void> {
         try {
             const existingRanking = await this.findOne(id);
             if (!existingRanking) {

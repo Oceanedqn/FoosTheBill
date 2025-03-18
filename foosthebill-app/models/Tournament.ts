@@ -10,7 +10,7 @@ export interface CreateTournament {
 };
 
 export interface BasicTournament {
-    id: number;
+    id: string;
     name: string;
     start_date: string;
     description: string;
@@ -18,7 +18,7 @@ export interface BasicTournament {
 }
 
 export class Tournament {
-    id: number;
+    id: string;
     name: string;
     start_date: string;
     description: string;
@@ -26,7 +26,7 @@ export class Tournament {
     teams: Team[];
     matches: Match[];
 
-    constructor(id: number, name: string, date: string, description: string, user: User) {
+    constructor(id: string, name: string, date: string, description: string, user: User) {
         this.id = id;
         this.name = name;
         this.start_date = date;
@@ -42,7 +42,7 @@ export class Tournament {
     }
 
     // Méthode pour enregistrer un résultat et mettre à jour les classements
-    recordResult(matchId: number, team1Score: number, team2Score: number) {
+    recordResult(matchId: string, team1Score: number, team2Score: number) {
         const match = this.matches.find(m => m.id === matchId);
         if (match) {
             match.result = { team1Score, team2Score };

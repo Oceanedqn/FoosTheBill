@@ -29,6 +29,14 @@
   "create_tournament":"Créer un tournoi",
   "description":"Description",
   "cancel": "Retour",
-  "no_tournament": "Aucun tournoi pour le moment"
+  "no_tournament": "Aucun tournoi pour le moment",
+
+  "create_team": "Créer une équipe",
+  "join_team_automatically": "Rejoindre une équipe aléatoirement",
+  "search_team": "Rechercher une équipe ou un coéquipier",
+  "join_team": "Rejoindre la team",
+  "participant": "Participant",
+  "player": "Joueur"
+
 
 }

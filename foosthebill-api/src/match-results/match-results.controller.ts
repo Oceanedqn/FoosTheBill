@@ -27,7 +27,7 @@ export class MatchResultsController {
     }
 
     @Get(':id')
-    async findOne(@Param('id') id: number) {
+    async findOne(@Param('id') id: string) {
         try {
             const matchResult = await this.matchResultsService.findOne(id);
             return { code: HttpStatus.OK, message: 'Match result fetched successfully', data: matchResult };
@@ -37,7 +37,7 @@ export class MatchResultsController {
     }
 
     @Put(':id')
-    async update(@Param('id') id: number, @Body() matchResult: MatchResult) {
+    async update(@Param('id') id: string, @Body() matchResult: MatchResult) {
         try {
             await this.matchResultsService.update(id, matchResult);
             return { code: HttpStatus.OK, message: 'Match result updated successfully' };
@@ -47,7 +47,7 @@ export class MatchResultsController {
     }
 
     @Delete(':id')
-    async remove(@Param('id') id: number) {
+    async remove(@Param('id') id: string) {
         try {
             await this.matchResultsService.remove(id);
             return { code: HttpStatus.OK, message: 'Match result deleted successfully' };

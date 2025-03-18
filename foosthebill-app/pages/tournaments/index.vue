@@ -119,21 +119,15 @@ import { createTournament, getTournaments } from '~/services/tournament';
 
 const authStore = useAuthStore();
 const router = useRouter();
-
-// Modal state
 const isModalOpen = ref(false);
 const newTournament = ref({
     name: '',
     description: '',
     start_date: '',
 });
-
-// State for the search query and filtered tournaments
 const searchQuery = ref('');
 const tournaments = ref([]);
-const filteredTournaments = ref([]); // To store filtered tournaments
-
-// State to track admin status (reactive)
+const filteredTournaments = ref([]);
 const isAdmin = ref(false);
 
 const getTodayDateTime = () => {
@@ -146,6 +140,12 @@ const getTodayDateTime = () => {
 
     return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
+
+onMounted(async () => {
+    await authStore.initialize();
+    isAdmin.value = authStore.user?.role === Role.ADMIN;
+    await fetchTournaments();
+});
 
 // Function to fetch tournaments with token
 const fetchTournaments = async () => {
@@ -167,19 +167,7 @@ const joinTournament = (tournamentId) => {
     router.push(`/tournaments/${tournamentId}`);
 };
 
-// Fetch tournaments and user info when the page is mounted
-onMounted(async () => {
-    await authStore.initialize();
 
-    // If the user is not authenticated, redirect to login
-    if (!authStore.isLoggedIn) {
-        router.push('/authentication/login');
-        return;
-    }
-
-    isAdmin.value = authStore.user?.role === Role.ADMIN;
-    await fetchTournaments();
-});
 
 // Watch for changes in authentication state (like token update)
 watch(() => authStore.accessToken, async (newToken) => {

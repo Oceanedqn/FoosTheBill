@@ -26,7 +26,7 @@ export class MatchResultsService {
         }
     }
 
-    async findOne(id: number): Promise<MatchResult> {
+    async findOne(id: string): Promise<MatchResult> {
         try {
             const matchResult = await this.matchResultsRepository.findOne({ where: { id } });
             if (!matchResult) {
@@ -38,7 +38,7 @@ export class MatchResultsService {
         }
     }
 
-    async update(id: number, matchResult: MatchResult): Promise<void> {
+    async update(id: string, matchResult: MatchResult): Promise<void> {
         try {
             await this.findOne(id);
             await this.matchResultsRepository.update(id, matchResult);
@@ -47,7 +47,7 @@ export class MatchResultsService {
         }
     }
 
-    async remove(id: number): Promise<void> {
+    async remove(id: string): Promise<void> {
         try {
             await this.findOne(id);
             await this.matchResultsRepository.delete(id);

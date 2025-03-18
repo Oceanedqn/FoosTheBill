@@ -1,4 +1,5 @@
 import type { CreateTournamentResponse, GenericResponse } from "~/models/Response";
+import type { Team } from "~/models/Team";
 import type { CreateTournament, Tournament } from "~/models/Tournament";
 
 const API_URL = 'http://localhost:3001';
@@ -69,5 +70,27 @@ export const getTournament = async (id_tournament: string, token: string): Promi
         return response;
     } catch (error) {
         throw new Error('Failed to retrieve tournament details');
+    }
+};
+
+/**
+ * Retrieves a list of tournaments from the API.
+ * @param {string} token - The authentication token.
+ * @returns {Promise<Team>} - The list of tournaments.
+ * @throws {Error} - Throws an error if the request fails.
+ */
+export const getTournamentTeams = async (tournementId: string, token: string): Promise<Team> => {
+    try {
+        const response = await $fetch(`${API_URL}/tournaments/${tournementId}/teams`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        }) as Team;
+
+        return response;
+    } catch (error) {
+        throw new Error('Failed to retrieve tournaments');
     }
 };

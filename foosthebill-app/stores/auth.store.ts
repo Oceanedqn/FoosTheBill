@@ -52,7 +52,7 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = null;
       this.user = null;
       localStorage.removeItem('accessToken'); // Remove the token from localStorage
-      router.push('authentication/login');
+      router.push('/authentication/login');
     },
 
     /**

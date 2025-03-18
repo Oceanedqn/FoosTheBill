@@ -29,7 +29,12 @@
   "create_tournament":"Create a tournament",
   "description":"Description",
   "cancel": "Cancel",
-  "no_tournament": "No tournament for the moment"
+  "no_tournament": "No tournament for the moment",
 
-
+  "create_team": "Create a team",
+  "join_team_automatically": "Join a team randomly",
+  "search_team": "Search for a team or teammate",
+  "join_team": "Join team",
+  "participant": "Participant",
+  "player": "Player"
 }

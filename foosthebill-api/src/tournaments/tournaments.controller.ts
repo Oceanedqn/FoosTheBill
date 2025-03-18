@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Param, Body, Put, Delete, HttpStatus, UseFilters, UseGuards, ForbiddenException } from '@nestjs/common';
 import { TournamentsService } from './tournaments.service';
-import { Tournament } from './tournament.entity';
 import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
 import { CreateTournamentDto, UpdateTournamentDto } from './dto/tournament.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from '@nestjs/common';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { TeamResponseDto } from 'src/teams/dto/team.dto';
 
 @Controller('tournaments')
 @UseFilters(new AllExceptionsFilter())
@@ -114,5 +114,23 @@ export class TournamentsController {
             statusCode: HttpStatus.OK,
             message: 'Tournament deleted successfully',
         }
+    }
+
+    /**
+     * Retrieves all teams related to a specific tournament.
+     * This function allows authenticated users to retrieve the list of teams associated with a tournament.
+     * @param id - The ID of the tournament for which teams are being retrieved.
+     * @returns Promise<{ statusCode: number, message: string, data: TeamResponseDto[] }> - Returns a status code, a success message, and an array of teams.
+     * @throws NotFoundException - If the tournament with the given ID is not found.
+     */
+    @UseGuards(AuthGuard)
+    @Get(':id/teams')
+    async findAllTeams(@Param('id') id: string) {
+        const teams: TeamResponseDto[] = await this.tournamentsService.findAllTeams(id);
+        return {
+            statusCode: HttpStatus.OK,
+            message: 'Teams retrieved successfully',
+            data: teams,
+        };
     }
 }

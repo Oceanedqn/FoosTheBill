@@ -1,11 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
 import { Tournament } from '../tournaments/tournament.entity';
 import { Team } from '../teams/team.entity';
 
 @Entity()
 export class Match {
     @PrimaryGeneratedColumn()
-    id: number;
+    id: string;
 
     @ManyToOne(() => Tournament)
     @JoinColumn({ name: 'tournament_id' })
@@ -27,4 +27,7 @@ export class Match {
 
     @Column()
     score_team_2: number;
+
+    @CreateDateColumn()
+    creation_date: Date;
 }

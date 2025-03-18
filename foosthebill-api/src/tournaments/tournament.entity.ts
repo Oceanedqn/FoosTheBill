@@ -1,6 +1,7 @@
 // src/tournaments/tournament.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, OneToMany } from 'typeorm';
 import { User } from 'src/users/user.entity';
+import { Team } from 'src/teams/team.entity';
 
 @Entity()
 export class Tournament {
@@ -22,5 +23,8 @@ export class Tournament {
     @ManyToOne(() => User)
     @JoinColumn({ name: 'admin_id' })
     admin: User;
+
+    @OneToMany(() => Team, (team) => team.tournament)
+    teams: Team[];
 
 }
