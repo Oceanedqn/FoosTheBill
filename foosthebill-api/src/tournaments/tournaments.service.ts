@@ -1,19 +1,20 @@
-import { Injectable, NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException, BadRequestException, forwardRef, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Tournament } from './tournament.entity';
 import { CreateTournamentDto, TournamentPeopleResponseDto, TournamentResponseDto, UpdateTournamentDto } from './dto/tournament.dto';
 import { UsersService } from 'src/users/users.service';
+import { TeamsService } from 'src/teams/teams.service';
 
 @Injectable()
 export class TournamentsService {
     constructor(
-        @InjectRepository(Tournament)
-        private tournamentsRepository: Repository<Tournament>,
+        @InjectRepository(Tournament) private tournamentsRepository: Repository<Tournament>,
+        @Inject(forwardRef(() => TeamsService)) private readonly teamsService: TeamsService,
         private readonly usersService: UsersService,
     ) { }
 
-    
+
     /**
      * Creates a new tournament.
      * This function checks the start date to ensure it is not in the past,
@@ -75,13 +76,13 @@ export class TournamentsService {
             const tournaments = await this.tournamentsRepository.find({
                 relations: ['admin', 'teams', 'teams.participant1', 'teams.participant2'],
             });
-    
+
             const tournamentResponses: TournamentPeopleResponseDto[] = [];
-    
+
             for (const tournament of tournaments) {
                 // Calculer le nombre de participants distincts
                 const participants = new Set<string>(); // Utiliser un Set pour éviter les doublons
-    
+
                 // Itérer sur toutes les équipes du tournoi
                 for (const team of tournament.teams) {
                     if (team.participant1) {
@@ -91,7 +92,7 @@ export class TournamentsService {
                         participants.add(team.participant2.id); // Ajouter l'ID du participant2
                     }
                 }
-    
+
                 const tournamentResponse: TournamentPeopleResponseDto = {
                     id: tournament.id,
                     name: tournament.name,
@@ -106,10 +107,10 @@ export class TournamentsService {
                     },
                     participant_number: participants.size, // Nombre de participants uniques
                 };
-    
+
                 tournamentResponses.push(tournamentResponse);
             }
-    
+
             return tournamentResponses;
         } catch (error) {
             console.error("[Service findAll] Error: ", error);

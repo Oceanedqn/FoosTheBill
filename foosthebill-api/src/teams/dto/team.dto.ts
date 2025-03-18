@@ -8,13 +8,17 @@ export class TeamResponseDto {
     participant2: UserResponseDto | null;
 }
 
-export class TeamsWithTournamentReponseDto extends TeamResponseDto{
+export class UpdateTeamDto {
+    participantId: string
+}
+
+export class TeamsWithTournamentReponseDto extends TeamResponseDto {
     tournament: TournamentResponseDto;
 }
 
-export class CreateTeamDto{
+export class CreateTeamDto {
     name: string;
     tournament_id: string;
     participant1: string;
-    participant2?:string;
+    participant2?: string;
 }

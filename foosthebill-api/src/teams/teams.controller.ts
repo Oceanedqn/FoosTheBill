@@ -1,73 +1,59 @@
 import { Controller, Get, Post, Param, Body, Put, Delete, HttpException, HttpStatus, NotFoundException, UseFilters, UseGuards } from '@nestjs/common';
 import { TeamsService } from './teams.service';
-import { Team } from './team.entity';
+import { Request } from '@nestjs/common';
 import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { UpdateTeamDto } from './dto/team.dto';
 
 @Controller('teams')
 @UseFilters(new AllExceptionsFilter())
 export class TeamsController {
     constructor(private readonly teamsService: TeamsService) { }
-    
 
     /**
-     * Retrieve a specific team by its IDs (commented out in the code).
-     * @param id1 - The first part of the team identifier.
-     * @param id2 - The second part of the team identifier.
+     * Retrieve a specific team by its ID.
+     * This method fetches the team data based on the provided ID and returns it.
+     * @param id - The ID of the team to be fetched.
      * @returns A response containing the team data and a success message.
-     * @throws NotFoundException if the team is not found.
+     * @throws NotFoundException if the team with the given ID is not found.
      */
-    // @UseGuards(AuthGuard)
-    // @Get(':id1/:id2')
-    // async findOne(@Param('id1') id1: string, @Param('id2') id2: string) {
-    //     try {
-    //         const team = await this.teamsService.findOne(id1, id2);
-    //         return { code: HttpStatus.OK, message: 'Team fetched successfully', data: team };
-    //     } catch (error) {
-    //         throw new NotFoundException(error.message);
-    //     }
-    // }
+    @UseGuards(AuthGuard)
+    @Get(':id')
+    async findOne(@Param('id') id: string) {
+        const team = await this.teamsService.findOne(id);
+        return { code: HttpStatus.OK, message: 'Team fetched successfully', data: team };
+    }
 
     /**
      * Update an existing team by its ID.
-     * @param id - The ID of the team to be updated.
-     * @param team - The updated team data.
-     * @returns A response with a success message.
+     * This method updates the team by assigning a second participant (if applicable).
+     * @param teamId - The ID of the team to be updated.
+     * @param req - The request object containing the authenticated user's ID.
+     * @returns A response with a success message after the team has been updated.
      * @throws HttpException if there is an error while updating the team.
+     * @throws NotFoundException if the team or user is not found.
+     * @throws ConflictException if the user is already in the team or the team already has two participants.
      */
-    // @UseGuards(AuthGuard)
-    // @Put(':id')
-    // async update(@Param('id') id: string, @Body() team: Team) {
-    //     try {
-    //         await this.teamsService.update(id, team);
-    //         return { code: HttpStatus.OK, message: 'Team updated successfully' };
-    //     } catch (error) {
-    //         throw new HttpException({
-    //             code: HttpStatus.INTERNAL_SERVER_ERROR,
-    //             message: 'Error updating team',
-    //             error: error.message,
-    //         }, HttpStatus.INTERNAL_SERVER_ERROR);
-    //     }
-    // }
+    @UseGuards(AuthGuard)
+    @Put(':id')
+    async update(@Param('id') teamId: string, @Request() req) {
+        const userId = req.user.id;
+        await this.teamsService.update(teamId, userId);
+        return { code: HttpStatus.OK, message: 'Team updated successfully' };
+    }
 
     /**
      * Delete a specific team by its ID.
+     * This method deletes the team identified by the given ID.
      * @param id - The ID of the team to be deleted.
-     * @returns A response with a success message.
+     * @returns A response with a success message once the team has been deleted.
      * @throws HttpException if there is an error while deleting the team.
+     * @throws NotFoundException if the team with the given ID is not found.
      */
-    // @UseGuards(AuthGuard)
-    // @Delete(':id')
-    // async remove(@Param('id') id: string) {
-    //     try {
-    //         await this.teamsService.remove(id);
-    //         return { code: HttpStatus.OK, message: 'Team deleted successfully' };
-    //     } catch (error) {
-    //         throw new HttpException({
-    //             code: HttpStatus.INTERNAL_SERVER_ERROR,
-    //             message: 'Error deleting team',
-    //             error: error.message,
-    //         }, HttpStatus.INTERNAL_SERVER_ERROR);
-    //     }
-    // }
+    @UseGuards(AuthGuard)
+    @Delete(':id')
+    async remove(@Param('id') id: string) {
+        await this.teamsService.remove(id);
+        return { code: HttpStatus.OK, message: 'Team deleted successfully' };
+    }
 }

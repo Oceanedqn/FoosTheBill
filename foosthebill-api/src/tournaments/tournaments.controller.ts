@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, Put, Delete, HttpStatus, UseFilters, UseGuards, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Put, Delete, HttpStatus, UseFilters, UseGuards } from '@nestjs/common';
 import { TournamentsService } from './tournaments.service';
 import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
 import { CreateTournamentDto, TournamentTeamsResponseDto, UpdateTournamentDto } from './dto/tournament.dto';
@@ -127,7 +127,7 @@ export class TournamentsController {
     @UseGuards(AuthGuard)
     @Get(':id/teams')
     async findAllTeams(@Param('id') id: string) {
-        const tournament: TournamentTeamsResponseDto = await this.teamService.findAllByTournamentId(id);
+        const tournament: TournamentTeamsResponseDto = await this.teamService.findAllTeamByTournamentId(id);
         return {
             statusCode: HttpStatus.OK,
             message: 'Teams retrieved successfully',
@@ -142,7 +142,7 @@ export class TournamentsController {
         createTournamentDto.participant1 = userId;
         createTournamentDto.tournament_id = id;
 
-        const createdTeam = await this.teamService.createByTournamentId(createTournamentDto);
+        const createdTeam = await this.teamService.createTeamByTournamentId(createTournamentDto);
 
         return {
             statusCode: HttpStatus.CREATED,
