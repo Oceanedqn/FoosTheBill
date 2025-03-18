@@ -36,5 +36,6 @@
   "search_team": "Search for a team or teammate",
   "join_team": "Join team",
   "participant": "Participant",
-  "player": "Player"
+  "player": "Player",
+  "team_name": "Team name"
 }

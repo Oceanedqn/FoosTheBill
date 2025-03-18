@@ -21,8 +21,15 @@ export const createTeam = async (createTeam: CreateTeam, tournamentId: string): 
         },
     });
 
+    if (error.value) {
+        return {
+            statusCode: error.value.statusCode || 400,
+            message: error.value.message || "An unknown error occurred",
+        };
+    }
+
     return {
-        statusCode: error.value?.data?.statusCode || 500,
-        message: error.value?.data?.message || "An unknown error occurred",
+        statusCode: data.value?.statusCode || 500,
+        message: data.value?.message || "An unknown error occurred",
     };
 };

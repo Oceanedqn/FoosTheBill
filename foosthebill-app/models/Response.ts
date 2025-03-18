@@ -5,7 +5,6 @@ import type { User } from "./User";
 export interface GenericResponse {
     statusCode: number;
     message: string;
-
 }
 
 

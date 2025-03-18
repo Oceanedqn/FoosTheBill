@@ -21,7 +21,7 @@ export class TeamsService {
     ) { }
 
     /**
-     * Create a new team with one or two participants and associate it with a tournament.
+     * Creates a new team with one or two participants and associates it with a tournament.
      * @param createTeamDto - The team data to be created, including participants and tournament.
      * @returns The created team with participants and tournament.
      * @throws NotFoundException if the tournament or any participant is not found.
@@ -29,10 +29,40 @@ export class TeamsService {
      */
     async createTeamByTournamentId(createTeamDto: CreateTeamDto): Promise<TeamsWithTournamentReponseDto> {
         try {
+            // Check if participant 1 is already in a team as either participant1 or participant2 in the tournament
+            const existingTeamForPlayer1 = await this.teamsRepository.findOne({
+                where: [
+                    { tournament: { id: createTeamDto.tournament_id }, participant1: { id: createTeamDto.participant1 } },
+                    { tournament: { id: createTeamDto.tournament_id }, participant2: { id: createTeamDto.participant1 } },
+                ],
+            });
+
+            // If participant 1 is already in another team, throw an error
+            if (existingTeamForPlayer1) {
+                throw new Error(`Participant 1 is already in a team in this tournament.`);
+            }
+
+            // Check if participant 2 is already in a team as either participant1 or participant2 in the tournament
+            let existingTeamForPlayer2: Team | null = null;  // Explicit type to allow Team | null
+            if (createTeamDto.participant2) {
+                existingTeamForPlayer2 = await this.teamsRepository.findOne({
+                    where: [
+                        { tournament: { id: createTeamDto.tournament_id }, participant1: { id: createTeamDto.participant2 } },
+                        { tournament: { id: createTeamDto.tournament_id }, participant2: { id: createTeamDto.participant2 } },
+                    ],
+                });
+
+                // If participant 2 is already in another team, throw an error
+                if (existingTeamForPlayer2) {
+                    throw new Error(`Participant 2 is already in a team in this tournament.`);
+                }
+            }
+
+            // Retrieve participants and tournament
             const player1 = await this.usersService.findOne(createTeamDto.participant1);
             const tournament = await this.tournamentService.findOne(createTeamDto.tournament_id);
 
-            // Vérifier si le participant 2 existe (si fourni)
+            // Check if participant 2 exists (if provided)
             let player2: User | null = null;
             if (createTeamDto.participant2) {
                 player2 = await this.usersRepository.findOne({
@@ -40,18 +70,18 @@ export class TeamsService {
                 });
             }
 
-            // Créer l'équipe
+            // Create the team
             const team = this.teamsRepository.create({
                 name: createTeamDto.name,
-                tournament: tournament,  // Assurez-vous d'assigner l'entité tournoi
+                tournament: tournament,  // Ensure tournament entity is assigned
                 participant1: player1,
                 participant2: player2,
             });
 
-            // Sauvegarder l'équipe
+            // Save the team
             await this.teamsRepository.save(team);
 
-            // Renvoyer la réponse structurée avec les données appropriées
+            // Return structured response with relevant data
             return {
                 id: team.id,
                 name: team.name,
@@ -60,8 +90,8 @@ export class TeamsService {
                 participant2: player2,
             };
         } catch (error) {
-            console.error("Error creating team:", error); // Log the error to understand the failure point
-            throw new InternalServerErrorException('Error creating team', error.message);
+            console.error("Error creating team:", error); // Log error for debugging
+            throw new InternalServerErrorException(error.message);
         }
     }
 
@@ -82,8 +112,8 @@ export class TeamsService {
 
             const teams = await this.teamsRepository.find({ where: { tournament: { id: tournamentId } }, relations: ['participant1', 'participant2'] });
 
-            // Mapping the teams to DTOs
-            const response: TournamentTeamsResponseDto = {
+            // Map teams to DTOs
+            return {
                 tournament: tournament,
                 teams: teams.map(team => ({
                     id: team.id,
@@ -105,21 +135,17 @@ export class TeamsService {
                         }
                         : null,
                 })),
-            }
-
-            return response;
+            };
         } catch (error) {
             console.error("[Service findAllTeams] Error: ", error);
-            throw new InternalServerErrorException('Error retrieving teams for tournament', error.message);
+            throw new InternalServerErrorException(error.message);
         }
     }
 
     /**
-     * Retrieve a specific team by its ID and related data such as participants and tournament.
+     * Retrieves a specific team by its ID along with related data such as participants and tournament.
      * @param id - The ID of the team.
-     * @returns The team with the specified ID and its related participants and tournament.
-     * @throws NotFoundException if the team is not found.
-     * @throws InternalServerErrorException if an error occurs during retrieval.
+     * @returns The team with the specified ID, including its participants and tournament.
      */
     async findOne(id: string): Promise<TeamResponseDto> {
         try {
@@ -148,63 +174,29 @@ export class TeamsService {
                     : null,
             };
         } catch (error) {
-            if (error instanceof NotFoundException) {
-                throw error;  // Rethrow NotFoundException
-            }
-            throw new InternalServerErrorException('Error fetching team', error.message);
+            throw new InternalServerErrorException(error.message);
         }
     }
 
     /**
-     * Update an existing team by its ID, assigning a second participant if possible.
-     * @param teamId - The ID of the team to be updated.
-     * @param userId - The ID of the user to be added as participant2.
-     * @returns void
-     * @throws NotFoundException if the team or user is not found.
-     * @throws ConflictException if the user is already in the team or if the team already has two participants.
-     * @throws InternalServerErrorException if there is an error during the update process.
+     * Checks if a user is already in a team for a specific tournament.
+     * @param userId - The ID of the user to check.
+     * @param tournamentId - The ID of the tournament.
+     * @returns true if the user is already in a team, otherwise false.
      */
-    async update(teamId: string, userId: string): Promise<void> {
-        const team = await this.teamsRepository.findOne({
-            where: { id: teamId },
-            relations: ['participant1', 'participant2']
-        });
-        if (!team) {
-            throw new NotFoundException(`Team not found`);
-        }
-
-        const user = await this.usersRepository.findOne({ where: { id: userId } });
-        if (!user) {
-            throw new NotFoundException(`User not found`);
-        }
-
-        if (userId === team.participant1.id) {
-            throw new ConflictException(`User is already in the team`);
-        }
-
-        if (team.participant2) {
-            throw new ConflictException(`Team already has a second participant`);
-        }
-
-        await this.teamsRepository.update(teamId, { participant2: user });
-    }
-
-    /**
-     * Delete a specific team by its ID.
-     * @param id - The ID of the team to be deleted.
-     * @returns void
-     * @throws NotFoundException if the team is not found.
-     * @throws InternalServerErrorException if there is an error during the deletion process.
-     */
-    async remove(id: string): Promise<void> {
+    async isUserInTeam(userId: string, tournamentId: string): Promise<boolean> {
         try {
-            const team = await this.findOne(id);  // Check if team exists
-            if (!team) {
-                throw new NotFoundException(`Team with id ${id} not found`);
-            }
-            await this.teamsRepository.delete(id);
+            const existingTeam = await this.teamsRepository.findOne({
+                where: [
+                    { tournament: { id: tournamentId }, participant1: { id: userId } },
+                    { tournament: { id: tournamentId }, participant2: { id: userId } },
+                ],
+            });
+
+            return existingTeam !== null;
         } catch (error) {
-            throw new InternalServerErrorException('Error deleting team', error.message);
+            console.error("Error checking if user is in a team:", error);
+            throw new InternalServerErrorException(error.message);
         }
     }
 }

@@ -14,16 +14,16 @@ export class TournamentsService {
         private readonly usersService: UsersService,
     ) { }
 
-
     /**
      * Creates a new tournament.
-     * This function checks the start date to ensure it is not in the past,
-     * maps the user creating the tournament as an admin, and creates the tournament record.
+     * 
+     * Validates that the start date is not in the past, assigns the tournament creator as the admin,
+     * and persists the tournament in the database.
+     * 
      * @param createTournamentDto - Data transfer object containing tournament details (name, description, start date).
-     * @param userId - The ID of the user creating the tournament (admin).
-     * @returns Promise<TournamentResponseDto> - A response object containing the details of the created tournament and admin.
+     * @returns Promise<TournamentResponseDto> - A response object with tournament details and the assigned admin.
      * @throws BadRequestException - If the start date is in the past.
-     * @throws InternalServerErrorException - If an error occurs during the creation process.
+     * @throws InternalServerErrorException - If an error occurs during creation.
      */
     async create(createTournamentDto: CreateTournamentDto): Promise<TournamentResponseDto> {
         try {
@@ -60,15 +60,17 @@ export class TournamentsService {
                 },
             };
         } catch (error) {
-            throw new InternalServerErrorException('Error creating tournament', error.message);
+            throw new InternalServerErrorException(error.message);
         }
     }
 
-
     /**
      * Retrieves all tournaments.
-     * This function fetches all the tournaments along with their respective admin details.
-     * @returns Promise<TournamentResponseDto[]> - An array of tournament response objects containing tournament details and admin info.
+     * 
+     * Fetches all tournaments along with their respective admin and teams, 
+     * then calculates the number of unique participants.
+     * 
+     * @returns Promise<TournamentPeopleResponseDto[]> - A list of tournaments with their details and participant count.
      * @throws InternalServerErrorException - If an error occurs while retrieving tournaments.
      */
     async findAll(): Promise<TournamentPeopleResponseDto[]> {
@@ -80,16 +82,15 @@ export class TournamentsService {
             const tournamentResponses: TournamentPeopleResponseDto[] = [];
 
             for (const tournament of tournaments) {
-                // Calculer le nombre de participants distincts
-                const participants = new Set<string>(); // Utiliser un Set pour éviter les doublons
+                // Use a Set to track unique participant IDs
+                const participants = new Set<string>();
 
-                // Itérer sur toutes les équipes du tournoi
                 for (const team of tournament.teams) {
                     if (team.participant1) {
-                        participants.add(team.participant1.id); // Ajouter l'ID du participant1
+                        participants.add(team.participant1.id);
                     }
                     if (team.participant2) {
-                        participants.add(team.participant2.id); // Ajouter l'ID du participant2
+                        participants.add(team.participant2.id);
                     }
                 }
 
@@ -105,7 +106,7 @@ export class TournamentsService {
                         email: tournament.admin.email,
                         role: tournament.admin.role,
                     },
-                    participant_number: participants.size, // Nombre de participants uniques
+                    participant_number: participants.size,
                 };
 
                 tournamentResponses.push(tournamentResponse);
@@ -114,24 +115,25 @@ export class TournamentsService {
             return tournamentResponses;
         } catch (error) {
             console.error("[Service findAll] Error: ", error);
-            throw new InternalServerErrorException('Error retrieving tournaments', error.message);
+            throw new InternalServerErrorException(error.message);
         }
     }
 
-
     /**
      * Retrieves a single tournament by its ID.
-     * This function fetches the details of a specific tournament along with its admin information.
+     * 
+     * Fetches the tournament details along with its admin.
+     * 
      * @param id - The ID of the tournament to retrieve.
-     * @returns Promise<TournamentResponseDto> - The details of the tournament along with admin info.
-     * @throws NotFoundException - If the tournament with the given ID is not found.
-     * @throws InternalServerErrorException - If an error occurs while retrieving the tournament.
+     * @returns Promise<TournamentResponseDto> - Tournament details including admin info.
+     * @throws NotFoundException - If no tournament is found with the given ID.
+     * @throws InternalServerErrorException - If an error occurs during retrieval.
      */
     async findOne(id: string): Promise<TournamentResponseDto> {
         try {
             const tournament = await this.tournamentsRepository.findOne({
                 where: { id },
-                relations: ['admin'],  // Include the admin relation
+                relations: ['admin'],
             });
 
             if (!tournament) {
@@ -155,19 +157,20 @@ export class TournamentsService {
             if (error instanceof NotFoundException) {
                 throw error;
             }
-            throw new InternalServerErrorException('Error retrieving tournament', error.message);
+            throw new InternalServerErrorException(error.message);
         }
     }
 
-
     /**
      * Updates an existing tournament.
-     * This function updates the tournament details for a given tournament ID.
+     * 
+     * Modifies tournament details based on the provided ID.
+     * 
      * @param id - The ID of the tournament to update.
      * @param tournament - The updated tournament data.
-     * @returns Promise<void> - Void if the update is successful.
-     * @throws NotFoundException - If the tournament with the given ID is not found.
-     * @throws InternalServerErrorException - If an error occurs while updating the tournament.
+     * @returns Promise<void> - Resolves if the update is successful.
+     * @throws NotFoundException - If no tournament is found with the given ID.
+     * @throws InternalServerErrorException - If an error occurs during the update.
      */
     async update(id: string, tournament: UpdateTournamentDto): Promise<void> {
         try {
@@ -179,18 +182,19 @@ export class TournamentsService {
             if (error instanceof NotFoundException) {
                 throw error;
             }
-            throw new InternalServerErrorException('Error updating tournament', error.message);
+            throw new InternalServerErrorException(error.message);
         }
     }
 
-
     /**
      * Deletes a tournament by ID.
-     * This function deletes a specific tournament based on its ID.
+     * 
+     * Removes a tournament from the database based on the given ID.
+     * 
      * @param id - The ID of the tournament to delete.
-     * @returns Promise<void> - Void if the deletion is successful.
-     * @throws NotFoundException - If the tournament with the given ID is not found.
-     * @throws InternalServerErrorException - If an error occurs while deleting the tournament.
+     * @returns Promise<void> - Resolves if the deletion is successful.
+     * @throws NotFoundException - If no tournament is found with the given ID.
+     * @throws InternalServerErrorException - If an error occurs during deletion.
      */
     async remove(id: string): Promise<void> {
         try {
@@ -202,7 +206,7 @@ export class TournamentsService {
             if (error instanceof NotFoundException) {
                 throw error;
             }
-            throw new InternalServerErrorException('Error deleting tournament', error.message);
+            throw new InternalServerErrorException(error.message);
         }
     }
 }

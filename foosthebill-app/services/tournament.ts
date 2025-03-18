@@ -31,7 +31,7 @@ export const createTournament = async (newTournament: CreateTournament): Promise
 /**
  * Retrieves a list of tournaments from the API.
  * @param {string} token - The authentication token.
- * @returns {Promise<Tournament>} - The list of tournaments.
+ * @returns {Promise<TournamentPeople>} - The list of tournaments.
  * @throws {Error} - Throws an error if the request fails.
  */
 export const getTournaments = async (token: string): Promise<TournamentPeople> => {
@@ -49,8 +49,6 @@ export const getTournaments = async (token: string): Promise<TournamentPeople> =
         throw new Error('Failed to retrieve tournaments');
     }
 };
-
-
 
 /**
  * Retrieves the details of a specific tournament by its ID.
@@ -75,17 +73,16 @@ export const getTournament = async (id_tournament: string, token: string): Promi
     }
 };
 
-
-
 /**
- * Retrieves a list of tournaments from the API.
+ * Retrieves the list of teams for a specific tournament.
+ * @param {string} tournamentId - The ID of the tournament.
  * @param {string} token - The authentication token.
- * @returns {Promise<Team>} - The list of tournaments.
+ * @returns {Promise<TournamentTeams>} - The list of teams in the tournament.
  * @throws {Error} - Throws an error if the request fails.
  */
-export const getTournamentTeams = async (tournementId: string, token: string): Promise<TournamentTeams> => {
+export const getTournamentTeams = async (tournamentId: string, token: string): Promise<TournamentTeams> => {
     try {
-        const response = await $fetch(`${API_URL}/tournaments/${tournementId}/teams`, {
+        const response = await $fetch(`${API_URL}/tournaments/${tournamentId}/teams`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -95,6 +92,29 @@ export const getTournamentTeams = async (tournementId: string, token: string): P
 
         return response;
     } catch (error) {
-        throw new Error('Failed to retrieve tournaments');
+        throw new Error('Failed to retrieve tournament teams');
+    }
+};
+
+/**
+ * Checks if a user is already part of a team in a specific tournament.
+ * @param {string} tournamentId - The ID of the tournament.
+ * @param {string} token - The authentication token.
+ * @returns {Promise<{ isInTeam: boolean }>} - Indicates whether the user is in a team for the tournament.
+ * @throws {Error} - Throws an error if the request fails.
+ */
+export const checkIfUserInTeam = async (tournamentId: string, token: string): Promise<{ isInTeam: boolean }> => {
+    try {
+        const response = await $fetch(`${API_URL}/tournaments/${tournamentId}/teams/isInTeam`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        return response as { isInTeam: boolean };
+    } catch (error) {
+        throw new Error('Failed to check if the user is in a team for the tournament');
     }
 };

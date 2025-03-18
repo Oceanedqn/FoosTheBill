@@ -15,13 +15,12 @@ export class TournamentsController {
 
     /**
      * Creates a new tournament.
-     * This function allows authenticated and authorized users (with the appropriate roles) 
-     * to create a new tournament.
-     * @param createTournamentDto - Data transfer object containing the details of the tournament (name, description, start date).
-     * @param req - The request object containing user details (used to extract the user ID).
-     * @returns Promise<{ statusCode: number, message: string, data: TournamentResponseDto }> - Returns a status code, a success message, and the created tournament details.
-     * @throws ForbiddenException - If the user does not have the necessary permissions.
-     * @throws BadRequestException - If any validation fails.
+     * Only authenticated and authorized users (with the required roles) can create a tournament.
+     * @param createTournamentDto - DTO containing tournament details (name, description, start date).
+     * @param req - Request object containing user details (used to extract user ID).
+     * @returns A response containing status, success message, and created tournament details.
+     * @throws ForbiddenException - If the user lacks the necessary permissions.
+     * @throws BadRequestException - If validation fails.
      */
     @UseGuards(AuthGuard, RolesGuard)
     @Post()
@@ -40,11 +39,9 @@ export class TournamentsController {
 
     /**
      * Retrieves all tournaments.
-     * This function allows authenticated users to retrieve the list of all tournaments.
-     * @param req - The request object containing user details (used to extract the user ID).
-     * @returns Promise<{ statusCode: number, message: string, data: TournamentResponseDto[] }> - Returns a status code, a success message, and an array of all tournaments.
+     * @returns A list of all tournaments.
      * @throws UnauthorizedException - If the user is not authenticated.
-     * @throws InternalServerErrorException - If there is an error retrieving tournaments.
+     * @throws InternalServerErrorException - If an error occurs during retrieval.
      */
     @UseGuards(AuthGuard)
     @Get()
@@ -59,16 +56,13 @@ export class TournamentsController {
 
     /**
      * Retrieves a specific tournament by its ID.
-     * This function allows authenticated users to retrieve a single tournament by its ID.
-     * @param id - The ID of the tournament to retrieve.
-     * @param req - The request object containing user details (used to extract the user ID).
-     * @returns Promise<{ statusCode: number, message: string, data: TournamentResponseDto }> - Returns a status code, a success message, and the details of the requested tournament.
-     * @throws NotFoundException - If the tournament with the specified ID is not found.
-     * @throws UnauthorizedException - If the user is not authenticated.
+     * @param id - Tournament ID.
+     * @returns The requested tournament.
+     * @throws NotFoundException - If the tournament is not found.
      */
     @UseGuards(AuthGuard)
     @Get(':id')
-    async findOne(@Param('id') id: string, @Request() req) {
+    async findOne(@Param('id') id: string) {
         const tournament = await this.tournamentsService.findOne(id);
         return {
             statusCode: HttpStatus.OK,
@@ -79,18 +73,17 @@ export class TournamentsController {
 
     /**
      * Updates an existing tournament.
-     * This function allows authenticated and authorized users to update an existing tournament.
-     * @param id - The ID of the tournament to update.
-     * @param tournament - Data transfer object containing updated tournament details (name, description, start date).
-     * @param req - The request object containing user details (used to extract the user ID).
-     * @returns Promise<{ statusCode: number, message: string }> - Returns a status code and a success message.
-     * @throws ForbiddenException - If the user does not have the necessary permissions to update the tournament.
-     * @throws NotFoundException - If the tournament with the given ID is not found.
-     * @throws BadRequestException - If the provided tournament data is invalid.
+     * Only authenticated and authorized users can update a tournament.
+     * @param id - Tournament ID.
+     * @param tournament - DTO containing updated tournament details.
+     * @returns A success message upon successful update.
+     * @throws ForbiddenException - If the user lacks the necessary permissions.
+     * @throws NotFoundException - If the tournament is not found.
+     * @throws BadRequestException - If provided data is invalid.
      */
     @UseGuards(AuthGuard, RolesGuard)
     @Put(':id')
-    async update(@Param('id') id: string, @Body() tournament: UpdateTournamentDto, @Request() req) {
+    async update(@Param('id') id: string, @Body() tournament: UpdateTournamentDto) {
         await this.tournamentsService.update(id, tournament);
         return {
             statusCode: HttpStatus.OK,
@@ -100,16 +93,15 @@ export class TournamentsController {
 
     /**
      * Deletes a tournament by its ID.
-     * This function allows authenticated and authorized users to delete a specific tournament.
-     * @param id - The ID of the tournament to delete.
-     * @param req - The request object containing user details (used to extract the user ID).
-     * @returns Promise<{ statusCode: number, message: string }> - Returns a status code and a success message.
-     * @throws ForbiddenException - If the user does not have the necessary permissions to delete the tournament.
-     * @throws NotFoundException - If the tournament with the given ID is not found.
+     * Only authenticated and authorized users can delete a tournament.
+     * @param id - Tournament ID.
+     * @returns A success message upon deletion.
+     * @throws ForbiddenException - If the user lacks the necessary permissions.
+     * @throws NotFoundException - If the tournament is not found.
      */
     @UseGuards(AuthGuard, RolesGuard)
     @Delete(':id')
-    async remove(@Param('id') id: string, @Request() req) {
+    async remove(@Param('id') id: string) {
         await this.tournamentsService.remove(id);
         return {
             statusCode: HttpStatus.OK,
@@ -118,11 +110,10 @@ export class TournamentsController {
     }
 
     /**
-     * Retrieves all teams related to a specific tournament.
-     * This function allows authenticated users to retrieve the list of teams associated with a tournament.
-     * @param id - The ID of the tournament for which teams are being retrieved.
-     * @returns Promise<{ statusCode: number, message: string, data: TeamResponseDto[] }> - Returns a status code, a success message, and an array of teams.
-     * @throws NotFoundException - If the tournament with the given ID is not found.
+     * Retrieves all teams associated with a specific tournament.
+     * @param id - Tournament ID.
+     * @returns A list of teams in the tournament.
+     * @throws NotFoundException - If the tournament is not found.
      */
     @UseGuards(AuthGuard)
     @Get(':id/teams')
@@ -135,6 +126,13 @@ export class TournamentsController {
         };
     }
 
+    /**
+     * Creates a new team within a tournament.
+     * @param id - Tournament ID.
+     * @param createTournamentDto - DTO containing team details.
+     * @param req - Request object containing user details (used to extract user ID).
+     * @returns A success message and the created team details.
+     */
     @UseGuards(AuthGuard)
     @Post(':id/teams')
     async createTeam(@Param('id') id: string, @Body() createTournamentDto: CreateTeamDto, @Request() req) {
@@ -149,5 +147,19 @@ export class TournamentsController {
             message: 'Team created successfully',
             data: createdTeam,
         };
+    }
+
+    /**
+     * Checks if a user is already part of a team in a specific tournament.
+     * @param tournamentId - Tournament ID.
+     * @param req - Request object containing user details (used to extract user ID).
+     * @returns true if the user is in a team, otherwise false.
+     */
+    @Get(':id/teams/isInTeam')
+    @UseGuards(AuthGuard)
+    async checkIfUserInTeam(@Param('id') tournamentId: string, @Request() req): Promise<{ isInTeam: boolean }> {
+        const userId = req.user.id;
+        const isInTeam = await this.teamService.isUserInTeam(userId, tournamentId);
+        return { isInTeam };
     }
 }

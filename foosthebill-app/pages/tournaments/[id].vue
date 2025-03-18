@@ -22,11 +22,11 @@
 
             <!-- Team Management Section -->
             <div class="flex items-center gap-4">
-                <button @click="openModal"
+                <button v-if="!isUserInTeam" @click="openModal"
                     class="px-4 py-2 text-white rounded-lg cursor-pointer bg-primary hover:bg-primary-dark">
                     {{ $t('create_team') }}<i class="pl-2 fa-solid fa-people-group"></i>
                 </button>
-                <button @click="joinTeamAutomatically"
+                <button v-if="!isUserInTeam && tournamentTeams?.teams?.length > 0" @click="joinTeamAutomatically"
                     class="px-4 py-2 text-white rounded-lg cursor-pointer bg-primary hover:bg-primary-dark">
                     {{ $t('join_team_automatically') }}<i class="pl-2 fa-solid fa-user-plus"></i>
                 </button>
@@ -107,35 +107,43 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { getTournament, getTournamentTeams } from '~/services/tournament';
+import { getTournamentTeams, checkIfUserInTeam } from '~/services/tournament';
 import { createTeam } from '~/services/team';
 import { getUsers } from '~/services/user';
 import { useAuthStore } from '~/stores/auth.store'; // Store to get user info
 
 const router = useRouter();
+const authStore = useAuthStore();
+const showModal = ref(false);
+const isAdmin = ref(false);
 const route = useRoute();
-
 const tournamentTeams = ref(null);
 const users = ref([]);
-
 const newTeam = ref({
     name: '',
     participant2: null,
 });
-
 const filteredTeams = ref([]);
 const searchQuery = ref('');
-const authStore = useAuthStore();
-const showModal = ref(false);
-const isAdmin = ref(false);
+const isUserInTeam = ref(false); // Variable pour savoir si l'utilisateur est dans une équipe
+
 
 // Fetch tournament details and teams when the component is mounted
 onMounted(async () => {
     await authStore.initialize();
     isAdmin.value = authStore.user?.role === 'ADMIN';
+
+
     await fetchTournamentTeams();
     await fetchUsers();
+    await checkIfUserIsInTeam();
 });
+
+const checkIfUserIsInTeam = async () => {
+    const tournamentId = route.params.id;
+    const token = authStore.accessToken;
+    isUserInTeam.value = (await checkIfUserInTeam(tournamentId, token)).isInTeam;
+}
 
 const fetchTournamentTeams = async () => {
     const tournamentId = route.params.id;
@@ -203,14 +211,22 @@ const handleCreateTeam = async () => {
 
     const tournamentId = route.params.id;
 
-
     try {
-        await createTeam(newTeam.value, tournamentId);
+        // Appel à la fonction pour créer l'équipe
+        const response = await createTeam(newTeam.value, tournamentId);
         await fetchTournamentTeams();
 
+        if (response && response.statusCode === 201) {
+            const successMessage = response.message || 'Succès';
+            await checkIfUserIsInTeam();
+
+        } else {
+            const errorMessage = response?.message || 'Erreur inconnue';
+            alert(`Erreur lors de la création de l'équipe : ${errorMessage}`);
+        }
     } catch (error) {
         console.error('Erreur lors de la création', error);
-        alert('Échec de la création');
+        alert('Échec de la création de l\'équipe. Veuillez réessayer plus tard.');
     } finally {
         closeModal();
     }
