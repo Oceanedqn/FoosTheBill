@@ -4,12 +4,10 @@ import { User } from './User';
 
 export interface CreateTeam {
     name: string;
-    tournament_id: string;
-    participant1: User;
     participant2?: User | null; // Nullable si on ajoute un seul joueur au début
 }
 
-export interface BasicTeam {
+export interface BaseTeam {
     id: string;
     name: string;
     participant1: User;

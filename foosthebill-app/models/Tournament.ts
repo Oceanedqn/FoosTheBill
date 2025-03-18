@@ -1,5 +1,5 @@
 // models/Tournament.ts
-import { Team, type BasicTeam } from './Team';
+import { Team, type BaseTeam } from './Team';
 import { Match } from './Match';
 import type { User } from './User';
 
@@ -34,8 +34,7 @@ export interface TournamentTeams {
     start_date: string;
     description: string;
     admin: User;
-    teams: BasicTeam
-
+    teams: BaseTeam[];
 }
 
 export class Tournament {
