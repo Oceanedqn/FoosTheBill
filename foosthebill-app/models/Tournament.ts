@@ -17,6 +17,17 @@ export interface BasicTournament {
     admin_id: string;
 }
 
+// Use in /tournaments
+export interface TournamentPeople {
+    id: string;
+    name: string;
+    start_date: string;
+    description: string;
+    participant_number: number;
+    admin: User;
+
+}
+
 export class Tournament {
     id: string;
     name: string;

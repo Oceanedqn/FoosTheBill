@@ -1,6 +1,6 @@
 import type { CreateTournamentResponse, GenericResponse } from "~/models/Response";
 import type { Team } from "~/models/Team";
-import type { CreateTournament, Tournament } from "~/models/Tournament";
+import type { CreateTournament, Tournament, TournamentPeople } from "~/models/Tournament";
 
 const API_URL = 'http://localhost:3001';
 
@@ -34,7 +34,7 @@ export const createTournament = async (newTournament: CreateTournament): Promise
  * @returns {Promise<Tournament>} - The list of tournaments.
  * @throws {Error} - Throws an error if the request fails.
  */
-export const getTournaments = async (token: string): Promise<Tournament> => {
+export const getTournaments = async (token: string): Promise<TournamentPeople> => {
     try {
         const response = await $fetch(`${API_URL}/tournaments`, {
             method: 'GET',
@@ -42,7 +42,7 @@ export const getTournaments = async (token: string): Promise<Tournament> => {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
-        }) as Tournament;
+        }) as TournamentPeople;
 
         return response;
     } catch (error) {

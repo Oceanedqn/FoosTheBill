@@ -1,17 +1,17 @@
 <template>
-    <div class="min-h-screen flex flex-col">
+    <div class="flex flex-col min-h-screen">
         <!-- Title -->
-        <div class="flex items-center justify-center space-x-1 mb-8">
+        <div class="flex items-center justify-center mb-8 space-x-1">
             <h1 class="text-4xl font-bold text-title-text">{{ $t('tournament') }}</h1>
             <i v-if="isAdmin" class="fa-solid fa-certificate text-primary"></i>
         </div>
 
         <!-- Container for the search bar and create button -->
-        <div class="flex justify-between items-center w-full mb-8">
+        <div class="flex items-center justify-between w-full mb-8">
             <!-- Search Bar -->
-            <div class="flex w-full items-center">
+            <div class="flex items-center w-full">
                 <input v-model="searchQuery" type="text" :placeholder="$t('search_tournament')"
-                    class="px-4 py-2 border border-gray-300 rounded-lg shadow-md mr-4 w-1/2 sm:w-1/3"
+                    class="w-1/2 px-4 py-2 mr-4 border border-gray-300 rounded-lg shadow-md sm:w-1/3"
                     @input="filterTournaments" />
 
                 <i class="fa-solid fa-magnifying-glass"></i>
@@ -20,37 +20,37 @@
             <!-- Button to create a new tournament (only visible for admins) -->
             <div v-if="isAdmin">
                 <button @click="openModal"
-                    class="px-4 py-2 bg-secondary text-white rounded-lg cursor-pointer shadow-md hover:bg-secondary-dark">
+                    class="px-4 py-2 text-white rounded-lg shadow-md cursor-pointer bg-secondary hover:bg-secondary-dark">
                     <div class="flex items-center text-center">
-                        {{ $t('create') }} <i class="fa-solid fa-futbol pl-2"></i>
+                        {{ $t('create') }} <i class="pl-2 fa-solid fa-futbol"></i>
                     </div>
                 </button>
             </div>
         </div>
 
-        <h2 class="text-2xl font-bold text-title-text mb-2">{{ $t('tournaments_list') }}</h2>
+        <h2 class="mb-2 text-2xl font-bold text-title-text">{{ $t('tournaments_list') }}</h2>
 
         <div v-if="filteredTournaments.length === 0">
             {{ $t('no_tournament') }}
         </div>
 
         <!-- Tournament Cards -->
-        <div class="relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-6xl">
+        <div class="relative grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             <div v-for="tournament in filteredTournaments" :key="tournament.id"
-                class="relative bg-white p-6 rounded-lg shadow-lg hover:shadow-xl">
+                class="relative p-6 bg-white rounded-lg shadow-lg hover:shadow-xl">
                 <div
-                    class="absolute top-0 right-0 m-2 bg-background text-dark-text p-4 rounded-md flex items-center justify-center w-5 h-5 group">
-                    3 <i class="fa-solid fa-person pl-1"></i>
+                    class="absolute top-0 right-0 flex items-center justify-center w-5 h-5 p-4 m-2 rounded-md bg-background text-dark-text group">
+                    {{ tournament.participant_number }} <i class="pl-1 fa-solid fa-person"></i>
                     <div
-                        class="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 text-sm text-white bg-black p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-                        3 inscrit(s) au tournoi
+                        class="absolute p-2 mb-2 text-sm text-white transition-opacity duration-300 transform -translate-x-1/2 bg-black rounded opacity-0 bottom-full left-1/2 group-hover:opacity-100 whitespace-nowrap">
+                        {{ tournament.participant_number }} inscrit(s) au tournoi
                     </div>
                 </div>
 
-                <h2 class="text-xl font-semibold text-center mb-4">{{ tournament.name }}</h2>
-                <p class="text-gray-600 text-sm">{{ tournament.description }}</p>
-                <p class="text-gray-500 text-sm mb-4">
-                    <i class="fa-solid fa-calendar-day pr-1"></i>
+                <h2 class="mb-4 text-xl font-semibold text-center">{{ tournament.name }}</h2>
+                <p class="text-sm text-gray-600">{{ tournament.description }}</p>
+                <p class="mb-4 text-sm text-gray-500">
+                    <i class="pr-1 fa-solid fa-calendar-day"></i>
                     {{ new Date(tournament.start_date).toLocaleDateString('fr-FR', {
                         weekday: 'long',
                         year: 'numeric',
@@ -59,9 +59,9 @@
                     }) }}
                 </p>
                 <button @click="joinTournament(tournament.id)"
-                    class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark w-full cursor-pointer">
+                    class="w-full px-4 py-2 text-white rounded-lg cursor-pointer bg-primary hover:bg-primary-dark">
                     {{ $t('join') }}
-                    <i class="fa-solid fa-hand-point-right ml-1"></i>
+                    <i class="ml-1 fa-solid fa-hand-point-right"></i>
                 </button>
             </div>
         </div>
@@ -69,9 +69,9 @@
 
         <!-- Modal for Create Tournament -->
         <div v-if="isModalOpen"
-            class="fixed inset-0 z-50 flex justify-center items-center bg-gray-800/50 bg-opacity-50">
-            <div class="bg-white p-6 rounded-lg w-96">
-                <h2 class="text-2xl font-bold mb-4">{{ $t('create_tournament') }}</h2>
+            class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 bg-gray-800/50">
+            <div class="p-6 bg-white rounded-lg w-96">
+                <h2 class="mb-4 text-2xl font-bold">{{ $t('create_tournament') }}</h2>
                 <form @submit.prevent="handleCreateTournament">
                     <div class="mb-4">
                         <label for="name" class="block text-sm font-semibold text-gray-700">{{ $t('name') }}</label>
@@ -96,11 +96,11 @@
 
                     <div class="flex justify-between">
                         <button type="button" @click="closeModal"
-                            class="px-4 py-2 bg-gray-500 cursor-pointer text-white rounded-lg">
+                            class="px-4 py-2 text-white bg-gray-500 rounded-lg cursor-pointer">
                             {{ $t('cancel') }}
                         </button>
                         <button type="submit"
-                            class="px-4 py-2 bg-primary text-white rounded-lg cursor-pointer hover:bg-primary-dark">
+                            class="px-4 py-2 text-white rounded-lg cursor-pointer bg-primary hover:bg-primary-dark">
                             {{ $t('create') }}
                         </button>
                     </div>
