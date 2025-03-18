@@ -1,3 +1,4 @@
+import { TeamResponseDto } from 'src/teams/dto/team.dto';
 import { UserResponseDto } from 'src/users/dto/user.dto';
 
 export class TournamentResponseDto {
@@ -15,6 +16,11 @@ export class TournamentPeopleResponseDto {
   start_date: Date;
   participant_number: number;
   admin: UserResponseDto;
+}
+
+export class TournamentTeamsResponseDto {
+  tournament: TournamentResponseDto;
+  teams: TeamResponseDto[];
 }
 
 export class CreateTournamentDto {

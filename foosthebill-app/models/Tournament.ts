@@ -1,5 +1,5 @@
 // models/Tournament.ts
-import { Team } from './Team';
+import { Team, type BasicTeam } from './Team';
 import { Match } from './Match';
 import type { User } from './User';
 
@@ -25,6 +25,16 @@ export interface TournamentPeople {
     description: string;
     participant_number: number;
     admin: User;
+
+}
+
+export interface TournamentTeams {
+    id: string;
+    name: string;
+    start_date: string;
+    description: string;
+    admin: User;
+    teams: BasicTeam
 
 }
 

@@ -1,10 +1,10 @@
+import { Tournament } from 'src/tournaments/tournament.entity';
+import { User } from 'src/users/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
-import { Tournament } from '../tournaments/tournament.entity';
-import { User } from '../users/user.entity';
 
 @Entity()
 export class Team {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn('uuid')
     id: string;
 
     @Column({ length: 100 })

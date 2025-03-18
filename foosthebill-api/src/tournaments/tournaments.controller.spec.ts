@@ -82,7 +82,7 @@ describe('TournamentsController', () => {
             const tournaments = [{ id: '1', name: 'Tournament 1' }];
             mockTournamentsService.findAll.mockResolvedValue(tournaments);
 
-            const result = await controller.findAll({ user: { id: '123' } });
+            const result = await controller.findAll();
 
             expect(result).toEqual({
                 statusCode: HttpStatus.OK,

@@ -2,21 +2,24 @@ import { Injectable, NotFoundException, InternalServerErrorException } from '@ne
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Team } from './team.entity';
-import { Tournament } from '../tournaments/tournament.entity';
 import { User } from '../users/user.entity';
+import { CreateTeamDto, TeamResponseDto, TeamsWithTournamentReponseDto } from './dto/team.dto';
+import { mapToTournamentResponseDto, mapToUserResponseDto } from 'src/utils/dto-helper';
+import { Tournament } from 'src/tournaments/tournament.entity';
+import { UsersService } from 'src/users/users.service';
+import { TournamentsService } from 'src/tournaments/tournaments.service';
+import { TournamentTeamsResponseDto } from 'src/tournaments/dto/tournament.dto';
 
 @Injectable()
 export class TeamsService {
     constructor(
-        @InjectRepository(Team)
-        private teamsRepository: Repository<Team>,
-
-        @InjectRepository(Tournament)
-        private tournamentsRepository: Repository<Tournament>,
-
-        @InjectRepository(User)
-        private usersRepository: Repository<User>,
+        @InjectRepository(Team) private teamsRepository: Repository<Team>,
+        @InjectRepository(Tournament) private tournamentsRepository: Repository<Tournament>,
+        @InjectRepository(User) private usersRepository: Repository<User>,
+        private readonly usersService: UsersService,
+        private readonly tournamentService: TournamentsService
     ) { }
+
 
     /**
      * Create a new team with one or two participants.
@@ -25,70 +28,96 @@ export class TeamsService {
      * @throws NotFoundException if the tournament or participants are not found.
      * @throws InternalServerErrorException if there is an error during team creation.
      */
-    async create(team: Team): Promise<Team> {
+    async createByTournamentId(createTeamDto: CreateTeamDto): Promise<TeamsWithTournamentReponseDto> {
         try {
-            // Check if the tournament exists
-            const tournament = await this.tournamentsRepository.findOne({
-                where: { id: team.tournament.id },
-            });
-            if (!tournament) {
-                throw new NotFoundException(`Tournament with id ${team.tournament.id} not found`);
-            }
 
-            // Check if participant 1 exists
-            if (!team.participant1) {
-                throw new NotFoundException('Participant 1 is required');
-            }
-            const participant1 = await this.usersRepository.findOne({
-                where: { id: team.participant1.id },
-            });
-            if (!participant1) {
-                throw new NotFoundException(`Participant 1 with id ${team.participant1.id} not found`);
-            }
-
-            // If participant 2 is provided, check its existence
-            if (team.participant2) {
-                const participant2 = await this.usersRepository.findOne({
-                    where: { id: team.participant2.id },
+            const player1 = await this.usersService.findOne(createTeamDto.participant1);
+            const tournament = await this.tournamentService.findOne(createTeamDto.tournament_id);
+    
+            // Vérifier si le participant 2 existe (si fourni)
+            let player2: User | null = null;
+            if (createTeamDto.participant2) {
+                player2 = await this.usersRepository.findOne({
+                    where: { id: createTeamDto.participant2 },
                 });
-                if (!participant2) {
-                    throw new NotFoundException(`Participant 2 with id ${team.participant2.id} not found`);
-                }
             }
-
-            // Save the new team
-            team.tournament = tournament;
-            team.participant1 = participant1;
-            return await this.teamsRepository.save(team);
+    
+            // Créer l'équipe
+            const team = this.teamsRepository.create({
+                name: createTeamDto.name,
+                tournament: tournament,  // Assurez-vous d'assigner l'entité tournoi
+                participant1: player1,
+                participant2: player2,
+            });
+    
+            // Sauvegarder l'équipe
+            await this.teamsRepository.save(team);
+    
+            // Renvoyer la réponse structurée avec les données appropriées
+            return {
+                id: team.id,
+                name: team.name,
+                tournament: tournament,
+                participant1: player1,
+                participant2: player2,
+            };
         } catch (error) {
+            console.error("Error creating team:", error); // Log the error to understand the failure point
             throw new InternalServerErrorException('Error creating team', error.message);
         }
     }
 
+    
+
     /**
-     * Retrieve all teams, optionally filtered by tournament ID.
-     * @param tournamentId - (Optional) The ID of the tournament to filter teams by.
-     * @returns A list of teams, potentially filtered by tournament.
-     * @throws InternalServerErrorException if there is an error while fetching the teams.
-     */
-    async findAll(tournamentId?: string): Promise<Team[]> {
-        try {
-            const query = this.teamsRepository.createQueryBuilder('team')
-                .leftJoinAndSelect('team.tournament', 'tournament')  // Join with tournament
-                .leftJoinAndSelect('team.participant1', 'participant1')  // Join with participant 1
-                .leftJoinAndSelect('team.participant2', 'participant2');  // Join with participant 2
+         * Retrieves all teams associated with a specific tournament.
+         * This function fetches the list of teams related to a specific tournament and maps them to DTOs.
+         * @param tournamentId - The ID of the tournament.
+         * @returns Promise<TeamResponseDto[]> - A list of teams associated with the tournament.
+         * @throws NotFoundException - If the tournament with the given ID is not found.
+         * @throws InternalServerErrorException - If an error occurs while retrieving teams.
+         */
+        async findAllByTournamentId(tournamentId: string): Promise<TournamentTeamsResponseDto> {
+            try {
+                const tournament = await this.tournamentService.findOne(tournamentId);
+    
+                if (!tournament) {
+                    throw new NotFoundException(`Tournament with id ${tournamentId} not found`);
+                }
 
-            // If a tournamentId is provided, filter by tournament
-            if (tournamentId) {
-                query.where('team.tournament_id = :tournamentId', { tournamentId });
+                const teams = await this.teamsRepository.find({ where: { tournament: { id: tournamentId } }, relations: ['participant1', 'participant2'] });
+    
+                // Mapping the teams to DTOs
+                const response: TournamentTeamsResponseDto = {
+                    tournament: tournament,
+                    teams: teams.map(team => ({
+                        id: team.id,
+                        name: team.name,
+                        participant1: {
+                            id: team.participant1.id,
+                            name: team.participant1.name,
+                            firstname: team.participant1.firstname,
+                            email: team.participant1.email,
+                            role: team.participant1.role
+                        },
+                        participant2: team.participant2
+                            ? {
+                                id: team.participant2.id,
+                                name: team.participant2.name,
+                                firstname: team.participant2.firstname,
+                                email: team.participant2.email,
+                                role: team.participant2.role
+                            }
+                            : null,
+                    })),
+                }
+    
+                return response;
+            } catch (error) {
+                console.error("[Service findAllTeams] Error: ", error);
+                throw new InternalServerErrorException('Error retrieving teams for tournament', error.message);
             }
-
-            return await query.getMany();  // Retrieve all teams
-        } catch (error) {
-            console.error('Error in findAll:', error);  // Log error details
-            throw new InternalServerErrorException('Error fetching teams', error.message);
         }
-    }
 
     /**
      * Retrieve a specific team by its IDs (commented-out in the code).

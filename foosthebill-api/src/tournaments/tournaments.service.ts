@@ -2,10 +2,8 @@ import { Injectable, NotFoundException, InternalServerErrorException, BadRequest
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Tournament } from './tournament.entity';
-import { CreateTournamentDto, TournamentResponseDto, UpdateTournamentDto } from './dto/tournament.dto';
+import { CreateTournamentDto, TournamentPeopleResponseDto, TournamentResponseDto, UpdateTournamentDto } from './dto/tournament.dto';
 import { UsersService } from 'src/users/users.service';
-import { TeamResponseDto } from 'src/teams/dto/team.dto';
-import { mapToTournamentResponseDto, mapToUserResponseDto } from 'src/utils/dto-helper';
 
 @Injectable()
 export class TournamentsService {
@@ -15,6 +13,7 @@ export class TournamentsService {
         private readonly usersService: UsersService,
     ) { }
 
+    
     /**
      * Creates a new tournament.
      * This function checks the start date to ensure it is not in the past,
@@ -64,22 +63,36 @@ export class TournamentsService {
         }
     }
 
+
     /**
      * Retrieves all tournaments.
      * This function fetches all the tournaments along with their respective admin details.
      * @returns Promise<TournamentResponseDto[]> - An array of tournament response objects containing tournament details and admin info.
      * @throws InternalServerErrorException - If an error occurs while retrieving tournaments.
      */
-    async findAll(): Promise<TournamentResponseDto[]> {
+    async findAll(): Promise<TournamentPeopleResponseDto[]> {
         try {
             const tournaments = await this.tournamentsRepository.find({
-                relations: ['admin'],
+                relations: ['admin', 'teams', 'teams.participant1', 'teams.participant2'],
             });
-
-            const tournamentResponses: TournamentResponseDto[] = [];
-
+    
+            const tournamentResponses: TournamentPeopleResponseDto[] = [];
+    
             for (const tournament of tournaments) {
-                const tournamentResponse: TournamentResponseDto = {
+                // Calculer le nombre de participants distincts
+                const participants = new Set<string>(); // Utiliser un Set pour éviter les doublons
+    
+                // Itérer sur toutes les équipes du tournoi
+                for (const team of tournament.teams) {
+                    if (team.participant1) {
+                        participants.add(team.participant1.id); // Ajouter l'ID du participant1
+                    }
+                    if (team.participant2) {
+                        participants.add(team.participant2.id); // Ajouter l'ID du participant2
+                    }
+                }
+    
+                const tournamentResponse: TournamentPeopleResponseDto = {
                     id: tournament.id,
                     name: tournament.name,
                     description: tournament.description,
@@ -91,18 +104,19 @@ export class TournamentsService {
                         email: tournament.admin.email,
                         role: tournament.admin.role,
                     },
+                    participant_number: participants.size, // Nombre de participants uniques
                 };
-
+    
                 tournamentResponses.push(tournamentResponse);
             }
-
+    
             return tournamentResponses;
-
         } catch (error) {
             console.error("[Service findAll] Error: ", error);
             throw new InternalServerErrorException('Error retrieving tournaments', error.message);
         }
     }
+
 
     /**
      * Retrieves a single tournament by its ID.
@@ -144,45 +158,6 @@ export class TournamentsService {
         }
     }
 
-    /**
-     * Retrieves all teams associated with a specific tournament.
-     * This function fetches the list of teams related to a specific tournament and maps them to DTOs.
-     * @param tournamentId - The ID of the tournament.
-     * @returns Promise<TeamResponseDto[]> - A list of teams associated with the tournament.
-     * @throws NotFoundException - If the tournament with the given ID is not found.
-     * @throws InternalServerErrorException - If an error occurs while retrieving teams.
-     */
-    async findAllTeams(tournamentId: string): Promise<TeamResponseDto[]> {
-        try {
-            const tournament = await this.tournamentsRepository.findOne({
-                where: { id: tournamentId },
-                relations: ['teams', 'teams.participant1', 'teams.participant2', 'teams.tournament', 'admin'], // Make sure 'admin' is the tournament's relation
-            });
-
-            if (!tournament) {
-                throw new NotFoundException(`Tournament with id ${tournamentId} not found`);
-            }
-
-            // Mapping the teams to DTOs
-            const teamsResponse: TeamResponseDto[] = tournament.teams.map((team) => {
-                const teamDto = new TeamResponseDto();
-                teamDto.id = team.id;
-                teamDto.name = team.name;
-                teamDto.tournament = mapToTournamentResponseDto(team.tournament); // Mapping the tournament
-                teamDto.participant1 = mapToUserResponseDto(team.participant1)!; // participant1 is mandatory
-
-                // Checking for participant2 and assigning null if necessary
-                teamDto.participant2 = team.participant2 ? mapToUserResponseDto(team.participant2) : null;
-
-                return teamDto;
-            });
-
-            return teamsResponse;
-        } catch (error) {
-            console.error("[Service findAllTeams] Error: ", error);
-            throw new InternalServerErrorException('Error retrieving teams for tournament', error.message);
-        }
-    }
 
     /**
      * Updates an existing tournament.
@@ -206,6 +181,7 @@ export class TournamentsService {
             throw new InternalServerErrorException('Error updating tournament', error.message);
         }
     }
+
 
     /**
      * Deletes a tournament by ID.

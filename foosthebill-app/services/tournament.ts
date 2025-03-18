@@ -1,6 +1,6 @@
 import type { CreateTournamentResponse, GenericResponse } from "~/models/Response";
 import type { Team } from "~/models/Team";
-import type { CreateTournament, Tournament, TournamentPeople } from "~/models/Tournament";
+import type { CreateTournament, Tournament, TournamentPeople, TournamentTeams } from "~/models/Tournament";
 
 const API_URL = 'http://localhost:3001';
 
@@ -50,6 +50,8 @@ export const getTournaments = async (token: string): Promise<TournamentPeople> =
     }
 };
 
+
+
 /**
  * Retrieves the details of a specific tournament by its ID.
  * @param {string} id_tournament - The ID of the tournament.
@@ -73,13 +75,15 @@ export const getTournament = async (id_tournament: string, token: string): Promi
     }
 };
 
+
+
 /**
  * Retrieves a list of tournaments from the API.
  * @param {string} token - The authentication token.
  * @returns {Promise<Team>} - The list of tournaments.
  * @throws {Error} - Throws an error if the request fails.
  */
-export const getTournamentTeams = async (tournementId: string, token: string): Promise<Team> => {
+export const getTournamentTeams = async (tournementId: string, token: string): Promise<TournamentTeams> => {
     try {
         const response = await $fetch(`${API_URL}/tournaments/${tournementId}/teams`, {
             method: 'GET',
@@ -87,7 +91,7 @@ export const getTournamentTeams = async (tournementId: string, token: string): P
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
-        }) as Team;
+        }) as TournamentTeams;
 
         return response;
     } catch (error) {

@@ -9,6 +9,13 @@ export interface CreateTeam {
     participant2?: User | null; // Nullable si on ajoute un seul joueur au début
 }
 
+export interface BasicTeam {
+    id: string;
+    name: string;
+    participant1: User;
+    participant2?: User | null; // Nullable si on ajoute un seul joueur au début
+}
+
 export class Team {
     id: string;
     name: string;

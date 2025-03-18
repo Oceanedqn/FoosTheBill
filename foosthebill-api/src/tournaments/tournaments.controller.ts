@@ -1,16 +1,17 @@
 import { Controller, Get, Post, Param, Body, Put, Delete, HttpStatus, UseFilters, UseGuards, ForbiddenException } from '@nestjs/common';
 import { TournamentsService } from './tournaments.service';
 import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
-import { CreateTournamentDto, UpdateTournamentDto } from './dto/tournament.dto';
+import { CreateTournamentDto, TournamentTeamsResponseDto, UpdateTournamentDto } from './dto/tournament.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from '@nestjs/common';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { TeamResponseDto } from 'src/teams/dto/team.dto';
+import { TeamsService } from '../teams/teams.service';
+import { CreateTeamDto, TeamResponseDto } from 'src/teams/dto/team.dto';
 
 @Controller('tournaments')
 @UseFilters(new AllExceptionsFilter())
 export class TournamentsController {
-    constructor(private readonly tournamentsService: TournamentsService) { }
+    constructor(private readonly tournamentsService: TournamentsService, private readonly teamService: TeamsService) { }
 
     /**
      * Creates a new tournament.
@@ -126,11 +127,27 @@ export class TournamentsController {
     @UseGuards(AuthGuard)
     @Get(':id/teams')
     async findAllTeams(@Param('id') id: string) {
-        const teams: TeamResponseDto[] = await this.tournamentsService.findAllTeams(id);
+        const tournament: TournamentTeamsResponseDto = await this.teamService.findAllByTournamentId(id);
         return {
             statusCode: HttpStatus.OK,
             message: 'Teams retrieved successfully',
-            data: teams,
+            data: tournament,
+        };
+    }
+
+    @UseGuards(AuthGuard)
+    @Post(':id/teams')
+    async createTeam(@Param('id') id: string, @Body() createTournamentDto: CreateTeamDto, @Request() req) {
+        const userId = req.user.id;
+        createTournamentDto.participant1 = userId;
+        createTournamentDto.tournament_id = id;
+
+        const createdTeam = await this.teamService.createByTournamentId(createTournamentDto);
+
+        return {
+            statusCode: HttpStatus.CREATED,
+            message: 'Team created successfully',
+            data: createdTeam,
         };
     }
 }

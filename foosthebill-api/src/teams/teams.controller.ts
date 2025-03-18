@@ -8,43 +8,7 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 @UseFilters(new AllExceptionsFilter())
 export class TeamsController {
     constructor(private readonly teamsService: TeamsService) { }
-
-    /**
-     * Create a new team.
-     * @param team - The team data to be created.
-     * @returns A response containing the created team data and a success message.
-     */
-    @UseGuards(AuthGuard)
-    @Post()
-    async create(@Body() team: Team) {
-        const newTeam = await this.teamsService.create(team);
-        return {
-            code: HttpStatus.CREATED,
-            message: 'Team created successfully',
-            data: newTeam
-        };
-    }
-
-    /**
-     * Retrieve all teams for a specific tournament.
-     * @param tournamentId - The ID of the tournament for which teams are to be retrieved.
-     * @returns A response containing a list of teams and a success message.
-     * @throws HttpException if there is an error while fetching the teams.
-     */
-    @UseGuards(AuthGuard)
-    @Get(':id')
-    async findAll(@Param('id') tournamentId: string) {
-        try {
-            const teams = await this.teamsService.findAll(tournamentId);
-            return { code: HttpStatus.OK, message: 'Teams fetched successfully', data: teams };
-        } catch (error) {
-            throw new HttpException({
-                code: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: 'Error fetching teams',
-                error: error.message,
-            }, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+    
 
     /**
      * Retrieve a specific team by its IDs (commented out in the code).

@@ -3,7 +3,7 @@ import { Match } from '../matches/match.entity';
 
 @Entity()
 export class MatchResult {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn('uuid')
     id: string;
 
     @ManyToOne(() => Match)
