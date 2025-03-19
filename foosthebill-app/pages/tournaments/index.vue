@@ -37,7 +37,7 @@
         <!-- Tournament Cards -->
         <div class="relative grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             <div v-for="tournament in filteredTournaments" :key="tournament.id"
-                class="relative p-6 bg-white rounded-lg shadow-lg hover:shadow-xl">
+                class="relative p-6 bg-white rounded-lg shadow-lg hover:shadow-xl" :class="{ 'border-2 shadow-secondary border-secondary-light': tournament.isRegister }">
                 <div
                     class="absolute top-0 right-0 flex items-center justify-center w-5 h-5 p-4 m-2 rounded-md bg-background text-dark-text group">
                     {{ tournament.participant_number }} <i class="pl-1 fa-solid fa-person"></i>
@@ -60,8 +60,8 @@
                 </p>
                 <button @click="joinTournament(tournament.id)"
                     class="w-full px-4 py-2 text-white rounded-lg cursor-pointer bg-primary hover:bg-primary-dark">
-                    {{ $t('join') }}
-                    <i class="ml-1 fa-solid fa-hand-point-right"></i>
+                    {{ tournament.isRegister ? $t('see') : $t('join') }}
+                    <i class="ml-1 fa-solid" :class="tournament.isRegister ? 'fa-calendar-days' : 'fa-hand-point-right'"></i>
                 </button>
             </div>
         </div>

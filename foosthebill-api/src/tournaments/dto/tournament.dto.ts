@@ -15,6 +15,7 @@ export class TournamentPeopleResponseDto {
   description: string;
   start_date: Date;
   participant_number: number;
+  isRegister: boolean;
   admin: UserResponseDto;
 }
 

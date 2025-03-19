@@ -199,4 +199,52 @@ export class TeamsService {
             throw new InternalServerErrorException(error.message);
         }
     }
+
+    /**
+      * Update an existing team by its ID, assigning a second participant if possible.
+      * @param teamId - The ID of the team to be updated.
+      * @param userId - The ID of the user to be added as participant2.
+      * @returns void
+      * @throws NotFoundException if the team or user is not found.
+      * @throws ConflictException if the user is already in the team or if the team already has two participants.
+      * @throws InternalServerErrorException if there is an error during the update process.
+      */
+    async update(teamId: string, userId: string): Promise<void> {
+        const team = await this.teamsRepository.findOne({
+            where: { id: teamId },
+            relations: ['participant1', 'participant2']
+        });
+        if (!team) {
+            throw new NotFoundException(`Team not found`);
+        }
+
+        const user = await this.usersRepository.findOne({ where: { id: userId } });
+        if (!user) {
+            throw new NotFoundException(`User not found`);
+        }
+
+        if (userId === team.participant1.id) {
+            throw new ConflictException(`User is already in the team`);
+        }
+
+        if (team.participant2) {
+            throw new ConflictException(`Team already has a second participant`);
+        }
+
+        await this.teamsRepository.update(teamId, { participant2: user });
+    }
+
+
+    async remove(id: string): Promise<void> {
+        try {
+            const team = await this.findOne(id);  // Check if team exists
+            if (!team) {
+                throw new NotFoundException(`Team with id ${id} not found`);
+            }
+            await this.teamsRepository.delete(id);
+        } catch (error) {
+            throw new InternalServerErrorException('Error deleting team', error.message);
+        }
+    }
 }
+

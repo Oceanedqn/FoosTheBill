@@ -45,8 +45,9 @@ export class TournamentsController {
      */
     @UseGuards(AuthGuard)
     @Get()
-    async findAll() {
-        const tournaments = await this.tournamentsService.findAll();
+    async findAll(@Request() req) {
+        const userId = req.user.id;
+        const tournaments = await this.tournamentsService.findAll(userId);
         return {
             statusCode: HttpStatus.OK,
             message: 'Tournaments retrieved successfully',

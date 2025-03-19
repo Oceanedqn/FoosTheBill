@@ -73,7 +73,7 @@ export class TournamentsService {
      * @returns Promise<TournamentPeopleResponseDto[]> - A list of tournaments with their details and participant count.
      * @throws InternalServerErrorException - If an error occurs while retrieving tournaments.
      */
-    async findAll(): Promise<TournamentPeopleResponseDto[]> {
+    async findAll(userId: string): Promise<TournamentPeopleResponseDto[]> {
         try {
             const tournaments = await this.tournamentsRepository.find({
                 relations: ['admin', 'teams', 'teams.participant1', 'teams.participant2'],
@@ -94,6 +94,11 @@ export class TournamentsService {
                     }
                 }
 
+                let isUserRegistered = false;
+            if (userId) {
+                isUserRegistered = await this.teamsService.isUserInTeam(userId, tournament.id);
+            }
+
                 const tournamentResponse: TournamentPeopleResponseDto = {
                     id: tournament.id,
                     name: tournament.name,
@@ -107,6 +112,7 @@ export class TournamentsService {
                         role: tournament.admin.role,
                     },
                     participant_number: participants.size,
+                    isRegister: isUserRegistered
                 };
 
                 tournamentResponses.push(tournamentResponse);

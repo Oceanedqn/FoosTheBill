@@ -24,6 +24,7 @@ export interface TournamentPeople {
     start_date: string;
     description: string;
     participant_number: number;
+    is_register: boolean;
     admin: User;
 
 }
