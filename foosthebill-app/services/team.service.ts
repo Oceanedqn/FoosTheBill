@@ -12,29 +12,24 @@ export const createTeam = async (createTeam: CreateTeam, tournamentId: string): 
     const authStore = useAuthStore();
     const token = authStore.accessToken;
 
-    const { data, error } = await useFetch<CreateTeamResponse>(`${API_URL}/tournaments/${tournamentId}/teams`, {
-        method: 'POST',
-        body: JSON.stringify(createTeam),
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-    });
+    try {
+        const response = await $fetch(`${API_URL}/tournaments/${tournamentId}/teams`, {
+            method: 'POST',
+            body: JSON.stringify(createTeam),
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        }) as CreateTeamResponse;
 
-    if (error.value) {
-        return {
-            statusCode: error.value.statusCode || 400,
-            message: error.value.message || "An unknown error occurred",
-        };
+        return response;
+
+    } catch (error) {
+        throw new Error('Failed to create team');
     }
-
-    return {
-        statusCode: data.value?.statusCode || 500,
-        message: data.value?.message || "An unknown error occurred",
-    };
 };
 
-export const joinExistingTeam = async(teamId: string):Promise<GenericResponse> => {
+export const joinExistingTeam = async (teamId: string): Promise<GenericResponse> => {
     const authStore = useAuthStore();
     const token = authStore.accessToken;
 

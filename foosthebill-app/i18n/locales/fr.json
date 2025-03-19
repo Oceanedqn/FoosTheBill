@@ -23,13 +23,19 @@
   "search_tournament": "Rechercher un tournoi",
   "search": "Rechercher",
   "create": "Créer",
-  "tournaments_list": "Liste des tournois",
+  "tournaments_list": "Trouver un nouveau tournoi",
   "start_date": "Date de début",
   "join": "Rejoindre",
   "create_tournament":"Créer un tournoi",
   "description":"Description",
   "cancel": "Retour",
   "no_tournament": "Aucun tournoi pour le moment",
+  "i_am_organizing":"Liste des tournois créés",
+  "i_am_participating":"Liste des tournois auxquels je participe",
+  "register_in_tournament":"inscrit(s) au tournoi",
+  "tournament_name":"Nom du tournoi",
+  "date":"Date",
+  "actions":"Action",
 
   "create_team": "Créer une équipe",
   "join_team_automatically": "Rejoindre une équipe aléatoirement",
@@ -40,7 +46,9 @@
   "team_name": "Nom d'équipe",
   "see": "Voir les matchs",
   "grid_view": "Grille",
-  "table_view": "Tableau"
+  "table_view": "Tableau",
+  "your_team": "Votre équipe : "
+ 
 
 
 }

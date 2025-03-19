@@ -23,7 +23,10 @@
   "search_tournament": "Search a tournament",
   "search": "Search",
   "create": "Create",
-  "tournaments_list": "Tournaments list",
+  "tournaments_list": "Find a new tournament",
+  "i_am_organizing":"List of created tournaments",
+  "i_am_participating":"List of tournaments I participate in",
+  "register_in_tournament":"registered for the tournament",
   "start_date": "Start date",
   "join": "Join",
   "create_tournament":"Create a tournament",
@@ -40,5 +43,7 @@
   "team_name": "Team name",
   "see": "See matchs",
   "grid_view": "Grid",
-  "table_view": "Table"
+  "table_view": "Table",
+  "your_team": "Your team: "
+
 }

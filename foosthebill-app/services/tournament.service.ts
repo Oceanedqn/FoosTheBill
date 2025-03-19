@@ -12,19 +12,21 @@ export const createTournament = async (newTournament: CreateTournament): Promise
     const authStore = useAuthStore();
     const token = authStore.accessToken;
 
-    const { error } = await useFetch<CreateTournamentResponse>(`${API_URL}/tournaments`, {
-        method: 'POST',
-        body: newTournament,
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-    });
+    try {
+        const response = await $fetch(`${API_URL}/tournaments`, {
+            method: 'POST',
+            body: JSON.stringify(newTournament),
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        }) as CreateTournamentResponse;
 
-    return {
-        statusCode: error.value?.data?.statusCode || 500,
-        message: error.value?.data?.message || "An unknown error occurred",
-    };
+        return response;
+
+    } catch (error) {
+        throw new Error('Failed to retrieve tournaments');
+    }
 };
 
 /**
