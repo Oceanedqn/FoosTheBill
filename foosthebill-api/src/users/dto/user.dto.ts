@@ -4,7 +4,6 @@ export class UserResponseDto {
     id: string;
     name: string;
     firstname: string;
-    email: string;
     role: Role;
 }
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, Put, Delete, HttpException, HttpStatus, NotFoundException, UseFilters, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Put, Delete, HttpException, HttpStatus, NotFoundException, UseFilters, UseGuards, Req } from '@nestjs/common';
 import { TeamsService } from './teams.service';
 import { Request } from '@nestjs/common';
 import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
@@ -19,8 +19,9 @@ export class TeamsController {
      */
     @UseGuards(AuthGuard)
     @Get(':id')
-    async findOne(@Param('id') id: string) {
-        const team = await this.teamsService.findOne(id);
+    async findOne(@Param('id') id: string, @Request() req) {
+        const userId = req.user.id;
+        const team = await this.teamsService.findOne(id, userId);
         return { code: HttpStatus.OK, message: 'Team fetched successfully', data: team };
     }
 
@@ -52,8 +53,9 @@ export class TeamsController {
      */
     @UseGuards(AuthGuard)
     @Delete(':id')
-    async remove(@Param('id') id: string) {
-        await this.teamsService.remove(id);
+    async remove(@Param('id') id: string, @Request() req) {
+        const userId = req.user.id;
+        await this.teamsService.remove(id, userId);
         return { code: HttpStatus.OK, message: 'Team deleted successfully' };
     }
 }

@@ -118,8 +118,9 @@ export class TournamentsController {
      */
     @UseGuards(AuthGuard)
     @Get(':id/teams')
-    async findAllTeams(@Param('id') id: string) {
-        const tournament: TournamentTeamsResponseDto = await this.teamService.findAllTeamByTournamentId(id);
+    async findAllTeams(@Param('id') id: string, @Request() req) {
+        const userId = req.user.id;
+        const tournament: TournamentTeamsResponseDto = await this.teamService.findAllTeamByTournamentId(id, userId);
         return {
             statusCode: HttpStatus.OK,
             message: 'Teams retrieved successfully',

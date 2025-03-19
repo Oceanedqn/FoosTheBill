@@ -38,7 +38,9 @@
   "participant": "Participant",
   "player": "Joueur",
   "team_name": "Nom d'équipe",
-  "see": "Voir les matchs"
+  "see": "Voir les matchs",
+  "grid_view": "Grille",
+  "table_view": "Tableau"
 
 
 }

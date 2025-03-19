@@ -38,5 +38,7 @@
   "participant": "Participant",
   "player": "Player",
   "team_name": "Team name",
-  "see": "See matchs"
+  "see": "See matchs",
+  "grid_view": "Grid",
+  "table_view": "Table"
 }

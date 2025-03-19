@@ -115,7 +115,7 @@ import { Role } from '~/models/User';
 import { ref, onMounted, watch } from 'vue';
 import { useAuthStore } from '~/stores/auth.store'; // Store to get user info
 import { useRouter } from 'vue-router';
-import { createTournament, getTournaments } from '~/services/tournament';
+import { createTournament, getTournaments } from '~/services/tournament.service';
 
 const authStore = useAuthStore();
 const router = useRouter();

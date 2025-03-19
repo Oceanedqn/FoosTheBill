@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import type { AuthResponse, UserResponse } from '~/models/Response';
 import type { User } from '~/models/User';
-import { getUserInfo, login, register } from '~/services/auth';
+import { getUserInfo, login, register } from '~/services/auth.service';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({

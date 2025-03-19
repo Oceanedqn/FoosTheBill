@@ -1,5 +1,4 @@
 import type { CreateTournamentResponse, GenericResponse } from "~/models/Response";
-import type { Team } from "~/models/Team";
 import type { CreateTournament, Tournament, TournamentPeople, TournamentTeams } from "~/models/Tournament";
 
 const API_URL = 'http://localhost:3001';
@@ -95,6 +94,7 @@ export const getTournamentTeams = async (tournamentId: string, token: string): P
         throw new Error('Failed to retrieve tournament teams');
     }
 };
+
 
 /**
  * Checks if a user is already part of a team in a specific tournament.

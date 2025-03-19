@@ -6,14 +6,6 @@ export class TournamentResponseDto {
   name: string;
   description: string;
   start_date: Date;
-  admin: UserResponseDto;
-}
-
-export class TournamentPeopleResponseDto {
-  id: string;
-  name: string;
-  description: string;
-  start_date: Date;
   participant_number: number;
   isRegister: boolean;
   admin: UserResponseDto;

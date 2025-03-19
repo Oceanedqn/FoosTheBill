@@ -10,6 +10,7 @@ export interface CreateTeam {
 export interface BaseTeam {
     id: string;
     name: string;
+    isMyTeam: boolean;
     participant1: User;
     participant2?: User | null; // Nullable si on ajoute un seul joueur au début
 }
@@ -17,16 +18,18 @@ export interface BaseTeam {
 export class Team {
     id: string;
     name: string;
+    isMyTeam: boolean;
     tournament: Tournament;
     participant1: User;
     participant2?: User | null; // Nullable si on ajoute un seul joueur au début
 
-    constructor(id: string, name: string, tournament: Tournament, participant1: User, participant2?: User | null) {
+    constructor(id: string, name: string, tournament: Tournament, participant1: User, isMyTeam: boolean, participant2?: User | null) {
         this.id = id;
         this.name = name;
         this.tournament = tournament;
         this.participant1 = participant1;
         this.participant2 = participant2 ?? null; // Assigner null si pas de second joueur
+        this.isMyTeam = isMyTeam;
     }
 
     // Méthode pour ajouter un second participant

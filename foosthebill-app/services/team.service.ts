@@ -33,3 +33,29 @@ export const createTeam = async (createTeam: CreateTeam, tournamentId: string): 
         message: data.value?.message || "An unknown error occurred",
     };
 };
+
+export const joinExistingTeam = async(teamId: string):Promise<GenericResponse> => {
+    const authStore = useAuthStore();
+    const token = authStore.accessToken;
+
+    const { data, error } = await useFetch<CreateTeamResponse>(`${API_URL}/teams/${teamId}`, {
+        method: 'PUT',
+        body: '',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (error.value) {
+        return {
+            statusCode: error.value.statusCode || 400,
+            message: error.value.message || "An unknown error occurred",
+        };
+    }
+
+    return {
+        statusCode: data.value?.statusCode || 500,
+        message: data.value?.message || "An unknown error occurred",
+    };
+}

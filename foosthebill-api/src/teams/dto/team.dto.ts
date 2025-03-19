@@ -4,6 +4,7 @@ import { UserResponseDto } from "src/users/dto/user.dto";
 export class TeamResponseDto {
     id: string;
     name: string;
+    isMyTeam: boolean;
     participant1: UserResponseDto;
     participant2: UserResponseDto | null;
 }
