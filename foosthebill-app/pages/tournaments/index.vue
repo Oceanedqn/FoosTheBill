@@ -54,7 +54,7 @@
                     <TournamentCard v-for="tournament in filteredOrganizingTournaments" :key="tournament.id"
                         :tournament="tournament" />
                 </div>
-                <div v-else class="w-full text-gray-500">
+                <div v-else>
                     {{ $t('no_tournament') }}
                 </div>
             </div>

@@ -47,9 +47,9 @@
         <!-- Teams List Section -->
         <div class="w-full max-w-6xl mb-4">
             <!-- Teams List Section - Grid View -->
-            <TeamGridView v-if="isGridView" :teams="filteredTeams.filter(t => t.id !== myTeam?.id)"
+            <TeamGridView v-if="isGridView && filteredTeams.length" :teams="filteredTeams.filter(t => t.id !== myTeam?.id)"
                 :isUserHasAlreadyTeam="isUserHasAlreadyTeam" :handleJoinTeam="handleJoinTeam" />
-
+            
             <!-- Teams List Section - Table View -->
             <TeamTableView v-if="!isGridView" :teams="filteredTeams.filter(t => t.id !== myTeam?.id)"
                 :isUserHasAlreadyTeam="isUserHasAlreadyTeam" :handleJoinTeam="handleJoinTeam" />

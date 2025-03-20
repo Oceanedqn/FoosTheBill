@@ -1,5 +1,5 @@
 <template>
-    <div class="grid w-full max-w-6xl grid-cols-2 gap-6 md:grid-cols-4">
+    <div v-if="teams.length" class="grid w-full max-w-6xl grid-cols-2 gap-6 md:grid-cols-4">
         <div v-for="team in teams" :key="team.id"
             class="relative flex flex-col items-center p-4 bg-white rounded-lg shadow-lg hover:shadow-xl"
             :class="{ 'border-2 shadow-primary border-primary-light': team.isMyTeam }">
@@ -25,6 +25,7 @@
             </div>
         </div>
     </div>
+    <div v-else>{{ $t('no_team') }}</div>
 </template>
 
 <script setup>

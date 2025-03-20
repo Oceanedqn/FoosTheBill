@@ -44,6 +44,7 @@
   "see": "See matchs",
   "grid_view": "Grid",
   "table_view": "Table",
-  "your_team": "Your team: "
+  "your_team": "Your team: ",
+  "no_team": "No team for the moment"
 
 }

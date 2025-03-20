@@ -1,5 +1,5 @@
 <template>
-    <div class="w-full max-w-6xl overflow-x-auto rounded-t-2xl">
+    <div v-if="teams.length" class="w-full max-w-6xl overflow-x-auto rounded-t-2xl">
         <table class="min-w-full table-auto">
             <thead>
                 <tr class="text-white bg-primary">
@@ -35,6 +35,7 @@
             </tbody>
         </table>
     </div>
+    <div v-else>{{ $t('no_team') }}</div>
 </template>
 
 <script setup>
