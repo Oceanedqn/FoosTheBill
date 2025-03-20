@@ -57,7 +57,7 @@
 
         <!-- Modal Directement sur la Page -->
         <ModalCreateTeam v-if="showModal" :show="showModal" :closeModal="closeModal"
-            :fetchTournamentTeams="fetchTournamentTeams" :checkIfUserHasAlreadyInTeam="checkIfUserHasAlreadyInTeam" />
+            :fetchTournamentTeams="fetchTournamentTeams" :checkIfUserHasAlreadyInTeam="checkIfUserHasAlreadyInTeam" :users="users" />
 
     </div>
 </template>
@@ -66,9 +66,8 @@
 import { ref, onMounted, watch } from 'vue';
 import { Role } from '~/models/User';
 import { useRouter, useRoute } from 'vue-router';
-import { getTournamentTeams, checkIfUserInTeam } from '~/services/tournament.service';
-import { createTeam, joinExistingTeam } from '~/services/team.service';
-import { getUsers } from '~/services/user.service';
+import { getTournamentTeams, checkIfUserInTeam, getUsersNotInTournament } from '~/services/tournament.service';
+import { joinExistingTeam } from '~/services/team.service';
 import { useAuthStore } from '~/stores/auth.store';
 import TournamentTitle from '~/components/tournaments/TournamentTitle.vue';
 import TeamCard from '~/components/teams/TeamCard.vue';
@@ -127,10 +126,11 @@ const fetchMyTeam = () => {
 };
 
 const fetchUsers = async () => {
+    const tournamentId = route.params.id;
     const token = authStore.accessToken;
     if (token) {
         try {
-            const response = await getUsers(token);
+            const response = await getUsersNotInTournament(tournamentId, token);
             users.value = response.data;
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -186,6 +186,11 @@ const handleJoinTeam = async (teamId) => {
     } catch (error) {
         console.error('Error joining team:', error);
     }
+};
+
+const joinTeamAutomatically = () => {
+    // Ton code ici pour rejoindre une équipe automatiquement
+    console.log('Join team automatically');
 };
 
 // Open modal

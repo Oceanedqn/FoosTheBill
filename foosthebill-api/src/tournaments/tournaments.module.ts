@@ -7,9 +7,9 @@ import { UsersModule } from 'src/users/users.module';
 import { TeamsModule } from 'src/teams/teams.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Tournament]), UsersModule, forwardRef(() => TeamsModule)], // Fix here
+    imports: [TypeOrmModule.forFeature([Tournament]), forwardRef(() => UsersModule), forwardRef(() => TeamsModule),],
     providers: [TournamentsService],
     controllers: [TournamentsController],
     exports: [TournamentsService]
-})
+  })
 export class TournamentsModule { }

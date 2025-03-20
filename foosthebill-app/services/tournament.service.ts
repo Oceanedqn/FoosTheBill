@@ -1,5 +1,6 @@
 import type { CreateTournamentResponse, GenericResponse } from "~/models/Response";
 import type { CreateTournament, Tournament, TournamentPeople, TournamentTeams } from "~/models/Tournament";
+import type { User } from "~/models/User";
 
 const API_URL = 'http://localhost:3001';
 
@@ -94,6 +95,29 @@ export const getTournamentTeams = async (tournamentId: string, token: string): P
         return response;
     } catch (error) {
         throw new Error('Failed to retrieve tournament teams');
+    }
+};
+
+/**
+ * Retrieves a list of user not register in team by tournament.
+ * @param {string} tournamentId - The tournament Id.
+ * @param {string} token - The authentication token.
+ * @returns {Promise<User>} - The list of tournaments.
+ * @throws {Error} - Throws an error if the request fails.
+ */
+export const getUsersNotInTournament = async (tournamentId: string, token: string): Promise<User> => {
+    try {
+        const response = await $fetch(`${API_URL}/tournaments/${tournamentId}/users`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        }) as User;
+
+        return response;
+    } catch (error) {
+        throw new Error('Failed to retrieve users');
     }
 };
 

@@ -2,11 +2,6 @@
     <div class="flex flex-col min-h-screen">
         <TournamentTitle :title="$t('tournament')" :isAdmin="isAdmin" />
 
-        <!-- Container for the search bar and create button -->
-
-        <!-- Search Bar -->
-
-
         <!-- Button to create a new tournament (only visible for admins) -->
         <div class="flex flex-col items-center justify-between w-full mb-6 sm:flex-row">
             <div class="w-full sm:w-1/3">
@@ -124,7 +119,6 @@ const newTournament = ref({
 });
 const searchQuery = ref('');
 const tournaments = ref([]);
-const filteredTournaments = ref([]);
 
 const filteredOrganizingTournaments = ref([]);
 const filteredParticipatingTournaments = ref([]);
@@ -170,9 +164,7 @@ const participatingTournaments = computed(() => {
 
 // Filter tournaments where the user is neither a participant nor the organizer
 const tournamentsList = computed(() => {
-    return tournaments.value.filter(tournament =>
-        !tournament.isRegister && tournament.admin.id !== userId.value
-    );
+    return tournaments.value.filter(tournament => !tournament.isRegister);
 });
 
 

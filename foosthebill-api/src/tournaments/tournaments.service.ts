@@ -7,27 +7,29 @@ import { UsersService } from 'src/users/users.service';
 import { TeamsService } from 'src/teams/teams.service';
 import { calculateParticipants } from 'src/utils/services.utils';
 import { mapToTournamentResponseDto, mapToUserResponseDto } from 'src/utils/map-dto.utils';
+import { UserResponseDto } from 'src/users/dto/user.dto';
 
 @Injectable()
 export class TournamentsService {
   constructor(
     @InjectRepository(Tournament) private tournamentsRepository: Repository<Tournament>,
     @Inject(forwardRef(() => TeamsService)) private readonly teamsService: TeamsService,
-    private readonly usersService: UsersService,
+    @Inject(forwardRef(() => UsersService)) private readonly usersService: UsersService,
   ) { }
 
-  
+
   /**
-     * Creates a new tournament.
-     * 
-     * Validates that the start date is not in the past, assigns the tournament creator as the admin,
-     * and persists the tournament in the database.
-     * 
-     * @param createTournamentDto - Data transfer object containing tournament details (name, description, start date).
-     * @returns Promise<TournamentResponseDto> - A response object with tournament details and the assigned admin.
-     * @throws BadRequestException - If the start date is in the past.
-     * @throws InternalServerErrorException - If an error occurs during creation.
-     */async create(createTournamentDto: CreateTournamentDto): Promise<TournamentResponseDto> {
+ * Creates a new tournament.
+ * 
+ * Validates that the start date is not in the past, assigns the tournament creator as the admin,
+ * and persists the tournament in the database.
+ * 
+ * @param createTournamentDto - Data transfer object containing tournament details (name, description, start date).
+ * @returns Promise<TournamentResponseDto> - A response object with tournament details and the assigned admin.
+ * @throws BadRequestException - If the start date is in the past.
+ * @throws InternalServerErrorException - If an error occurs during creation.
+ */
+  async create(createTournamentDto: CreateTournamentDto): Promise<TournamentResponseDto> {
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -54,16 +56,18 @@ export class TournamentsService {
     }
   }
 
-  
+
   /**
-     * Retrieves all tournaments.
-     * 
-     * Fetches all tournaments along with their respective admin and teams, 
-     * then calculates the number of unique participants.
-     * 
-     * @returns Promise<TournamentPeopleResponseDto[]> - A list of tournaments with their details and participant count.
-     * @throws InternalServerErrorException - If an error occurs while retrieving tournaments.
-     */async findAll(userId: string): Promise<TournamentResponseDto[]> {
+ * Retrieves all tournaments.
+ * 
+ * Fetches all tournaments along with their respective admin and teams, 
+ * then calculates the number of unique participants.
+ * 
+ * @param userId - The ID of the user requesting the tournaments (used for checking if they are registered).
+ * @returns Promise<TournamentResponseDto[]> - A list of tournaments with their details and participant count.
+ * @throws InternalServerErrorException - If an error occurs while retrieving tournaments.
+ */
+  async findAll(userId: string): Promise<TournamentResponseDto[]> {
     try {
       const tournaments = await this.tournamentsRepository.find({
         relations: ['admin', 'teams', 'teams.participant1', 'teams.participant2'],
@@ -83,15 +87,15 @@ export class TournamentsService {
   }
 
   /**
-     * Retrieves a single tournament by its ID.
-     * 
-     * Fetches the tournament details along with its admin.
-     * 
-     * @param id - The ID of the tournament to retrieve.
-     * @returns Promise<TournamentResponseDto> - Tournament details including admin info.
-     * @throws NotFoundException - If no tournament is found with the given ID.
-     * @throws InternalServerErrorException - If an error occurs during retrieval.
-     */
+ * Retrieves a single tournament by its ID.
+ * 
+ * Fetches the tournament details along with its admin.
+ * 
+ * @param id - The ID of the tournament to retrieve.
+ * @returns Promise<TournamentResponseDto> - Tournament details including admin info.
+ * @throws NotFoundException - If no tournament is found with the given ID.
+ * @throws InternalServerErrorException - If an error occurs during retrieval.
+ */
   async findOne(id: string): Promise<TournamentResponseDto> {
     try {
       const tournament = await this.tournamentsRepository.findOne({
@@ -112,17 +116,52 @@ export class TournamentsService {
     }
   }
 
+
   /**
-     * Updates an existing tournament.
-     * 
-     * Modifies tournament details based on the provided ID.
-     * 
-     * @param id - The ID of the tournament to update.
-     * @param tournament - The updated tournament data.
-     * @returns Promise<void> - Resolves if the update is successful.
-     * @throws NotFoundException - If no tournament is found with the given ID.
-     * @throws InternalServerErrorException - If an error occurs during the update.
-     */
+ * Retrieves all users who are not registered in a team for a specific tournament.
+ * 
+ * @param tournamentId - The ID of the tournament for which to find users not yet registered.
+ * @param userId - The ID of the user making the request (optional, for checking their status).
+ * @returns Promise<UserResponseDto[]> - A list of users not registered in the given tournament.
+ * @throws InternalServerErrorException - If an error occurs while fetching users.
+ */
+  async findAllUsersNotInTournament(tournamentId: string, userId: string): Promise<UserResponseDto[]> {
+    try {
+      const users = await this.usersService.findAll();
+
+      const tournamentTeams = await this.teamsService.findAllTeamByTournamentId(tournamentId, userId);
+
+      const usersInTeams = new Set<string>();
+      tournamentTeams.teams.forEach(team => {
+        if (team.participant1) {
+          usersInTeams.add(team.participant1.id);
+        }
+        if (team.participant2) {
+          usersInTeams.add(team.participant2.id);
+        }
+      });
+
+      const usersNotInTournament = users.filter(user =>
+        !usersInTeams.has(user.id) && user.id !== userId
+      );
+
+      return usersNotInTournament;
+
+    } catch (error) {
+      throw new InternalServerErrorException('Error fetching users', error.message);
+    }
+  }
+  /**
+ * Updates an existing tournament.
+ * 
+ * Modifies tournament details based on the provided ID.
+ * 
+ * @param id - The ID of the tournament to update.
+ * @param tournament - The updated tournament data.
+ * @returns Promise<void> - Resolves if the update is successful.
+ * @throws NotFoundException - If no tournament is found with the given ID.
+ * @throws InternalServerErrorException - If an error occurs during the update.
+ */
   async update(id: string, tournament: UpdateTournamentDto): Promise<void> {
     try {
       const result = await this.tournamentsRepository.update(id, tournament);
@@ -138,15 +177,15 @@ export class TournamentsService {
   }
 
   /**
-     * Deletes a tournament by ID.
-     * 
-     * Removes a tournament from the database based on the given ID.
-     * 
-     * @param id - The ID of the tournament to delete.
-     * @returns Promise<void> - Resolves if the deletion is successful.
-     * @throws NotFoundException - If no tournament is found with the given ID.
-     * @throws InternalServerErrorException - If an error occurs during deletion.
-     */
+ * Deletes a tournament by ID.
+ * 
+ * Removes a tournament from the database based on the given ID.
+ * 
+ * @param id - The ID of the tournament to delete.
+ * @returns Promise<void> - Resolves if the deletion is successful.
+ * @throws NotFoundException - If no tournament is found with the given ID.
+ * @throws InternalServerErrorException - If an error occurs during deletion.
+ */
   async remove(id: string): Promise<void> {
     try {
       const result = await this.tournamentsRepository.delete(id);

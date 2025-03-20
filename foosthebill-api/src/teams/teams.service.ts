@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, InternalServerErrorException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException, ConflictException, forwardRef, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Team } from './team.entity';
@@ -17,8 +17,8 @@ export class TeamsService {
         @InjectRepository(Tournament) private tournamentsRepository: Repository<Tournament>,
         @InjectRepository(User) private usersRepository: Repository<User>,
         private readonly usersService: UsersService,
-        private readonly tournamentService: TournamentsService
-    ) { }
+        private readonly tournamentsService: TournamentsService
+      ) {}
 
     /**
      * Creates a new team with one or two participants and associates it with a tournament.
@@ -46,7 +46,7 @@ export class TeamsService {
             }
 
             const player1 = await this.usersService.findOne(createTeamDto.participant1);
-            const tournament = await this.tournamentService.findOne(createTeamDto.tournament_id);
+            const tournament = await this.tournamentsService.findOne(createTeamDto.tournament_id);
 
             const team = this.teamsRepository.create({
                 name: createTeamDto.name,
@@ -74,7 +74,7 @@ export class TeamsService {
      */
     async findAllTeamByTournamentId(tournamentId: string, currentUserId: string): Promise<TournamentTeamsResponseDto> {
         try {
-            const tournament = await this.tournamentService.findOne(tournamentId);
+            const tournament = await this.tournamentsService.findOne(tournamentId);
 
             if (!tournament) {
                 throw new NotFoundException(`Tournament with id ${tournamentId} not found`);

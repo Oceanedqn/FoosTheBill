@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, InternalServerErrorException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException, ConflictException, forwardRef, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Role, User } from './user.entity';
@@ -8,8 +8,8 @@ import { CreateUserDto, UpdateUserDto, UserResponseDto } from './dto/user.dto';
 @Injectable()
 export class UsersService {
     constructor(
-        @InjectRepository(User)
-        private userRepository: Repository<User>,
+        @InjectRepository(User) private userRepository: Repository<User>,
+
     ) { }
 
     /**
@@ -73,6 +73,7 @@ export class UsersService {
             throw new InternalServerErrorException('Error fetching users', error.message);  // Handle any errors
         }
     }
+
 
     /**
      * Retrieves a user by their ID.

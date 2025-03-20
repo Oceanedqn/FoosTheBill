@@ -6,12 +6,13 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from '@nestjs/common';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { TeamsService } from '../teams/teams.service';
-import { CreateTeamDto, TeamResponseDto } from 'src/teams/dto/team.dto';
+import { CreateTeamDto } from 'src/teams/dto/team.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Controller('tournaments')
 @UseFilters(new AllExceptionsFilter())
 export class TournamentsController {
-    constructor(private readonly tournamentsService: TournamentsService, private readonly teamService: TeamsService) { }
+    constructor(private readonly tournamentsService: TournamentsService, private readonly teamsService: TeamsService, private readonly usersService: UsersService) { }
 
     /**
      * Creates a new tournament.
@@ -120,12 +121,36 @@ export class TournamentsController {
     @Get(':id/teams')
     async findAllTeams(@Param('id') id: string, @Request() req) {
         const userId = req.user.id;
-        const tournament: TournamentTeamsResponseDto = await this.teamService.findAllTeamByTournamentId(id, userId);
+        const tournament: TournamentTeamsResponseDto = await this.teamsService.findAllTeamByTournamentId(id, userId);
         return {
             statusCode: HttpStatus.OK,
             message: 'Teams retrieved successfully',
             data: tournament,
         };
+    }
+
+    /**
+ * Retrieves all users who are not registered in a team for a specific tournament.
+ * 
+ * This endpoint fetches users who are not yet part of any team in the specified tournament.
+ * It requires user authentication, and the user ID is extracted from the request.
+ * 
+ * @param id - The ID of the tournament for which to find users not yet registered.
+ * @param req - The request object, containing the authenticated user's ID.
+ * @returns An object containing a status code, a success message, and the list of users not in the tournament.
+ * @throws UnauthorizedException - If the user is not authenticated.
+ * @throws InternalServerErrorException - If an error occurs during the retrieval of users.
+ */
+    @UseGuards(AuthGuard)
+    @Get(':id/users')
+    async findAllUsersNotInTournament(@Param('id') id: string, @Request() req) {
+        const userId = req.user.id;
+        const tournaments = await this.tournamentsService.findAllUsersNotInTournament(id, userId);
+        return {
+            statusCode: HttpStatus.OK,
+            message: 'Tournaments users retrieved successfully',
+            data: tournaments,
+        }
     }
 
     /**
@@ -142,7 +167,7 @@ export class TournamentsController {
         createTournamentDto.participant1 = userId;
         createTournamentDto.tournament_id = id;
 
-        const createdTeam = await this.teamService.createTeamByTournamentId(createTournamentDto);
+        const createdTeam = await this.teamsService.createTeamByTournamentId(createTournamentDto);
 
         return {
             statusCode: HttpStatus.CREATED,
@@ -161,7 +186,7 @@ export class TournamentsController {
     @UseGuards(AuthGuard)
     async checkIfUserInTeam(@Param('id') tournamentId: string, @Request() req): Promise<{ isInTeam: boolean }> {
         const userId = req.user.id;
-        const isInTeam = await this.teamService.isUserInTeam(userId, tournamentId);
+        const isInTeam = await this.teamsService.isUserInTeam(userId, tournamentId);
         return { isInTeam };
     }
 }
