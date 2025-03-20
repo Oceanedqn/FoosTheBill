@@ -1,5 +1,5 @@
 // models/Tournament.ts
-import { Team } from './Team';
+import { Team, type BaseTeam } from './Team';
 import { Match } from './Match';
 import type { User } from './User';
 
@@ -10,15 +10,36 @@ export interface CreateTournament {
 };
 
 export interface BasicTournament {
-    id: number;
+    id: string;
     name: string;
     start_date: string;
     description: string;
     admin_id: string;
 }
 
+// Use in /tournaments
+export interface TournamentPeople {
+    id: string;
+    name: string;
+    start_date: string;
+    description: string;
+    participant_number: number;
+    is_register: boolean;
+    admin: User;
+
+}
+
+export interface TournamentTeams {
+    id: string;
+    name: string;
+    start_date: string;
+    description: string;
+    admin: User;
+    teams: BaseTeam[];
+}
+
 export class Tournament {
-    id: number;
+    id: string;
     name: string;
     start_date: string;
     description: string;
@@ -26,7 +47,7 @@ export class Tournament {
     teams: Team[];
     matches: Match[];
 
-    constructor(id: number, name: string, date: string, description: string, user: User) {
+    constructor(id: string, name: string, date: string, description: string, user: User) {
         this.id = id;
         this.name = name;
         this.start_date = date;
@@ -42,7 +63,7 @@ export class Tournament {
     }
 
     // Méthode pour enregistrer un résultat et mettre à jour les classements
-    recordResult(matchId: number, team1Score: number, team2Score: number) {
+    recordResult(matchId: string, team1Score: number, team2Score: number) {
         const match = this.matches.find(m => m.id === matchId);
         if (match) {
             match.result = { team1Score, team2Score };

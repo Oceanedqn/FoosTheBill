@@ -18,7 +18,7 @@ describe('TournamentsService', () => {
         description: 'Description test',
         start_date: new Date(),
         admin_id: 'admin1',
-    } as Tournament;
+    } as unknown as Tournament;
 
     const mockAdmin = {
         id: 'admin1',
@@ -73,7 +73,7 @@ describe('TournamentsService', () => {
                 admin_id: 'admin1',
             };
 
-            const result = await service.create(dto, dto.admin_id);
+            const result = await service.create(dto);
             expect(repository.save).toHaveBeenCalledWith(dto);
             expect(usersService.findOne).toHaveBeenCalledWith(dto.admin_id);
             expect(result).toEqual({
@@ -88,7 +88,7 @@ describe('TournamentsService', () => {
         it('should throw an error if creation fails', async () => {
             jest.spyOn(repository, 'save').mockRejectedValue(new Error('Database Error'));
 
-            await expect(service.create({} as CreateTournamentDto, 'admin1')).rejects.toThrow(
+            await expect(service.create({} as CreateTournamentDto)).rejects.toThrow(
                 InternalServerErrorException,
             );
         });

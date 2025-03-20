@@ -5,20 +5,18 @@ export enum Role {
 }
 
 export class User {
-    id: number;
+    id: string;
     name: string;
     firstname: string;
     email: string;
     role: Role;
 
     constructor(
-        id: number,
+        id: string,
         name: string,
         firstname: string,
         email: string,
-        password: string,
         role: Role,
-        creation_date: Date
     ) {
         this.id = id;
         this.name = name;

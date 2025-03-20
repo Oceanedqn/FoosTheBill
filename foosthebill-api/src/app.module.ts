@@ -1,30 +1,30 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModule } from './users/users.module';
-import { TournamentsModule } from './tournaments/tournaments.module';
-import { TeamsModule } from './teams/teams.module';
-import { MatchesModule } from './matches/matches.module';
-import { RankingsModule } from './rankings/rankings.module';
-import { MatchResultsModule } from './match-results/match-results.module';
-import { User } from './users/user.entity';
-import { Tournament } from './tournaments/tournament.entity';
-import { Team } from './teams/team.entity';
-import { Match } from './matches/match.entity';
-import { Ranking } from './rankings/ranking.entity';
-import { MatchResult } from './match-results/match-result.entity';
 import { APP_FILTER } from '@nestjs/core';
-import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthController } from './auth/auth.controller';
-import { AuthService } from './auth/auth.service';
 import { AuthModule } from './auth/auth.module';
+import { AuthService } from './auth/auth.service';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { MatchResult } from './match-results/match-result.entity';
+import { MatchResultsModule } from './match-results/match-results.module';
+import { Match } from './matches/match.entity';
+import { MatchesModule } from './matches/matches.module';
+import { Ranking } from './rankings/ranking.entity';
+import { RankingsModule } from './rankings/rankings.module';
+import { Team } from './teams/team.entity';
+import { TeamsModule } from './teams/teams.module';
+import { Tournament } from './tournaments/tournament.entity';
+import { TournamentsModule } from './tournaments/tournaments.module';
+import { User } from './users/user.entity';
+import { UsersModule } from './users/users.module';
 import { getEnv } from './utils/env.utils';
 
 @Module({
   providers: [
     {
       provide: APP_FILTER,
-      useClass: AllExceptionsFilter,
+          useClass: AllExceptionsFilter,
     },
     AuthService,
   ],

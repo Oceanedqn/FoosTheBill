@@ -1,10 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
 import { Match } from '../matches/match.entity';
 
 @Entity()
 export class MatchResult {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
     @ManyToOne(() => Match)
     @JoinColumn({ name: 'match_id' })
@@ -18,4 +18,7 @@ export class MatchResult {
 
     @Column()
     recorded_date: Date;
+
+    @CreateDateColumn()
+    creation_date: Date;
 }

@@ -31,7 +31,7 @@ export class RankingsController {
     }
 
     @Get(':id')
-    async findOne(@Param('id') id: number) {
+    async findOne(@Param('id') id: string) {
         try {
             const ranking = await this.rankingsService.findOne(id);
             return { code: HttpStatus.OK, message: 'Ranking fetched successfully', data: ranking };
@@ -47,7 +47,7 @@ export class RankingsController {
     }
 
     @Put(':id')
-    async update(@Param('id') id: number, @Body() ranking: Ranking) {
+    async update(@Param('id') id: string, @Body() ranking: Ranking) {
         try {
             await this.rankingsService.update(id, ranking);
             return { code: HttpStatus.OK, message: 'Ranking updated successfully' };
@@ -63,7 +63,7 @@ export class RankingsController {
     }
 
     @Delete(':id')
-    async remove(@Param('id') id: number) {
+    async remove(@Param('id') id: string) {
         try {
             await this.rankingsService.remove(id);
             return { code: HttpStatus.OK, message: 'Ranking deleted successfully' };

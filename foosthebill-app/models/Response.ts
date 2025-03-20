@@ -1,10 +1,10 @@
+import type { Team } from "./Team";
 import type { BasicTournament } from "./Tournament";
 import type { User } from "./User";
 
 export interface GenericResponse {
     statusCode: number;
     message: string;
-
 }
 
 
@@ -22,4 +22,8 @@ export interface UserResponse extends GenericResponse {
 
 export interface CreateTournamentResponse extends GenericResponse {
     data: BasicTournament
+}
+
+export interface CreateTeamResponse extends GenericResponse {
+    data: Team
 }

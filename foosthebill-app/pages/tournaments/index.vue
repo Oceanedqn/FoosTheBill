@@ -1,147 +1,142 @@
 <template>
-    <div class="min-h-screen flex flex-col">
-        <!-- Title -->
-        <div class="flex items-center justify-center space-x-1 mb-8">
-            <h1 class="text-4xl font-bold text-title-text">{{ $t('tournament') }}</h1>
-            <i v-if="isAdmin" class="fa-solid fa-certificate text-primary"></i>
-        </div>
+    <div class="flex flex-col min-h-screen">
+        <TournamentTitle :title="$t('tournament')" :isAdmin="isAdmin" />
 
-        <!-- Container for the search bar and create button -->
-        <div class="flex justify-between items-center w-full mb-8">
-            <!-- Search Bar -->
-            <div class="flex w-full items-center">
-                <input v-model="searchQuery" type="text" :placeholder="$t('search_tournament')"
-                    class="px-4 py-2 border border-gray-300 rounded-lg shadow-md mr-4 w-1/2 sm:w-1/3"
-                    @input="filterTournaments" />
+        <!-- Button to create a new tournament (only visible for admins) -->
+        <div class="flex flex-col items-center justify-between w-full mb-6 sm:flex-row">
+            <div class="w-full sm:w-1/3">
+                <input v-model="searchQuery" type="text" :placeholder="$t('search_tournament') + '...'"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg" @input="filterTournaments" />
 
-                <i class="fa-solid fa-magnifying-glass"></i>
             </div>
-
-            <!-- Button to create a new tournament (only visible for admins) -->
-            <div v-if="isAdmin">
-                <button @click="openModal"
-                    class="px-4 py-2 bg-secondary text-white rounded-lg cursor-pointer shadow-md hover:bg-secondary-dark">
+            <div class="flex justify-end w-full mt-4 space-x-2 sm:w-auto sm:mt-0 ">
+                <div v-if="isAdmin">
+                    <button @click="openModal"
+                        class="px-4 py-2 mr-10 text-white rounded-lg shadow-md cursor-pointer bg-secondary hover:bg-secondary-dark">
+                        <div class="flex items-center text-center">
+                            {{ $t('create') }} <i class="pl-2 fa-solid fa-futbol"></i>
+                        </div>
+                    </button>
+                </div>
+                <button @click="isGridView = true"
+                    :class="{ 'bg-primary text-white': isGridView, 'bg-gray-200': !isGridView }"
+                    class="px-4 py-2 transition rounded-lg cursor-pointer hover:bg-primary-dark hover:text-white">
                     <div class="flex items-center text-center">
-                        {{ $t('create') }} <i class="fa-solid fa-futbol pl-2"></i>
+                        <i class="pr-1 fa-solid fa-grip"></i>{{ $t('grid_view') }}
+                    </div>
+                </button>
+                <button @click="isGridView = false"
+                    :class="{ 'bg-primary text-white': !isGridView, 'bg-gray-200': isGridView }"
+                    class="px-4 py-2 transition rounded-lg cursor-pointer hover:bg-primary-dark hover:text-white">
+
+                    <div class="flex items-center text-center">
+                        <i class="pr-1 fa-solid fa-table-list"></i>{{ $t('table_view') }}
                     </div>
                 </button>
             </div>
         </div>
-
-        <h2 class="text-2xl font-bold text-title-text mb-2">{{ $t('tournaments_list') }}</h2>
 
         <!-- Tournament Cards -->
-        <div class="relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-6xl">
-            <div v-for="tournament in filteredTournaments" :key="tournament.id"
-                class="relative bg-white p-6 rounded-lg shadow-lg hover:shadow-xl">
-                <div
-                    class="absolute top-0 right-0 m-2 bg-background text-dark-text p-4 rounded-md flex items-center justify-center w-5 h-5 group">
-                    3 <i class="fa-solid fa-person pl-1"></i>
-                    <div
-                        class="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 text-sm text-white bg-black p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-                        3 inscrit(s) au tournoi
-                    </div>
+        <div v-if="isAdmin" class="pb-16">
+            <div class="flex pb-4 space-x-1">
+                <h2 class="mb-2 text-2xl font-bold text-title-text">{{ $t('i_am_organizing') }}</h2>
+                <i class="pt-1 fa-solid fa-certificate text-primary"></i>
+            </div>
+
+            <div v-if="isGridView">
+                <div v-if="filteredOrganizingTournaments.length"
+                    class="relative grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                    <TournamentCard v-for="tournament in filteredOrganizingTournaments" :key="tournament.id"
+                        :tournament="tournament" />
+                </div>
+                <div v-else>
+                    {{ $t('no_tournament') }}
+                </div>
+            </div>
+            <TournamentTableView v-else :tournaments="filteredOrganizingTournaments" />
+
+        </div>
+
+        <!-- Tournament Cards -->
+        <div class="pb-16">
+            <h2 class="pb-4 mb-2 text-2xl font-bold text-title-text">{{ $t('i_am_participating') }}</h2>
+            <div v-if="isGridView">
+                <div v-if="filteredParticipatingTournaments.length"
+                    class="relative grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                    <TournamentCard v-for="tournament in filteredParticipatingTournaments" :key="tournament.id"
+                        :tournament="tournament" />
+                </div>
+                <div v-else class="w-full text-gray-500">
+                    {{ $t('no_tournament') }}
                 </div>
 
-                <h2 class="text-xl font-semibold text-center mb-4">{{ tournament.name }}</h2>
-                <p class="text-gray-600 text-sm">{{ tournament.description }}</p>
-                <p class="text-gray-500 text-sm mb-4">
-                    <i class="fa-solid fa-calendar-day pr-1"></i>
-                    {{ new Date(tournament.start_date).toLocaleDateString('fr-FR', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    }) }}
-                </p>
-                <button @click="joinTournament(tournament.id)"
-                    class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark w-full cursor-pointer">
-                    {{ $t('join') }}
-                    <i class="fa-solid fa-hand-point-right ml-1"></i>
-                </button>
             </div>
+            <TournamentTableView v-else :tournaments="filteredParticipatingTournaments" />
+
+        </div>
+        <div class="pb-16">
+            <!-- Tournament Cards -->
+            <h2 class="pb-4 mb-2 text-2xl font-bold text-title-text">{{ $t('tournaments_list') }}</h2>
+            <div v-if="isGridView">
+                <div v-if="filteredTournamentsList.length"
+                    class="relative grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                    <TournamentCard v-for="tournament in filteredTournamentsList" :key="tournament.id"
+                        :tournament="tournament" />
+                </div>
+                <div v-else class="w-full text-gray-500">
+                    {{ $t('no_tournament') }}
+                </div>
+
+            </div>
+            <TournamentTableView v-else :tournaments="filteredTournamentsList" />
+
         </div>
 
 
         <!-- Modal for Create Tournament -->
-        <div v-if="isModalOpen"
-            class="fixed inset-0 z-50 flex justify-center items-center bg-gray-800/50 bg-opacity-50">
-            <div class="bg-white p-6 rounded-lg w-96">
-                <h2 class="text-2xl font-bold mb-4">{{ $t('create_tournament') }}</h2>
-                <form @submit.prevent="handleCreateTournament">
-                    <div class="mb-4">
-                        <label for="name" class="block text-sm font-semibold text-gray-700">{{ $t('name') }}</label>
-                        <input v-model="newTournament.name" id="name" type="text"
-                            class="w-full p-2 border border-gray-300 rounded-lg" :placeholder="$t('name')" required />
-                    </div>
+        <ModalCreateTournament :show="isModalOpen" :closeModal="closeModal" :fetchTournaments="fetchTournaments" />
 
-                    <div class="mb-4">
-                        <label for="description" class="block text-sm font-semibold text-gray-700">{{ $t('description')
-                        }}</label>
-                        <textarea v-model="newTournament.description" id="description"
-                            class="w-full p-2 border border-gray-300 rounded-lg" :placeholder="$t('description')"
-                            required></textarea>
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="start_date" class="block text-sm font-semibold text-gray-700">{{ $t('start_date')
-                        }}</label>
-                        <input v-model="newTournament.start_date" id="start_date" type="datetime-local"
-                            class="w-full p-2 border border-gray-300 rounded-lg" :min="getTodayDateTime()" required />
-                    </div>
-
-                    <div class="flex justify-between">
-                        <button type="button" @click="closeModal"
-                            class="px-4 py-2 bg-gray-500 cursor-pointer text-white rounded-lg">
-                            {{ $t('cancel') }}
-                        </button>
-                        <button type="submit"
-                            class="px-4 py-2 bg-primary text-white rounded-lg cursor-pointer hover:bg-primary-dark">
-                            {{ $t('create') }}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
     </div>
 </template>
 
 <script setup>
 import { Role } from '~/models/User';
 import { ref, onMounted, watch } from 'vue';
-import { useAuthStore } from '~/stores/auth.store'; // Store to get user info
-import { useRouter } from 'vue-router';
-import { createTournament, getTournaments } from '~/services/tournament';
+import { useAuthStore } from '~/stores/auth.store';
+import { createTournament, getTournaments } from '~/services/tournament.service';
+import TournamentTitle from '~/components/tournaments/TournamentTitle.vue';
+import TournamentCard from '~/components/tournaments/TournamentCard.vue';
+import ModalCreateTournament from '~/components/modals/ModalCreateTournament.vue';
+import TournamentTableView from '~/components/tournaments/TournamentTableView.vue';
+
 
 const authStore = useAuthStore();
-const router = useRouter();
-
-// Modal state
 const isModalOpen = ref(false);
 const newTournament = ref({
     name: '',
     description: '',
     start_date: '',
 });
-
-// State for the search query and filtered tournaments
 const searchQuery = ref('');
 const tournaments = ref([]);
-const filteredTournaments = ref([]); // To store filtered tournaments
 
-// State to track admin status (reactive)
+const filteredOrganizingTournaments = ref([]);
+const filteredParticipatingTournaments = ref([]);
+const filteredTournamentsList = ref([]);
+
+
 const isAdmin = ref(false);
+const userId = ref(null);
 
-const getTodayDateTime = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
+const isGridView = ref(false);
 
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-};
+
+onMounted(async () => {
+    await authStore.initialize();
+    isAdmin.value = authStore.user?.role === Role.ADMIN;
+    userId.value = authStore.user?.id;
+    await fetchTournaments();
+});
 
 // Function to fetch tournaments with token
 const fetchTournaments = async () => {
@@ -149,51 +144,66 @@ const fetchTournaments = async () => {
     if (token) {
         try {
             const response = await getTournaments(token);
-            tournaments.value = response.data; // Store all tournaments
-            filteredTournaments.value = [...tournaments.value]; // Initialize filteredTournaments
+            tournaments.value = response.data;
+            filterTournaments();
         } catch (error) {
             console.error('Error fetching tournaments:', error);
         }
-    } else {
-        console.log('User is not authenticated');
     }
 };
 
-// Function to handle joining a tournament
-const joinTournament = (tournamentId) => {
-    console.log(`Joining tournament with id: ${tournamentId}`);
-    router.push(`/tournaments/${tournamentId}`);
-};
-
-// Fetch tournaments when the component is mounted
-onMounted(async () => {
-    await authStore.initialize();
-    isAdmin.value = authStore.user?.role === Role.ADMIN;
-    await fetchTournaments();
+// Filter tournaments where the user is the organizer
+const organizingTournaments = computed(() => {
+    return tournaments.value.filter(tournament => tournament.admin.id === userId.value);
 });
 
-// Watch for changes in the authentication state
+// Filter tournaments where the user is a participant
+const participatingTournaments = computed(() => {
+    return tournaments.value.filter(tournament => tournament.isRegister);
+});
+
+// Filter tournaments where the user is neither a participant nor the organizer
+const tournamentsList = computed(() => {
+    return tournaments.value.filter(tournament => !tournament.isRegister);
+});
+
+
+// Watch for changes in authentication state (like token update)
 watch(() => authStore.accessToken, async (newToken) => {
     if (newToken) {
         await fetchTournaments();
     }
 });
 
-// Function to filter tournaments based on the search query
+// Filter tournaments based on search input
 const filterTournaments = () => {
-    if (searchQuery.value.trim() === '') {
-        // When search is empty, reset the filtered tournaments
-        filteredTournaments.value = [...tournaments.value];
-    } else {
-        filteredTournaments.value = tournaments.value.filter(tournament =>
-            tournament.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+    const search = searchQuery.value.trim().toLowerCase();
+
+    // Filtrer tout d'abord les catégories sans recherche (par défaut, tout s'affiche)
+    filteredOrganizingTournaments.value = organizingTournaments.value;
+    filteredParticipatingTournaments.value = participatingTournaments.value;
+    filteredTournamentsList.value = tournamentsList.value;
+
+    // Si une recherche est effectuée, appliquez le filtrage sur toutes les listes
+    if (search) {
+        filteredOrganizingTournaments.value = organizingTournaments.value.filter(tournament =>
+            tournament.name.toLowerCase().includes(search)
+        );
+
+        filteredParticipatingTournaments.value = participatingTournaments.value.filter(tournament =>
+            tournament.name.toLowerCase().includes(search)
+        );
+
+        filteredTournamentsList.value = tournamentsList.value.filter(tournament =>
+            tournament.name.toLowerCase().includes(search)
         );
     }
 };
 
+// Handle creating a tournament
 const handleCreateTournament = async () => {
     try {
-        await createTournament(newTournament);
+        await createTournament(newTournament.value);
         await fetchTournaments();
     } catch (error) {
         console.error('Creation failed', error);
@@ -203,12 +213,10 @@ const handleCreateTournament = async () => {
     }
 };
 
-// Function to open the create tournament modal
+// Modal controls
 const openModal = () => {
     isModalOpen.value = true;
 };
-
-// Function to close the modal
 const closeModal = () => {
     isModalOpen.value = false;
 };

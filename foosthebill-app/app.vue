@@ -5,13 +5,13 @@
 
     <template v-if="isAuthenticated">
       <Header />
-      <div class="w-full max-w-6xl mx-auto mt-2 p-6 bg-white shadow-lg rounded-lg flex-grow overflow-y-auto">
+      <div class="flex-grow w-full max-w-6xl p-6 mx-auto mt-2 overflow-y-auto bg-white rounded-lg shadow-lg">
         <NuxtPage />
       </div>
     </template>
 
     <template v-else>
-      <div class="w-full max-w-6xl mx-auto flex-grow overflow-y-auto">
+      <div class="flex-grow w-full max-w-6xl mx-auto overflow-y-auto">
         <NuxtPage />
       </div>
     </template>

@@ -28,7 +28,7 @@ export class MatchesService {
     }
 
     // Méthode pour récupérer un match
-    async findOne(id: number): Promise<Match> {
+    async findOne(id: string): Promise<Match> {
         try {
             const match = await this.matchesRepository.findOne({ where: { id } });
             if (!match) {
@@ -40,7 +40,7 @@ export class MatchesService {
         }
     }
 
-    async update(id: number, match: Match): Promise<void> {
+    async update(id: string, match: Match): Promise<void> {
         try {
             await this.findOne(id);
             await this.matchesRepository.update(id, match);
@@ -50,7 +50,7 @@ export class MatchesService {
     }
 
     // Méthode pour supprimer un match
-    async remove(id: number): Promise<any> {
+    async remove(id: string): Promise<any> {
         try {
             const result = await this.matchesRepository.delete(id);
             if (result.affected === 0) {

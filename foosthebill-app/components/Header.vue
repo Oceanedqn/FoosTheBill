@@ -7,11 +7,17 @@
             </div>
 
             <nav class="flex space-x-4 items-center text-primary">
-                <NuxtLink :to="localePath('/')">{{ $t('home') }}</NuxtLink>
+                <NuxtLink :to="localePath('/')" class="hover:text-primary-dark"><i class="fa-solid fa-house pr-2"></i>{{
+                    $t('home')
+                }}</NuxtLink>
+                <NuxtLink :to="localePath('/tournaments')" class="hover:text-primary-dark"><i
+                        class="fa-solid fa-trophy pr-2"></i>{{ $t('tournament') }}
+                </NuxtLink>
             </nav>
             <nav class="flex space-x-4 items-center text-primary">
-                <button class="cursor-pointer text-secondary hover:text-secondary-dark" @click="logout">
-                    {{ $t('logout') }} <i class="fa-solid fa-right-from-bracket"></i>
+                <button class="cursor-pointer text-white hover:bg-primary-dark rounded-4xl bg-primary p-1 px-3"
+                    @click="logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
             </nav>
         </div>
