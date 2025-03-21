@@ -1,17 +1,14 @@
 <template>
-    <div class="relative flex flex-col overflow-hidden rounded-lg shadow-lg hover:shadow-xl">
-        <div class="relative flex flex-col items-center w-full p-4 text-white bg-primary"
+    <div v-if="tournament" class="relative flex flex-col overflow-hidden rounded-lg shadow-lg hover:shadow-xl">
+        <div class="relative flex flex-col items-center w-full p-3 text-white bg-primary"
             :class="{ 'bg-primary-dark': tournament.isRegister }">
             <div
-                class="absolute flex items-center px-3 py-1 text-sm font-semibold bg-white rounded-full top-2 right-2 text-primary">
+                class="absolute flex items-center px-2 py-1 text-sm font-semibold transform -translate-y-1/2 bg-white rounded-full top-1/2 right-2 text-primary">
                 {{ tournament.participant_number }} <i class="pl-1 fa-solid fa-person"></i>
-                <div
-                    class="absolute p-2 mb-2 text-sm text-white transition-opacity duration-300 transform -translate-x-1/2 bg-black rounded opacity-0 bottom-full left-1/2 group-hover:opacity-100 whitespace-nowrap">
-                    {{ tournament.participant_number }} {{ $t('register_in_tournament') }}
-                </div>
+
             </div>
             <!-- Tournament name -->
-            <h2 class="mt-2 text-xl font-semibold text-center">{{ tournament.name }}</h2>
+            <h2 class="text-xl font-semibold text-center">{{ tournament.name }}</h2>
         </div>
         <div class="flex flex-col p-6 pt-2 bg-white">
             <!-- Tournament start date -->
@@ -29,7 +26,7 @@
             <!-- Button to join or view tournament -->
             <button @click="joinTournament(tournament.id)"
                 class="w-full px-4 py-2 mt-auto text-white rounded-lg cursor-pointer bg-primary-light hover:bg-primary-dark">
-                {{ tournament.isRegister ? $t('see') : $t('join') }}
+                {{ tournament.isRegister ? $t('see_matches') : $t('join') }}
                 <i class="ml-1 fa-solid"
                     :class="tournament.isRegister ? 'fa-calendar-days' : 'fa-hand-point-right'"></i>
             </button>
@@ -37,7 +34,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useRouter } from 'vue-router';
 
 const props = defineProps({
@@ -49,7 +46,7 @@ const props = defineProps({
 
 const router = useRouter();
 
-const formatDate = (startDate) => {
+const formatDate = (startDate: string | Date): string => {
     return new Date(startDate).toLocaleDateString('fr-FR', {
         weekday: 'long',
         year: 'numeric',
@@ -58,7 +55,7 @@ const formatDate = (startDate) => {
     });
 };
 
-const joinTournament = (tournamentId) => {
+const joinTournament = (tournamentId: string): void => {
     router.push(`/tournaments/${tournamentId}`);
 };
 </script>

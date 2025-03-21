@@ -38,17 +38,20 @@
   "actions":"Action",
 
   "create_team": "Créer une équipe",
+  "create_matches": "Générer les matches",
   "join_team_automatically": "Rejoindre une équipe aléatoirement",
   "search_team": "Rechercher une équipe ou un coéquipier",
   "join_team": "Rejoindre la team",
   "participant": "Participant",
   "player": "Joueur",
   "team_name": "Nom d'équipe",
-  "see": "Voir les matchs",
+  "see_matches": "Voir les matchs",
   "grid_view": "Grille",
   "table_view": "Tableau",
   "your_team": "Votre équipe : ",
-  "no_team": "Aucune équipe pour le moment"
+  "no_team": "Aucune équipe pour le moment",
+  "score":"Score",
+  "classement":"Classement"
  
 
 

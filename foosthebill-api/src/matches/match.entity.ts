@@ -20,7 +20,7 @@ export class Match {
     team2: Team;
 
     @Column()
-    date_match: Date;
+    round: number;
 
     @Column()
     score_team_1: number;

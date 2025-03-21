@@ -8,6 +8,7 @@ export class TournamentResponseDto {
   start_date: Date;
   participant_number: number;
   isRegister: boolean;
+  isMatches: boolean;
   admin: UserResponseDto;
 }
 

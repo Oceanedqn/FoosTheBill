@@ -1,18 +1,18 @@
 // models/Team.ts
 import { Tournament } from './Tournament';
-import { User } from './User';
+import { User, type IUser } from './User';
 
 export interface CreateTeam {
     name: string;
     participant2?: User | null; // Nullable si on ajoute un seul joueur au début
 }
 
-export interface BaseTeam {
+export interface ITeam {
     id: string;
     name: string;
     isMyTeam: boolean;
-    participant1: User;
-    participant2?: User | null; // Nullable si on ajoute un seul joueur au début
+    participant1: IUser;
+    participant2?: IUser | null; // Nullable si on ajoute un seul joueur au début
 }
 
 export class Team {

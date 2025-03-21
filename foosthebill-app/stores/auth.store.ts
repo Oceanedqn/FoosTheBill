@@ -35,7 +35,6 @@ export const useAuthStore = defineStore('auth', {
         localStorage.setItem('accessToken', this.accessToken);
 
         await this.fetchUserInfo();
-
         router.push('/');
       } catch (error) {
         console.error('Login failed:', error);
@@ -48,11 +47,11 @@ export const useAuthStore = defineStore('auth', {
      * Redirects the user to the login page.
      * @param {any} router - The router instance to handle redirection.
      */
-    logout(router: any) {
+    async logout(router: any) {
       this.accessToken = null;
       this.user = null;
       localStorage.removeItem('accessToken'); // Remove the token from localStorage
-      router.push('/authentication/login');
+      await router.push('/authentication/login');
     },
 
     /**
@@ -82,6 +81,8 @@ export const useAuthStore = defineStore('auth', {
      * If no user data is found, fetches user info from the API.
      */
     async initialize() {
+      if (this.accessToken !== null) return;
+
       if (import.meta.client) {
         const storedToken = localStorage.getItem('accessToken');
         const storedUser = localStorage.getItem('user');
@@ -90,9 +91,9 @@ export const useAuthStore = defineStore('auth', {
           this.accessToken = storedToken;
 
           if (storedUser) {
-            this.user = JSON.parse(storedUser); // Retrieve user data from localStorage
+            this.user = JSON.parse(storedUser);
           } else {
-            await this.fetchUserInfo(); // Fetch user info if not cached
+            await this.fetchUserInfo();
           }
         }
       }
