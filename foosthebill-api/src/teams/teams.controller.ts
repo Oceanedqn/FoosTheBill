@@ -39,8 +39,8 @@ export class TeamsController {
     @Put(':id')
     async update(@Param('id') teamId: string, @Request() req) {
         const userId = req.user.id;
-        await this.teamsService.update(teamId, userId);
-        return { code: HttpStatus.OK, message: 'Team updated successfully' };
+        const team = await this.teamsService.update(teamId, userId);
+        return { code: HttpStatus.OK, message: 'Team updated successfully', data: team };
     }
 
     /**

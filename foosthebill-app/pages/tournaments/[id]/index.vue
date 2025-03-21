@@ -35,7 +35,6 @@
                 <ViewToggleButton :isGridView="isGridView" @update:isGridView="setGridView" />
             </div>
         </div>
-
         <!-- Teams List Section -->
         <div class="w-full max-w-6xl mb-4">
             <!-- Teams List Section - Grid View -->
@@ -74,19 +73,17 @@ import type { ITournamentWithTeams } from '~/models/Tournament';
 import type { ITeam } from '~/models/Team';
 import ViewToggleButton from '~/components/ViewToggleButton.vue';
 
-// Router and auth store
 const router = useRouter();
 const authStore = useAuthStore();
 const route = useRoute();
 
-// Reactive variables
-const showModal = ref(false);
-const isAdmin = ref(false);
+const showModal = ref<boolean>(false);
+const isAdmin = ref<boolean>(false);
 const tournamentTeams = ref<ITournamentWithTeams>();
 const users = ref<IUser[]>([]);
 const filteredTeams = ref<ITeam[]>([]);
-const searchQuery = ref('');
-const isUserHasAlreadyTeam = ref(false);
+const searchQuery = ref<string>('');
+const isUserHasAlreadyTeam = ref<boolean>(false);
 const myTeam = ref<ITeam>();
 const isGridView = ref<boolean>(false);
 
@@ -97,8 +94,9 @@ onMounted(async () => {
     isAdmin.value = authStore.user?.role === Role.ADMIN;
 
     await fetchTournamentTeams();
-    await fetchUsers();
-    await checkIfUserHasAlreadyInTeam();
+    if (!tournamentTeams.value?.tournament.isMatches) {
+        await fetchUsers();
+    }
     whichView();
 });
 
@@ -170,7 +168,7 @@ const checkIfUserHasAlreadyInTeam = async () => {
     const tournamentId = route.params.id as string;
     const token = authStore.accessToken;
     const response = await checkIfUserInTeam(tournamentId, token!);
-    isUserHasAlreadyTeam.value = response.isInTeam;
+    isUserHasAlreadyTeam.value = response;
 };
 
 // Watch for changes to the access token

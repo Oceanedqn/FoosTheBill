@@ -8,7 +8,7 @@ import { mapToTeamResponseDto, mapToTeamsWithTournamentResponseDto } from 'src/u
 import { Tournament } from 'src/tournaments/tournament.entity';
 import { UsersService } from 'src/users/users.service';
 import { TournamentsService } from 'src/tournaments/tournaments.service';
-import { TournamentTeamsResponseDto } from 'src/tournaments/dto/tournament.dto';
+import { TournamentTeamResponseDto, TournamentTeamsResponseDto } from 'src/tournaments/dto/tournament.dto';
 
 @Injectable()
 export class TeamsService {
@@ -69,14 +69,14 @@ export class TeamsService {
     }
 
     /**
- * Retrieves all teams associated with a specific tournament and maps them to DTOs.
- * 
- * @param tournamentId - The ID of the tournament whose teams are to be fetched.
- * @param currentUserId - The ID of the current user to customize the response (e.g., to check if the user is part of the team).
- * @returns A promise that resolves to a `TournamentTeamsResponseDto` containing the tournament and its associated teams.
- * @throws NotFoundException - If the tournament is not found.
- * @throws InternalServerErrorException - If an error occurs while retrieving the teams.
- */
+     * Retrieves all teams associated with a specific tournament and maps them to DTOs.
+     * 
+     * @param tournamentId - The ID of the tournament whose teams are to be fetched.
+     * @param currentUserId - The ID of the current user to customize the response (e.g., to check if the user is part of the team).
+     * @returns A promise that resolves to a `TournamentTeamsResponseDto` containing the tournament and its associated teams.
+     * @throws NotFoundException - If the tournament is not found.
+     * @throws InternalServerErrorException - If an error occurs while retrieving the teams.
+     */
     async findAllTeamByTournamentId(tournamentId: string, currentUserId: string): Promise<TournamentTeamsResponseDto> {
         try {
             const tournament = await this.tournamentsService.findOne(tournamentId, currentUserId);
@@ -91,6 +91,46 @@ export class TeamsService {
             return {
                 tournament: tournament,
                 teams: teams.map(team => (mapToTeamResponseDto(team, currentUserId))),
+            };
+        } catch (error) {
+            console.error("[Service findAllTeams] Error: ", error);
+            throw new InternalServerErrorException(error.message);
+        }
+    }
+
+
+    /**
+     * Retrieves all teams associated with a specific tournament and maps them to DTOs.
+     * 
+     * @param tournamentId - The ID of the tournament whose teams are to be fetched.
+     * @param currentUserId - The ID of the current user to customize the response (e.g., to check if the user is part of the team).
+     * @returns A promise that resolves to a `TournamentTeamsResponseDto` containing the tournament and its associated teams.
+     * @throws NotFoundException - If the tournament is not found.
+     * @throws InternalServerErrorException - If an error occurs while retrieving the teams.
+     */
+    async findMyTeamByTournamentId(tournamentId: string, currentUserId: string): Promise<TournamentTeamResponseDto> {
+        try {
+            const tournament = await this.tournamentsService.findOne(tournamentId, currentUserId);
+
+            if (!tournament) {
+                throw new NotFoundException(`Tournament with id ${tournamentId} not found`);
+            }
+
+            const team = await this.teamsRepository.findOne({
+                where: [
+                    { tournament: { id: tournamentId }, participant1: { id: currentUserId } },
+                    { tournament: { id: tournamentId }, participant2: { id: currentUserId } }
+                ], relations: ['participant1', 'participant2']
+            });
+
+            if (!team) {
+                throw new NotFoundException(`Team with id ${tournamentId} not found`);
+            }
+
+            // Map teams to DTOs
+            return {
+                tournament: tournament,
+                team: mapToTeamResponseDto(team, currentUserId)
             };
         } catch (error) {
             console.error("[Service findAllTeams] Error: ", error);
@@ -131,7 +171,7 @@ export class TeamsService {
  * @throws ConflictException - If the user is already in the team or if the team already has two participants.
  * @throws InternalServerErrorException - If an error occurs during the update process.
  */
-    async update(teamId: string, userId: string): Promise<void> {
+    async update(teamId: string, userId: string): Promise<TeamResponseDto> {
         const team = await this.teamsRepository.findOne({
             where: { id: teamId },
             relations: ['participant1', 'participant2']
@@ -154,6 +194,8 @@ export class TeamsService {
         }
 
         await this.teamsRepository.update(teamId, { participant2: user });
+
+        return mapToTeamResponseDto(team, userId);
     }
 
     /**

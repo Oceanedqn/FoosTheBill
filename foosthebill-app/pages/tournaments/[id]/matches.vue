@@ -1,50 +1,73 @@
 <template>
-    <div class="container p-4 mx-auto">
+    <div v-if="matchesTournament" class="container p-4 mx-auto">
+        <TournamentTitle :title="$t('tournament')" :isAdmin="isAdmin" />
+        <div class="w-full p-6 mb-6 border-2 rounded-lg shadow-md border-primary shadow-primary">
+            <div class="flex flex-col gap-6 md:flex-row">
+                <div class="md:w-2/3">
+                    <h2 class="mb-4 text-3xl font-semibold">{{ tournamentTeam?.tournament.name }}</h2>
+                    <p class="mb-2 text-gray-600">{{ tournamentTeam?.tournament.description }}</p>
+                    <p class="mb-4 text-sm text-gray-500">
+                        <i class="pr-1 fa-solid fa-calendar-day"></i>
+                        {{ new Date(tournamentTeam?.tournament.start_date!).toLocaleDateString('fr-FR', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                        }) }}
+                    </p>
+                </div>
+                <div v-if="tournamentTeam?.team" class="md:w-1/3">
+                    <TeamCard :team="tournamentTeam.team" :isMyTeam="true" :isUserHasAlreadyTeam="true"
+                        :joinTeam="handleJoinTeam" />
+                </div>
+            </div>
+            <!-- <TeamManagement :isUserHasAlreadyTeam="isUserHasAlreadyTeam" :tournamentTeams="tournamentTeams"
+                :openModal="openModal" :isAdmin="isAdmin" :isMatches="tournamentTeams?.tournament.isMatches"
+                :seeMatches="seeMatchs" :handleCreateMatches="handleCreateMatches" /> -->
+        </div>
 
         <!-- Table des matchs -->
         <h2 class="mb-2 text-xl font-bold">Matchs Planifiés</h2>
-        <div v-for="(tour, index) in scheduledMatches" :key="index">
+        <div v-for="(tour, index) in matchesTournament" :key="index">
             <h3 class="text-lg font-semibold">Tour {{ index + 1 }}</h3>
-            <table class="min-w-full mb-4 border-collapse table-auto">
-                <thead>
-                    <tr>
-                        <th class="px-4 py-2 border">Equipe 1</th>
-                        <th class="px-4 py-2 border">Equipe 2</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(match, matchIndex) in tour.matches" :key="matchIndex">
-                        <td class="px-4 py-2 border">{{ match.team1.name }}</td>
-                        <td class="px-4 py-2 border">{{ match.team2.name }}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="relative grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                <MatchCard v-for="match in tour.matches" :key="match.round" :match="match"
+                    v-if="matchesTournament && matchesTournament.length" />
+            </div>
         </div>
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { getMatchesTournament } from '~/services/tournament.service';
+import { getMatchesTournament, getTournamentTeam } from '~/services/tournament.service';
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '../../../stores/auth.store';
+import type { IMatchesTournament } from '~/models/Match';
+import MatchCard from '~/components/matches/MatchCard.vue';
+import TournamentTitle from '~/components/tournaments/TournamentTitle.vue';
+import type { ITournamentWithTeam } from '~/models/Tournament';
+import { Role } from '~/models/User';
+import TeamCard from '~/components/teams/TeamCard.vue';
+
 
 const route = useRoute();
 const authStore = useAuthStore();
-const matchesTournament = ref([]);
-const scheduledMatches = ref([]);
+const matchesTournament = ref<IMatchesTournament[]>([]);
+const tournamentTeam = ref<ITournamentWithTeam>();
+const isAdmin = ref<boolean>(false);
+
 
 
 // Fetch matches from the API
 const fetchMatches = async () => {
-    const tournamentId = route.params.id;
+    const tournamentId = route.params.id as string;
     const token = authStore.accessToken;
 
     if (token) {
         try {
             const response = await getMatchesTournament(tournamentId, token);
-            matchesTournament.value = response.data;
-            scheduledMatches.value = response.data;
+            matchesTournament.value = response;
         } catch (error) {
             console.error('Error fetching teams:', error);
         }
@@ -53,6 +76,26 @@ const fetchMatches = async () => {
 
 // Generate matches when the component is mounted
 onMounted(async () => {
+    await authStore.initialize();
+    isAdmin.value = authStore.user?.role === Role.ADMIN;
+
     await fetchMatches();
+    await fetchTournamentTeams();
 });
+
+const fetchTournamentTeams = async () => {
+    const tournamentId = route.params.id as string;
+    const token = authStore.accessToken;
+    if (token) {
+        try {
+            tournamentTeam.value = await getTournamentTeam(tournamentId, token);
+        } catch (error) {
+            console.error('Error fetching teams:', error);
+        }
+    }
+};
+
+const handleJoinTeam = () => {
+
+}
 </script>

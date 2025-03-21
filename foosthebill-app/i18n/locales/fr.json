@@ -51,7 +51,9 @@
   "your_team": "Votre équipe : ",
   "no_team": "Aucune équipe pour le moment",
   "score":"Score",
-  "classement":"Classement"
+  "classement":"Classement",
+
+  "current_score": "Score du match"
  
 
 

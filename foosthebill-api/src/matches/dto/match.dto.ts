@@ -1,5 +1,6 @@
 import { TeamResponseDto } from "src/teams/dto/team.dto";
 import { Team } from "src/teams/team.entity";
+import { TournamentResponseDto } from "src/tournaments/dto/tournament.dto";
 
 export class MatchesResponseDto {
     round: number;
@@ -31,7 +32,6 @@ export class CreateMatchesDto {
 }
 
 export class UpdateMatchDto {
-    id: string;
     score_team_1: number;
     score_team_2: number;
 }

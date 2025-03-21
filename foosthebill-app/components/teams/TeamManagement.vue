@@ -17,7 +17,10 @@
 
 <script setup lang="ts">
 const props = defineProps({
-    isUserHasAlreadyTeam: Boolean,
+    isUserHasAlreadyTeam: {
+        type: Boolean,
+        required: true,
+    },
     isAdmin: Boolean,
     isMatches: Boolean,
     tournamentTeams: Object,

@@ -17,6 +17,11 @@ export class TournamentTeamsResponseDto {
   teams: TeamResponseDto[];
 }
 
+export class TournamentTeamResponseDto {
+  tournament: TournamentResponseDto;
+  team: TeamResponseDto;
+}
+
 export class CreateTournamentDto {
   name: string;
   description: string;

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { AuthResponse, UserResponse } from '~/models/Response';
+import type { AuthResponse } from '~/models/Response';
 import type { User } from '~/models/User';
 import { getUserInfo, login, register } from '~/services/auth.service';
 
@@ -27,11 +27,11 @@ export const useAuthStore = defineStore('auth', {
       try {
         const response: AuthResponse = await login(credentials);
 
-        if (!response || !response.data.accessToken) {
+        if (!response || !response.accessToken) {
           throw new Error('Invalid credentials');
         }
 
-        this.accessToken = response.data.accessToken;
+        this.accessToken = response.accessToken;
         localStorage.setItem('accessToken', this.accessToken);
 
         await this.fetchUserInfo();
@@ -63,7 +63,7 @@ export const useAuthStore = defineStore('auth', {
      */
     async register(credentials: { name: string; firstname: string; email: string; password: string }, router: any) {
       try {
-        const response: UserResponse = await register(credentials);
+        const response: User = await register(credentials);
 
         if (!response) {
           throw new Error('Invalid credentials');
@@ -107,13 +107,13 @@ export const useAuthStore = defineStore('auth', {
     async fetchUserInfo() {
       if (this.accessToken) {
         try {
-          const response: UserResponse = await getUserInfo(this.accessToken);
+          const response: User = await getUserInfo(this.accessToken);
 
-          if (!response || !response.data) {
+          if (!response) {
             throw new Error('Invalid credentials');
           }
 
-          this.user = response.data;
+          this.user = response;
           localStorage.setItem('user', JSON.stringify(this.user));
 
         } catch (error) {

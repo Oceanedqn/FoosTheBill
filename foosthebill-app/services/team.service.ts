@@ -1,5 +1,5 @@
-import type { CreateTeamResponse, GenericResponse } from "~/models/Response";
-import type { CreateTeam, Team } from "~/models/Team";
+import type { ApiResponse } from "~/models/Response";
+import type { CreateTeam, ITeam, Team } from "~/models/Team";
 
 const API_URL = 'http://localhost:3001';
 
@@ -8,7 +8,7 @@ const API_URL = 'http://localhost:3001';
  * @param {CreateTeam} newTeam - The tournament data to be created.
  * @returns {Promise<GenericResponse>} - The response containing the status code and message.
  */
-export const createTeam = async (createTeam: CreateTeam, tournamentId: string): Promise<GenericResponse> => {
+export const createTeam = async (createTeam: CreateTeam, tournamentId: string): Promise<ITeam> => {
     const authStore = useAuthStore();
     const token = authStore.accessToken;
 
@@ -20,37 +20,32 @@ export const createTeam = async (createTeam: CreateTeam, tournamentId: string): 
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
-        }) as CreateTeamResponse;
+        }) as ApiResponse<ITeam>;
 
-        return response;
+        return response.data;
 
     } catch (error) {
         throw new Error('Failed to create team');
     }
 };
 
-export const joinExistingTeam = async (teamId: string): Promise<GenericResponse> => {
+export const joinExistingTeam = async (teamId: string): Promise<ITeam> => {
     const authStore = useAuthStore();
     const token = authStore.accessToken;
 
-    const { data, error } = await useFetch<CreateTeamResponse>(`${API_URL}/teams/${teamId}`, {
-        method: 'PUT',
-        body: '',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-    });
+    try {
+        const response = await $fetch(`${API_URL}/teams/${teamId}`, {
+            method: 'PUT',
+            body: '',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        }) as ApiResponse<ITeam>;
 
-    if (error.value) {
-        return {
-            statusCode: error.value.statusCode || 400,
-            message: error.value.message || "An unknown error occurred",
-        };
+        return response.data;
+    } catch (error) {
+        throw new Error('Failed to create team');
     }
-
-    return {
-        statusCode: data.value?.statusCode || 500,
-        message: data.value?.message || "An unknown error occurred",
-    };
 }
+

@@ -48,6 +48,8 @@
   "your_team": "Your team: ",
   "no_team": "No team for the moment",
   "score":"Score",
-  "classement":"Classement"
+  "classement":"Classement",
+
+  "current-score": "Current Score"
 
 }
