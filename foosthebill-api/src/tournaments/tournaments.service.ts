@@ -8,6 +8,7 @@ import { TeamsService } from 'src/teams/teams.service';
 import { calculateParticipants } from 'src/utils/services.utils';
 import { mapToTournamentResponseDto, mapToUserResponseDto } from 'src/utils/map-dto.utils';
 import { UserResponseDto } from 'src/users/dto/user.dto';
+import { MatchesService } from 'src/matches/matches.service';
 
 @Injectable()
 export class TournamentsService {
@@ -15,6 +16,7 @@ export class TournamentsService {
     @InjectRepository(Tournament) private tournamentsRepository: Repository<Tournament>,
     @Inject(forwardRef(() => TeamsService)) private readonly teamsService: TeamsService,
     @Inject(forwardRef(() => UsersService)) private readonly usersService: UsersService,
+    @Inject(forwardRef(() => MatchesService)) private readonly matchesService: MatchesService,
   ) { }
 
 
@@ -49,8 +51,7 @@ export class TournamentsService {
       });
 
       await this.tournamentsRepository.save(tournament);
-
-      return mapToTournamentResponseDto(tournament, mapToUserResponseDto(user)!, new Set(), false);
+      return mapToTournamentResponseDto(tournament, mapToUserResponseDto(user)!, new Set(), false, false);
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
@@ -77,7 +78,8 @@ export class TournamentsService {
         tournaments.map(async (tournament) => {
           const participants = calculateParticipants(tournament);
           const isUserRegistered = userId ? await this.teamsService.isUserInTeam(userId, tournament.id) : false;
-          return mapToTournamentResponseDto(tournament, mapToUserResponseDto(tournament.admin)!, participants, isUserRegistered);
+          const isMatches = await this.matchesService.isMatchesCreated(tournament.id);
+          return mapToTournamentResponseDto(tournament, mapToUserResponseDto(tournament.admin)!, participants, isUserRegistered, isMatches);
         })
       );
     } catch (error) {
@@ -96,7 +98,7 @@ export class TournamentsService {
  * @throws NotFoundException - If no tournament is found with the given ID.
  * @throws InternalServerErrorException - If an error occurs during retrieval.
  */
-  async findOne(id: string): Promise<TournamentResponseDto> {
+  async findOne(id: string, userId: string): Promise<TournamentResponseDto> {
     try {
       const tournament = await this.tournamentsRepository.findOne({
         where: { id },
@@ -107,7 +109,9 @@ export class TournamentsService {
         throw new NotFoundException(`Tournament with id ${id} not found`);
       }
 
-      return mapToTournamentResponseDto(tournament, mapToUserResponseDto(tournament.admin)!, new Set(), false);
+      const isUserRegistered = userId ? await this.teamsService.isUserInTeam(userId, tournament.id) : false;
+      const isMatches = await this.matchesService.isMatchesCreated(tournament.id);
+      return mapToTournamentResponseDto(tournament, mapToUserResponseDto(tournament.admin)!, new Set(), isUserRegistered, isMatches);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

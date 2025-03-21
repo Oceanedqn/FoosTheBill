@@ -18,21 +18,7 @@
                         </div>
                     </button>
                 </div>
-                <button @click="isGridView = true"
-                    :class="{ 'bg-primary text-white': isGridView, 'bg-gray-200': !isGridView }"
-                    class="px-4 py-2 transition rounded-lg cursor-pointer hover:bg-primary-dark hover:text-white">
-                    <div class="flex items-center text-center">
-                        <i class="pr-1 fa-solid fa-grip"></i>{{ $t('grid_view') }}
-                    </div>
-                </button>
-                <button @click="isGridView = false"
-                    :class="{ 'bg-primary text-white': !isGridView, 'bg-gray-200': isGridView }"
-                    class="px-4 py-2 transition rounded-lg cursor-pointer hover:bg-primary-dark hover:text-white">
-
-                    <div class="flex items-center text-center">
-                        <i class="pr-1 fa-solid fa-table-list"></i>{{ $t('table_view') }}
-                    </div>
-                </button>
+                <ViewToggleButton :isGridView="isGridView" @update:isGridView="setGridView" />
             </div>
         </div>
 
@@ -99,7 +85,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { Role } from '~/models/User';
 import { ref, onMounted, watch } from 'vue';
 import { useAuthStore } from '~/stores/auth.store';
@@ -108,6 +94,7 @@ import TournamentTitle from '~/components/tournaments/TournamentTitle.vue';
 import TournamentCard from '~/components/tournaments/TournamentCard.vue';
 import ModalCreateTournament from '~/components/modals/ModalCreateTournament.vue';
 import TournamentTableView from '~/components/tournaments/TournamentTableView.vue';
+import type { ITournament } from '~/models/Tournament';
 
 
 const authStore = useAuthStore();
@@ -118,33 +105,49 @@ const newTournament = ref({
     start_date: '',
 });
 const searchQuery = ref('');
-const tournaments = ref([]);
+const tournaments = ref<ITournament[]>([]);
 
-const filteredOrganizingTournaments = ref([]);
-const filteredParticipatingTournaments = ref([]);
-const filteredTournamentsList = ref([]);
+const filteredOrganizingTournaments = ref<ITournament[]>([]);
+const filteredParticipatingTournaments = ref<ITournament[]>([]);
+const filteredTournamentsList = ref<ITournament[]>([]);
 
 
 const isAdmin = ref(false);
-const userId = ref(null);
-
-const isGridView = ref(false);
+const userId = ref<string | null>(null);
+const isGridView = ref<boolean>(false);
 
 
 onMounted(async () => {
     await authStore.initialize();
     isAdmin.value = authStore.user?.role === Role.ADMIN;
-    userId.value = authStore.user?.id;
+    userId.value = authStore.user?.id ?? null;
+    whichView();
     await fetchTournaments();
 });
 
+const whichView = () => {
+    const storedView = localStorage.getItem('viewType');
+    if (storedView) {
+        isGridView.value = storedView === 'grid';
+    }
+};
+
+// Mettre à jour localStorage lorsque isGridView change
+watch(isGridView, (newValue) => {
+    localStorage.setItem('viewType', newValue ? 'grid' : 'table');
+});
+
+// Mise à jour de la vue
+const setGridView = (value: boolean) => {
+    isGridView.value = value;
+};
 // Function to fetch tournaments with token
 const fetchTournaments = async () => {
     const token = authStore.accessToken;
     if (token) {
         try {
             const response = await getTournaments(token);
-            tournaments.value = response.data;
+            tournaments.value = response;
             filterTournaments();
         } catch (error) {
             console.error('Error fetching tournaments:', error);
@@ -203,7 +206,11 @@ const filterTournaments = () => {
 // Handle creating a tournament
 const handleCreateTournament = async () => {
     try {
-        await createTournament(newTournament.value);
+        const tournamentData = {
+            ...newTournament.value,
+            start_date: new Date(newTournament.value.start_date),  // Conversion en Date
+        };
+        await createTournament(tournamentData);
         await fetchTournaments();
     } catch (error) {
         console.error('Creation failed', error);

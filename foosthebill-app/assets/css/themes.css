@@ -106,19 +106,19 @@
     --color-secondary-dark: #b23c17;
   }
 
-  [data-theme="futur-theme"] {
-    --color-background: #121212;
-    --color-background-alternatif: #1e1e1e;
+  [data-theme="clementine-theme"] {
+    --color-background: #ffffff;
+    --color-background-alternatif: #eff5ff;
     --color-background-light: #ffffff;
-    --color-text: #cfd8dc;
-    --color-dark-text: #b0bec5;
-    --color-title-text: #ffffff;
-    --color-primary: #00e676;
-    --color-primary-light: #33eb91;
-    --color-primary-dark: #00a152;
-    --color-secondary: #ff4081;
-    --color-secondary-light: #ff80ab;
-    --color-secondary-dark: #c51162;
+    --color-text: #b7b8b9;
+    --color-dark-text: #333333;
+    --color-title-text: #333333;
+    --color-primary: #ff7e3c;
+    --color-primary-light: #ff9e6a;
+    --color-primary-dark: #e55c1b;
+    --color-secondary: #3c88ff;
+    --color-secondary-light: #6a99ff;
+    --color-secondary-dark: #2a56cc;
   }
 }
 

@@ -1,3 +1,4 @@
+import { MatchDto, MatchesResponseDto, MatchResponseDto } from 'src/matches/dto/match.dto';
 import { TeamResponseDto, TeamsWithTournamentReponseDto } from 'src/teams/dto/team.dto';
 import { Team } from 'src/teams/team.entity';
 import { TournamentResponseDto } from 'src/tournaments/dto/tournament.dto';
@@ -30,14 +31,15 @@ export function mapToUserResponseDto(user: any): UserResponseDto | null {
  * @param isRegister - A boolean indicating if the user is registered.
  * @returns TournamentResponseDto - The mapped tournament DTO.
  */
-export function mapToTournamentResponseDto(tournament: Tournament, user: UserResponseDto, participants: Set<string>, isRegister: boolean): TournamentResponseDto {
+export function mapToTournamentResponseDto(tournament: Tournament, user: UserResponseDto, participants: Set<string>, isRegister: boolean, isMatches): TournamentResponseDto {
     return {
         id: tournament.id,
         name: tournament.name,
         description: tournament.description,
         start_date: tournament.start_date,
-        participant_number: participants.size,
         isRegister,
+        isMatches,
+        participant_number: participants.size,
         admin: mapToUserResponseDto(user)!
     };
 }
@@ -69,8 +71,45 @@ export function mapToTeamsWithTournamentResponseDto(team: Team, currentUserId: s
         id: team.id,
         name: team.name,
         isMyTeam: team.participant1.id === currentUserId || (team.participant2 ? team.participant2.id === currentUserId : false),
-        tournament: mapToTournamentResponseDto(team.tournament, mapToUserResponseDto(team.tournament.admin)!, new Set(), false),
+        tournament: mapToTournamentResponseDto(team.tournament, mapToUserResponseDto(team.tournament.admin)!, new Set(), false, false),
         participant1: mapToUserResponseDto(team.participant1)!,
         participant2: team.participant2 ? mapToUserResponseDto(team.participant2) : null,
     };
+}
+
+export function mapToMatchResponseDto(match: MatchDto, currentUserId: string): MatchResponseDto {
+    return {
+        id: match.id,
+        round: match.round,
+        score_team_1: match.score_team_1,
+        score_team_2: match.score_team_2,
+        team1: mapToTeamResponseDto(match.team1, currentUserId),
+        team2: mapToTeamResponseDto(match.team2, currentUserId),
+    };
+}
+
+export function mapToMatchesResponseDto(matches: MatchDto[]): MatchesResponseDto[] {
+    const groupedMatches: { [key: number]: MatchDto[] } = {};
+
+    // Grouper les matchs par round
+    matches.forEach(match => {
+        const round = match.round || 1;  // Si aucun round, utiliser 1
+        if (!groupedMatches[round]) {
+            groupedMatches[round] = [];
+        }
+
+        groupedMatches[round].push({
+            id: match.id,
+            round: match.round,
+            score_team_1: match.score_team_1,
+            score_team_2: match.score_team_2,
+            team1: match.team1,
+            team2: match.team2,
+        });
+    });
+
+    return Object.keys(groupedMatches).map(round => ({
+        round: parseInt(round),
+        matches: groupedMatches[parseInt(round)].map(match => mapToMatchResponseDto(match, "")),
+    }));
 }

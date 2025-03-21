@@ -1,5 +1,5 @@
 // models/Tournament.ts
-import { Team, type BaseTeam } from './Team';
+import { Team, type ITeam } from './Team';
 import { Match } from './Match';
 import type { User } from './User';
 
@@ -18,24 +18,21 @@ export interface BasicTournament {
 }
 
 // Use in /tournaments
-export interface TournamentPeople {
+export interface ITournament {
     id: string;
     name: string;
     start_date: string;
     description: string;
     participant_number: number;
-    is_register: boolean;
+    isRegister: boolean;
+    isMatches: boolean;
     admin: User;
 
 }
 
-export interface TournamentTeams {
-    id: string;
-    name: string;
-    start_date: string;
-    description: string;
-    admin: User;
-    teams: BaseTeam[];
+export interface ITournamentWithTeams {
+    tournament: ITournament
+    teams: ITeam[];
 }
 
 export class Tournament {

@@ -27,7 +27,7 @@
 
             <button @click="joinTournament(tournament.id)"
               class="px-4 py-1 mt-auto text-white rounded-lg cursor-pointer bg-primary-light hover:bg-primary-dark">
-              {{ tournament.isRegister ? $t('see') : $t('join') }}
+              {{ tournament.isRegister ? $t('see_matches') : $t('join') }}
               <i class="ml-1 fa-solid" :class="tournament.isRegister ? 'fa-calendar-days' : 'fa-hand-point-right'"></i>
             </button>
           </td>

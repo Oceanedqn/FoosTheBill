@@ -6,10 +6,12 @@
                     <th class="px-4 py-2 text-center">{{ $t('team_name') }}</th>
                     <th class="px-4 py-2 text-center">{{ $t('player') }} 1</th>
                     <th class="px-4 py-2 text-center">{{ $t('player') }} 2</th>
+                    <th v-if="props.isMatches" class="px-4 py-2 text-center">{{ $t('score') }}</th>
+                    <th v-if="props.isMatches" class="px-4 py-2 text-center">{{ $t('classement') }}</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="team in teams" :key="team.id" class="border-b border-gray-300">
+                <tr v-for="team in props.teams" :key="team.id" class="border-b border-gray-300">
                     <td class="px-4 py-1 md:text-center sm:text-left whitespace-nowrap">
                         {{ team.name }}
                     </td>
@@ -23,7 +25,7 @@
                             {{ team.participant2.name }} {{ team.participant2.firstname }}
                         </span>
                         <div v-else class="flex items-center justify-center">
-                            <button v-if="!isUserHasAlreadyTeam" @click="handleJoinTeam(team.id)"
+                            <button v-if="!props.isUserHasAlreadyTeam" @click="props.handleJoinTeam(team.id)"
                                 class="flex items-center justify-center px-4 py-1 text-white rounded-lg cursor-pointer bg-primary-light hover:bg-primary-dark">
                                 <i class="pr-1 fa-solid fa-user-plus"></i>
                                 <span class="hidden sm:inline">{{ $t('join_team') }}</span>
@@ -38,10 +40,12 @@
     <div v-else>{{ $t('no_team') }}</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import type { ITeam } from '~/models/Team';
+
 const props = defineProps({
     teams: {
-        type: Array,
+        type: Array as () => ITeam[],
         required: true,
     },
     isUserHasAlreadyTeam: {
@@ -52,5 +56,9 @@ const props = defineProps({
         type: Function,
         required: true,
     },
+    isMatches: {
+        type: Boolean,
+        required: true,
+    }
 });
 </script>

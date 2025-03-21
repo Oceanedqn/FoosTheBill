@@ -27,3 +27,9 @@ export interface CreateTournamentResponse extends GenericResponse {
 export interface CreateTeamResponse extends GenericResponse {
     data: Team
 }
+
+export interface ApiResponse<T> {
+    statusCode: number;
+    message: string;
+    data: T;
+}

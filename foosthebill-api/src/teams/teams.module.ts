@@ -10,7 +10,9 @@ import { UsersModule } from 'src/users/users.module';
 import { TournamentsModule } from 'src/tournaments/tournaments.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Team, Tournament, User]), forwardRef(() => UsersModule), forwardRef(() => TournamentsModule)],
+    imports: [TypeOrmModule.forFeature([Team, Tournament, User]),
+    forwardRef(() => UsersModule),
+    forwardRef(() => TournamentsModule)],
     providers: [TeamsService],
     controllers: [TeamsController],
     exports: [TeamsService]

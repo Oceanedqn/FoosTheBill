@@ -4,6 +4,13 @@ export enum Role {
     PARTICIPANT = 'participant',
 }
 
+export interface IUser {
+    id: string;
+    name: string;
+    firstname: string;
+    role: Role;
+}
+
 export class User {
     id: string;
     name: string;
