@@ -1,8 +1,8 @@
 <template>
-    <div class="flex flex-col min-h-screen">
+    <div v-if="tournamentTeams" class="flex flex-col">
         <TournamentTitle :title="$t('tournament')" :isAdmin="isAdmin" />
         <div class="w-full p-6 mb-6 border-2 rounded-lg shadow-md border-primary shadow-primary">
-            <div class="flex flex-col gap-6 md:flex-row">
+            <div class="flex flex-col gap-6 mb-4 md:flex-row">
                 <div class="md:w-2/3">
                     <h2 class="mb-4 text-3xl font-semibold">{{ tournamentTeams?.tournament.name }}</h2>
                     <p class="mb-2 text-gray-600">{{ tournamentTeams?.tournament.description }}</p>
@@ -22,7 +22,7 @@
                 </div>
             </div>
             <TeamManagement :isUserHasAlreadyTeam="isUserHasAlreadyTeam" :tournamentTeams="tournamentTeams"
-                :openModal="openModal" :isAdmin="isAdmin" :isMatches="tournamentTeams?.tournament.isMatches"
+                :openModal="openModal" :isAdmin="isAdmin" :isMatches="tournamentTeams.tournament.isMatches"
                 :seeMatches="seeMatchs" :handleCreateMatches="handleCreateMatches" />
         </div>
 
@@ -35,18 +35,16 @@
                 <ViewToggleButton :isGridView="isGridView" @update:isGridView="setGridView" />
             </div>
         </div>
-
         <!-- Teams List Section -->
         <div class="w-full max-w-6xl mb-4">
             <!-- Teams List Section - Grid View -->
             <TeamGridView v-if="isGridView && filteredTeams.length"
                 :teams="filteredTeams.filter(t => t.id !== myTeam?.id)" :isUserHasAlreadyTeam="isUserHasAlreadyTeam"
                 :handleJoinTeam="handleJoinTeam" />
-
             <!-- Teams List Section - Table View -->
             <TeamTableView v-if="!isGridView" :teams="filteredTeams.filter(t => t.id !== myTeam?.id)"
                 :isUserHasAlreadyTeam="isUserHasAlreadyTeam" :handleJoinTeam="handleJoinTeam"
-                :isMatches="tournamentTeams?.tournament.isMatches!" />
+                :isMatches="tournamentTeams.tournament.isMatches" />
         </div>
 
         <!-- Modal Directement sur la Page -->
@@ -73,20 +71,18 @@ import ModalCreateTeam from '~/components/modals/ModalCreateTeam.vue';
 import type { ITournamentWithTeams } from '~/models/Tournament';
 import type { ITeam } from '~/models/Team';
 import ViewToggleButton from '~/components/ViewToggleButton.vue';
+import { showAlertToast } from "@/utils/toast.utils";
 
-// Router and auth store
 const router = useRouter();
 const authStore = useAuthStore();
 const route = useRoute();
-
-// Reactive variables
-const showModal = ref(false);
-const isAdmin = ref(false);
+const showModal = ref<boolean>(false);
+const isAdmin = ref<boolean>(false);
 const tournamentTeams = ref<ITournamentWithTeams>();
 const users = ref<IUser[]>([]);
 const filteredTeams = ref<ITeam[]>([]);
-const searchQuery = ref('');
-const isUserHasAlreadyTeam = ref(false);
+const searchQuery = ref<string>('');
+const isUserHasAlreadyTeam = ref<boolean>(false);
 const myTeam = ref<ITeam>();
 const isGridView = ref<boolean>(false);
 
@@ -97,15 +93,19 @@ onMounted(async () => {
     isAdmin.value = authStore.user?.role === Role.ADMIN;
 
     await fetchTournamentTeams();
-    await fetchUsers();
-    await checkIfUserHasAlreadyInTeam();
+    if (!tournamentTeams.value?.tournament.isMatches) {
+        await fetchUsers();
+    }
     whichView();
 });
 
 const handleCreateMatches = async () => {
+    if (tournamentTeams.value && tournamentTeams.value?.teams.length < 2) {
+        showAlertToast("not_enough_teams");
+    }
+
     const tournamentId = route.params.id as string;
     const token = authStore.accessToken;
-    console.log("handleCreateMatches", tournamentId)
     if (token) {
         try {
             await createMatchesTournament(tournamentId, tournamentTeams.value!.teams, token);
@@ -170,7 +170,7 @@ const checkIfUserHasAlreadyInTeam = async () => {
     const tournamentId = route.params.id as string;
     const token = authStore.accessToken;
     const response = await checkIfUserInTeam(tournamentId, token!);
-    isUserHasAlreadyTeam.value = response.isInTeam;
+    isUserHasAlreadyTeam.value = response;
 };
 
 // Watch for changes to the access token

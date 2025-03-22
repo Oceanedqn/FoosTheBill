@@ -1,9 +1,8 @@
 <template>
     <div v-if="tournament" class="relative flex flex-col overflow-hidden rounded-lg shadow-lg hover:shadow-xl">
-        <div class="relative flex flex-col items-center w-full p-3 text-white bg-primary"
-            :class="{ 'bg-primary-dark': tournament.isRegister }">
+        <div class="relative flex flex-col items-center w-full p-3 border-b-2 text-dark border-primary">
             <div
-                class="absolute flex items-center px-2 py-1 text-sm font-semibold transform -translate-y-1/2 bg-white rounded-full top-1/2 right-2 text-primary">
+                class="absolute flex items-center px-2 py-1 text-sm font-semibold text-white transform -translate-y-1/2 rounded-full bg-primary top-1/2 right-2">
                 {{ tournament.participant_number }} <i class="pl-1 fa-solid fa-person"></i>
 
             </div>

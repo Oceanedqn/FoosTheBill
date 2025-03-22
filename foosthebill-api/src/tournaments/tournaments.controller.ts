@@ -1,14 +1,14 @@
 import { Controller, Get, Post, Param, Body, Put, Delete, HttpStatus, UseFilters, UseGuards } from '@nestjs/common';
 import { TournamentsService } from './tournaments.service';
 import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
-import { CreateTournamentDto, TournamentTeamsResponseDto, UpdateTournamentDto } from './dto/tournament.dto';
+import { CreateTournamentDto, TournamentTeamResponseDto, TournamentTeamsResponseDto, UpdateTournamentDto } from './dto/tournament.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from '@nestjs/common';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { TeamsService } from '../teams/teams.service';
 import { CreateTeamDto, TeamResponseDto } from 'src/teams/dto/team.dto';
 import { MatchesService } from 'src/matches/matches.service';
-import { CreateMatchesDto, MatchesResponseDto } from 'src/matches/dto/match.dto';
+import { CreateMatchesDto } from 'src/matches/dto/match.dto';
 
 @Controller('tournaments')
 @UseFilters(new AllExceptionsFilter())
@@ -140,6 +140,26 @@ export class TournamentsController {
         };
     }
 
+
+    /**
+    * Retrieves all teams associated with a specific tournament.
+    * 
+    * @param id - Tournament ID.
+    * @returns A list of teams in the tournament.
+    * @throws NotFoundException - If the tournament is not found.
+    */
+    @UseGuards(AuthGuard)
+    @Get(':id/team')
+    async findTournamentTeam(@Param('id') id: string, @Request() req) {
+        const userId = req.user.id;
+        const tournament: TournamentTeamResponseDto = await this.teamsService.findMyTeamByTournamentId(id, userId);
+        return {
+            statusCode: HttpStatus.OK,
+            message: 'Teams retrieved successfully',
+            data: tournament,
+        };
+    }
+
     /**
     * Retrieves all users who are not registered in a team for a specific tournament.
     * 
@@ -201,7 +221,11 @@ export class TournamentsController {
     async checkIfUserInTeam(@Param('id') tournamentId: string, @Request() req) {
         const userId = req.user.id;
         const isInTeam = await this.teamsService.isUserInTeam(userId, tournamentId);
-        return { isInTeam };
+        return {
+            statusCode: HttpStatus.CREATED,
+            message: 'Check if user in team successfully',
+            data: isInTeam,
+        };
     }
 
 
@@ -226,7 +250,7 @@ export class TournamentsController {
         const matches = await this.matchesService.createMatches(createMatchesDto, userId);
         return {
             statusCode: HttpStatus.CREATED,
-            message: 'Team created successfully',
+            message: 'Matches created successfully',
             data: matches,
         };
     }
@@ -243,11 +267,10 @@ export class TournamentsController {
     @Get(':id/matches')
     @UseGuards(AuthGuard)
     async findAllMatches(@Param('id') tournamentId: string) {
-        console.log("CONTROLLER :", tournamentId)
         const matches = await this.matchesService.findAll(tournamentId);
         return {
             statusCode: HttpStatus.OK,
-            message: 'Team fetch successfully',
+            message: 'Matches fetch successfully',
             data: matches,
         };
     }

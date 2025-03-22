@@ -2,18 +2,18 @@ import { Injectable, NotFoundException, InternalServerErrorException, forwardRef
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Match } from './match.entity';
-import { CreateMatchesDto, MatchDto, MatchesResponseDto } from './dto/match.dto';
-import { TeamsService } from 'src/teams/teams.service';
+import { CreateMatchesDto, MatchDto, MatchResponseDto, MatchesResponseDto, UpdateMatchDto } from './dto/match.dto';
 import { TournamentsService } from 'src/tournaments/tournaments.service';
 import { TeamResponseDto } from 'src/teams/dto/team.dto';
 import { mapToMatchesResponseDto, mapToMatchResponseDto } from 'src/utils/map-dto.utils';
+import { MatchResult } from 'src/match-results/match-result.entity';
 
 @Injectable()
 export class MatchesService {
     constructor(
         @InjectRepository(Match) private matchesRepository: Repository<Match>,
         @Inject(forwardRef(() => TournamentsService)) private readonly tournamentsService: TournamentsService,
-
+        @InjectRepository(MatchResult) private matchResultsRepository: Repository<MatchResult>,
     ) { }
 
     /**
@@ -149,15 +149,30 @@ export class MatchesService {
  * Updates an existing match.
  * 
  * @param id - The ID of the match to update.
- * @param match - The match object containing the updated data.
+ * @param matchDto - The match object containing the updated data.
  * @returns A promise that resolves when the match is successfully updated.
  * @throws NotFoundException - If the match with the given ID is not found.
  * @throws InternalServerErrorException - If there is an error updating the match in the repository.
  */
-    async update(id: string, match: Match): Promise<void> {
+    async update(id: string, matchDto: UpdateMatchDto): Promise<void> {
         try {
-            await this.findOne(id);
-            await this.matchesRepository.update(id, match);
+            const match = await this.findOne(id);
+            if (!match) {
+                throw new NotFoundException(`Match with id ${id} not found`);
+            }
+
+            // Create a new entry in MatchResult before updating the match
+            const matchResult = this.matchResultsRepository.create({
+                match: match,
+                score_team_1: matchDto.score_team_1,
+                score_team_2: matchDto.score_team_2,
+                recorded_date: new Date(),
+            });
+
+            await this.matchResultsRepository.save(matchResult);
+
+            // Update the match with the new values
+            await this.matchesRepository.update(id, matchDto);
         } catch (error) {
             throw new InternalServerErrorException('Error updating match', error.message);
         }

@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col min-h-screen">
+    <div class="flex flex-col">
         <TournamentTitle :title="$t('tournament')" :isAdmin="isAdmin" />
 
         <!-- Button to create a new tournament (only visible for admins) -->
@@ -7,14 +7,13 @@
             <div class="w-full sm:w-1/3">
                 <input v-model="searchQuery" type="text" :placeholder="$t('search_tournament') + '...'"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg" @input="filterTournaments" />
-
             </div>
             <div class="flex justify-end w-full mt-4 space-x-2 sm:w-auto sm:mt-0 ">
                 <div v-if="isAdmin">
                     <button @click="openModal"
                         class="px-4 py-2 mr-10 text-white rounded-lg shadow-md cursor-pointer bg-secondary hover:bg-secondary-dark">
                         <div class="flex items-center text-center">
-                            {{ $t('create') }} <i class="pl-2 fa-solid fa-futbol"></i>
+                            {{ $t('create_tournament') }} <i class="pl-2 fa-solid fa-futbol"></i>
                         </div>
                     </button>
                 </div>
@@ -25,8 +24,8 @@
         <!-- Tournament Cards -->
         <div v-if="isAdmin" class="pb-16">
             <div class="flex pb-4 space-x-1">
-                <h2 class="mb-2 text-2xl font-bold text-title-text">{{ $t('i_am_organizing') }}</h2>
-                <i class="pt-1 fa-solid fa-certificate text-primary"></i>
+                <h2 class="mb-2 text-2xl font-bold text-title">{{ $t('i_am_organizing') }}</h2>
+                <i class="pt-2 fa-xs fa-solid fa-certificate text-secondary"></i>
             </div>
 
             <div v-if="isGridView">
@@ -45,7 +44,7 @@
 
         <!-- Tournament Cards -->
         <div class="pb-16">
-            <h2 class="pb-4 mb-2 text-2xl font-bold text-title-text">{{ $t('i_am_participating') }}</h2>
+            <h2 class="pb-4 mb-2 text-2xl font-bold text-title">{{ $t('i_am_participating') }}</h2>
             <div v-if="isGridView">
                 <div v-if="filteredParticipatingTournaments.length"
                     class="relative grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -62,7 +61,7 @@
         </div>
         <div class="pb-16">
             <!-- Tournament Cards -->
-            <h2 class="pb-4 mb-2 text-2xl font-bold text-title-text">{{ $t('tournaments_list') }}</h2>
+            <h2 class="pb-4 mb-2 text-2xl font-bold text-title">{{ $t('tournaments_list') }}</h2>
             <div v-if="isGridView">
                 <div v-if="filteredTournamentsList.length"
                     class="relative grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -200,23 +199,6 @@ const filterTournaments = () => {
         filteredTournamentsList.value = tournamentsList.value.filter(tournament =>
             tournament.name.toLowerCase().includes(search)
         );
-    }
-};
-
-// Handle creating a tournament
-const handleCreateTournament = async () => {
-    try {
-        const tournamentData = {
-            ...newTournament.value,
-            start_date: new Date(newTournament.value.start_date),  // Conversion en Date
-        };
-        await createTournament(tournamentData);
-        await fetchTournaments();
-    } catch (error) {
-        console.error('Creation failed', error);
-        alert('invalid infos');
-    } finally {
-        closeModal();
     }
 };
 

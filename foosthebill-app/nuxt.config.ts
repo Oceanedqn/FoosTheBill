@@ -2,7 +2,9 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
-  devtools: { enabled: true },
+  devtools: { enabled: true },  // Active les outils de développement
+  debug: true,  // Active le mode debug
+  logLevel: 'info',
   typescript: {
     strict: true // Active strict verification
   },

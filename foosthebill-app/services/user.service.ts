@@ -1,3 +1,4 @@
+import type { ApiResponse } from "~/models/Response";
 import type { User } from "~/models/User";
 
 const API_URL = 'http://localhost:3001';
@@ -16,9 +17,9 @@ export const getUsers = async (token: string): Promise<User> => {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
-        }) as User;
+        }) as ApiResponse<User>;
 
-        return response;
+        return response.data;
     } catch (error) {
         throw new Error('Failed to retrieve users');
     }
@@ -39,9 +40,9 @@ export const getUser = async (id: string, token: string): Promise<User> => {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
-        }) as User;
+        }) as ApiResponse<User>;
 
-        return response;
+        return response.data;
     } catch (error) {
         throw new Error('Failed to retrieve user details');
     }
