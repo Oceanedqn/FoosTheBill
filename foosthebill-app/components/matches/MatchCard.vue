@@ -1,5 +1,5 @@
 <template>
-    <div v-if="match" class="relative flex flex-col p-4 overflow-hidden rounded-lg shadow-lg hover:shadow-xl">
+    <div v-if="match" class="relative flex flex-col p-4 mb-2 overflow-hidden rounded-lg shadow-lg hover:shadow-xl">
 
         <!-- Tournament name -->
 
@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { updateScore } from '~/services/match.service'; // Import your service method
+import { updateScore } from '~/services/match.service';
 import type { IMatchUpdate } from '~/models/Match';
 
 const props = defineProps({

@@ -37,7 +37,7 @@
   "date":"Date",
   "actions":"Action",
 
-  "create_team": "Créer une équipe",
+  "create_team": "Créer mon équipe",
   "create_matches": "Générer les matches",
   "join_team_automatically": "Rejoindre une équipe aléatoirement",
   "search_team": "Rechercher une équipe ou un coéquipier",
@@ -67,5 +67,8 @@
   "error": "Erreur",
   "warning": "Attention",
   "success": "Réussi",
-  "info": "Info"
+  "info": "Info",
+  "create_teams":"Créer des équipes",
+  "add":"Ajouter",
+  "optional":"optionnel"
 }

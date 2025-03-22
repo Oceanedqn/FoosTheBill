@@ -37,10 +37,10 @@
                 <div>{{ tour.matches.length }} {{ $t(tour.matches.length > 1 ? 'matches' : 'match') }}</div>
             </div>
 
-
-            <div class="grid w-full gap-4 mx-auto">
-                <div class="flex justify-center" v-for="match in tour.matches" :key="match.round">
-                    <MatchCard :match="match" :isAdmin="isAdmin" />
+            <div class="flex justify-center w-full">
+                <div class="flex flex-wrap justify-center w-full max-w-6xl gap-4">
+                    <MatchCard v-for="match in tour.matches" :key="match.round" class="w-full max-w-xs" :match="match"
+                        :isAdmin="isAdmin" />
                 </div>
             </div>
         </div>

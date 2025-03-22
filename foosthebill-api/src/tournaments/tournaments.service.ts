@@ -132,10 +132,9 @@ export class TournamentsService {
   async findAllUsersNotInTournament(tournamentId: string, userId: string): Promise<UserResponseDto[]> {
     try {
       const users = await this.usersService.findAll();
-
       const tournamentTeams = await this.teamsService.findAllTeamByTournamentId(tournamentId, userId);
-
       const usersInTeams = new Set<string>();
+
       tournamentTeams.teams.forEach(team => {
         if (team.participant1) {
           usersInTeams.add(team.participant1.id);
@@ -145,9 +144,7 @@ export class TournamentsService {
         }
       });
 
-      const usersNotInTournament = users.filter(user =>
-        !usersInTeams.has(user.id) && user.id !== userId
-      );
+      const usersNotInTournament = users.filter(user => !usersInTeams.has(user.id));
 
       return usersNotInTournament;
 

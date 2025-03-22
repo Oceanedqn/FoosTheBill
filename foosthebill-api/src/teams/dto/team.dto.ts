@@ -13,8 +13,13 @@ export class UpdateTeamDto {
     participantId: string
 }
 
-export class TeamsWithTournamentReponseDto extends TeamResponseDto {
+export class TeamWithTournamentReponseDto extends TeamResponseDto {
     tournament: TournamentResponseDto;
+}
+
+export class TeamsWithTournamentReponseDto {
+    tournament: TournamentResponseDto;
+    teams: TeamResponseDto[];
 }
 
 export class CreateTeamDto {

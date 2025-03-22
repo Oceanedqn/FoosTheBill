@@ -59,7 +59,6 @@ const credentials = ref({
 })
 
 const handleRegister = async () => {
-    console.log(credentials.value)
     try {
         await authStore.register(credentials.value, router);
         await redirectToLogin();

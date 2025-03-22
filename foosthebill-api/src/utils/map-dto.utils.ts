@@ -1,9 +1,10 @@
 import { MatchDto, MatchesResponseDto, MatchResponseDto } from 'src/matches/dto/match.dto';
-import { TeamResponseDto, TeamsWithTournamentReponseDto } from 'src/teams/dto/team.dto';
+import { TeamResponseDto, TeamsWithTournamentReponseDto, TeamWithTournamentReponseDto } from 'src/teams/dto/team.dto';
 import { Team } from 'src/teams/team.entity';
 import { TournamentResponseDto } from 'src/tournaments/dto/tournament.dto';
 import { Tournament } from 'src/tournaments/tournament.entity';
 import { UserResponseDto } from 'src/users/dto/user.dto';
+import { User } from 'src/users/user.entity';
 
 
 /**
@@ -61,12 +62,12 @@ export function mapToTeamResponseDto(team: Team, currentUserId: string): TeamRes
 
 
 /**
- * Maps a Team entity to TeamsWithTournamentReponseDto, including tournament details.
+ * Maps a Team entity to TeamWithTournamentReponseDto, including tournament details.
  * @param team - The team entity to map.
  * @param currentUserId - The ID of the current user to determine if they are part of the team.
- * @returns TeamsWithTournamentReponseDto - The mapped team DTO with tournament details.
+ * @returns TeamWithTournamentReponseDto - The mapped team DTO with tournament details.
  */
-export function mapToTeamsWithTournamentResponseDto(team: Team, currentUserId: string): TeamsWithTournamentReponseDto {
+export function mapToTeamWithTournamentResponseDto(team: Team, currentUserId: string): TeamWithTournamentReponseDto {
     return {
         id: team.id,
         name: team.name,
@@ -74,6 +75,20 @@ export function mapToTeamsWithTournamentResponseDto(team: Team, currentUserId: s
         tournament: mapToTournamentResponseDto(team.tournament, mapToUserResponseDto(team.tournament.admin)!, new Set(), false, false),
         participant1: mapToUserResponseDto(team.participant1)!,
         participant2: team.participant2 ? mapToUserResponseDto(team.participant2) : null,
+    };
+}
+
+/**
+ * Maps a Team entity to TeamWithTournamentReponseDto, including tournament details.
+ * @param team - The team entity to map.
+ * @param currentUserId - The ID of the current user to determine if they are part of the team.
+ * @returns TeamWithTournamentReponseDto - The mapped team DTO with tournament details.
+ */
+export function mapToTeamsWithTournamentResponseDto(teams: Team[], tournament: Tournament, user: User): TeamsWithTournamentReponseDto {
+    const mappedTeams = teams.map(team => mapToTeamResponseDto(team, user.id));
+    return {
+        tournament: mapToTournamentResponseDto(tournament, mapToUserResponseDto(user)!, new Set(), false, false),
+        teams: mappedTeams
     };
 }
 

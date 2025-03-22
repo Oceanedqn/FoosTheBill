@@ -22,8 +22,9 @@
                 </div>
             </div>
             <TeamManagement :isUserHasAlreadyTeam="isUserHasAlreadyTeam" :tournamentTeams="tournamentTeams"
-                :openModal="openModal" :isAdmin="isAdmin" :isMatches="tournamentTeams.tournament.isMatches"
-                :seeMatches="seeMatchs" :handleCreateMatches="handleCreateMatches" />
+                :openModalTeam="openModalTeam" :openModalTeams="openModalTeams" :isAdmin="isAdmin"
+                :isMatches="tournamentTeams.tournament.isMatches" :seeMatches="seeMatchs"
+                :handleCreateMatches="handleCreateMatches" />
         </div>
 
         <div class="flex flex-col items-center justify-between w-full mb-6 sm:flex-row">
@@ -48,7 +49,11 @@
         </div>
 
         <!-- Modal Directement sur la Page -->
-        <ModalCreateTeam v-if="showModal" :show="showModal" :closeModal="closeModal"
+        <ModalCreateTeam v-if="showModalTeam" :show="showModalTeam" :closeModalTeam="closeModalTeam"
+            :fetchTournamentTeams="fetchTournamentTeams" :checkIfUserHasAlreadyInTeam="checkIfUserHasAlreadyInTeam"
+            :users="users" />
+
+        <ModalCreateTeams v-if="showModalTeams" :show="showModalTeams" :closeModalTeams="closeModalTeams"
             :fetchTournamentTeams="fetchTournamentTeams" :checkIfUserHasAlreadyInTeam="checkIfUserHasAlreadyInTeam"
             :users="users" />
     </div>
@@ -68,6 +73,7 @@ import TeamManagement from '~/components/teams/TeamManagement.vue';
 import TeamGridView from '~/components/teams/TeamGridView.vue';
 import TeamTableView from '~/components/teams/TeamTableView.vue';
 import ModalCreateTeam from '~/components/modals/ModalCreateTeam.vue';
+import ModalCreateTeams from '~/components/modals/ModalCreateTeams.vue';
 import type { ITournamentWithTeams } from '~/models/Tournament';
 import type { ITeam } from '~/models/Team';
 import ViewToggleButton from '~/components/ViewToggleButton.vue';
@@ -76,7 +82,8 @@ import { showAlertToast } from "@/utils/toast.utils";
 const router = useRouter();
 const authStore = useAuthStore();
 const route = useRoute();
-const showModal = ref<boolean>(false);
+const showModalTeam = ref<boolean>(false);
+const showModalTeams = ref<boolean>(false);
 const isAdmin = ref<boolean>(false);
 const tournamentTeams = ref<ITournamentWithTeams>();
 const users = ref<IUser[]>([]);
@@ -102,6 +109,7 @@ onMounted(async () => {
 const handleCreateMatches = async () => {
     if (tournamentTeams.value && tournamentTeams.value?.teams.length < 2) {
         showAlertToast("not_enough_teams");
+        return;
     }
 
     const tournamentId = route.params.id as string;
@@ -109,6 +117,9 @@ const handleCreateMatches = async () => {
     if (token) {
         try {
             await createMatchesTournament(tournamentId, tournamentTeams.value!.teams, token);
+            await getTournamentTeams(tournamentId, token);
+            tournamentTeams.value!.tournament.isMatches = true;
+            showSuccessToast("");
         } catch (error) {
             console.error('Error creating matches:', error);
         }
@@ -221,12 +232,22 @@ const seeMatchs = () => {
 };
 
 // Open modal
-const openModal = () => {
-    showModal.value = true;
+const openModalTeam = () => {
+    showModalTeam.value = true;
 };
 
 // Close modal
-const closeModal = () => {
-    showModal.value = false;
+const closeModalTeam = () => {
+    showModalTeam.value = false;
+};
+
+const openModalTeams = () => {
+    showModalTeams.value = true;
+};
+
+// Close modal
+const closeModalTeams = () => {
+    showModalTeams.value = false;
+    fetchUsers();
 };
 </script>

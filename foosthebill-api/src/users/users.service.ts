@@ -64,7 +64,6 @@ export class UsersService {
     async findAll(): Promise<UserResponseDto[]> {
         try {
             const users = await this.userRepository.find();
-
             return users.map(user => {
                 const { password, creation_date, ...userWithoutPassword } = user;  // Remove sensitive fields
                 return userWithoutPassword as UserResponseDto;
