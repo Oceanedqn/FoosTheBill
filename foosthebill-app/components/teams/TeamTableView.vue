@@ -59,6 +59,7 @@ const props = defineProps({
     isMatches: {
         type: Boolean,
         required: true,
+        default: false
     }
 });
 </script>

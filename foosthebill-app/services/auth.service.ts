@@ -2,7 +2,6 @@ import type { LoginCredentials, RegisterCredentials } from "~/models/Authenticat
 import type { ApiResponse, AuthResponse } from "~/models/Response";
 import type { User } from "~/models/User";
 
-
 const API_URL = 'http://localhost:3001';
 
 export const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {

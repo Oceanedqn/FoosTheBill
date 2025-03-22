@@ -13,7 +13,7 @@
                     <i class="cursor-pointer fas fa-times"></i>
                 </button>
 
-                <h2 class="mb-4 text-lg font-bold text-title-text">{{ $t('change_language') }}</h2>
+                <h2 class="mb-4 text-lg font-bold text-title">{{ $t('change_language') }}</h2>
 
                 <!-- List of languages -->
                 <div class="grid grid-cols-2 gap-4">

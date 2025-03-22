@@ -1,10 +1,10 @@
 <template>
-    <div v-if="match" class="relative flex flex-col overflow-hidden rounded-lg shadow-lg hover:shadow-xl">
-        <div class="relative flex flex-col items-center w-full p-3 border-b-2 text-dark border-primary">
-            <!-- Tournament name -->
-            <h2 class="text-xl font-semibold text-center text">{{ match.team1?.name }} vs {{ match.team2?.name }}</h2>
-        </div>
-        <div class="flex flex-col p-6 pt-2 bg-white">
+    <div v-if="match" class="relative flex flex-col p-4 overflow-hidden rounded-lg shadow-lg hover:shadow-xl">
+
+        <!-- Tournament name -->
+
+        <h2 class="text-xl font-semibold text-center text">{{ match.team1?.name }} vs {{ match.team2?.name }}</h2>
+        <div class="flex flex-col pt-2 bg-white">
 
             <!-- Display current scores -->
             <div class="text-center">
@@ -12,19 +12,20 @@
                 <div>{{ match.score_team_1 }} - {{ match.score_team_2 }}</div>
             </div>
 
+
             <!-- Score Inputs -->
-            <div class="flex gap-4 mb-4">
-                <input v-model="updatedScore.team1" type="number" placeholder="Team 1 Score"
+            <div v-if="isAdmin" class="flex gap-4 mt-4">
+                <input v-model="updatedScore.team1" type="number" :placeholder="match.team1?.name + ' score'"
                     class="w-full p-2 border rounded-md" min="0" :disabled="isUpdating" />
-                <input v-model="updatedScore.team2" type="number" placeholder="Team 2 Score"
+                <input v-model="updatedScore.team2" type="number" :placeholder="match.team2?.name + ' score'"
                     class="w-full p-2 border rounded-md" min="0" :disabled="isUpdating" />
             </div>
 
             <!-- Update Button -->
-            <button @click="updateScores"
-                class="px-4 py-2 mt-4 text-white bg-blue-500 rounded-md hover:bg-blue-600 disabled:bg-gray-300"
+            <button v-if="isAdmin" @click="updateScores"
+                class="px-4 py-2 mt-4 text-white rounded-md cursor-pointer bg-secondary hover:bg-secondary-dark"
                 :disabled="isUpdating">
-                Update Score
+                {{ $t('update_score') }}
             </button>
         </div>
     </div>
@@ -40,6 +41,10 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+    isAdmin: {
+        type: Boolean,
+        required: true
+    }
 });
 
 const updatedScore = ref<{ team1: number | null; team2: number | null }>({

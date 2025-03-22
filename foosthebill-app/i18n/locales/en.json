@@ -50,6 +50,19 @@
   "score":"Score",
   "classement":"Classement",
 
-  "current-score": "Current Score"
+  "current-score": "Current Score",
+  "see_teams": "See teams",
+  "invalid_credentials":"Invalid credentials",
+  "scheduled_matches":"Scheduled matches",
+  "round":"Round",
+  "match":"match",
+  "matches":"matches",
+  "scheduled":"scheduled",
+  "update_score": "Update score",
+  "not_enough_teams":"Not enough teams",
 
+  "error": "Error",
+  "warning": "Warning",
+  "success": "Sucess",
+  "info": "Info"
 }

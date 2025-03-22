@@ -10,7 +10,7 @@ export const updateScore = async (matchId: string, matchUpdate: IMatchUpdate): P
     const token = authStore.accessToken;
 
     try {
-        const response = await $fetch(`${API_URL}/match/${matchId}`, {
+        const response = await $fetch(`${API_URL}/matches/${matchId}`, {
             method: 'PUT',
             body: matchUpdate,
             headers: {

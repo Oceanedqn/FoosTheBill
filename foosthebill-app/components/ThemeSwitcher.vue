@@ -13,7 +13,7 @@
                     <i class="cursor-pointer fas fa-times"></i>
                 </button>
 
-                <h2 class="mb-4 text-lg font-bold text-title-text">{{ $t('choice_theme') }}</h2>
+                <h2 class="mb-4 text-lg font-bold text-title">{{ $t('choice_theme') }}</h2>
 
                 <!-- Liste des thèmes avec icônes -->
                 <div class="grid grid-cols-3 gap-4">
@@ -40,12 +40,20 @@ const theme = ref('ocean-theme')
 const isModalOpen = ref(false)
 
 const themes = [
+    { name: "Clémentine", className: "clementine-theme", icon: "fas fa-circle" },
     { name: "Mignon", className: "cute-theme", icon: "fas fa-heart" },
     { name: "Océan", className: "ocean-theme", icon: "fas fa-water" },
-    { name: "Nature", className: "nature-theme", icon: "fas fa-leaf" },
     { name: "Terre", className: "terre-theme", icon: "fas fa-globe" },
-    { name: "Clementine", className: "clementine-theme", icon: "fas fa-circle" },
-    { name: "Pastel", className: "pastel-theme", icon: "fas fa-palette" }
+    { name: "Chocolat", className: "chocolat-theme", icon: "fas fa-cookie-bite" },
+    { name: "Pro", className: "pro-theme", icon: "fas fa-briefcase" },
+    { name: "Abeille", className: "abeille-theme", icon: "fas fa-bug" },
+    { name: "Jeu", className: "jeu-theme", icon: "fas fa-gamepad" },
+    { name: "Océanique", className: "oceanic-theme", icon: "fas fa-fish" },
+    { name: "Agrume", className: "citrus-theme", icon: "fas fa-lemon" },
+    { name: "Givré", className: "frost-theme", icon: "fas fa-snowflake" },
+    { name: "Floraison", className: "blossom-theme", icon: "fas fa-futbol" },
+    { name: "Charbon", className: "charcoal-theme", icon: "fas fa-moon" },
+    { name: "Noël", className: "noel-theme", icon: "fas fa-tree" }
 ];
 
 // Ouvrir/fermer le modal

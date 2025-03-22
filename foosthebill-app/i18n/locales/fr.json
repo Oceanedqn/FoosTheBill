@@ -53,8 +53,19 @@
   "score":"Score",
   "classement":"Classement",
 
-  "current_score": "Score du match"
- 
+  "current_score": "Score du match",
+  "see_teams": "Voir les équipes",
+  "invalid_credentials":"Informations d'identification invalides",
+  "scheduled_matches":"Matchs Planifiés",
+  "round":"Tour",
+  "match":"match",
+  "matches":"matchs",
+  "scheduled":"de prévu",
+  "update_score": "Mettre à jour le score",
+  "not_enough_teams":"Il n'y a pas assez d'équipes",
 
-
+  "error": "Erreur",
+  "warning": "Attention",
+  "success": "Réussi",
+  "info": "Info"
 }

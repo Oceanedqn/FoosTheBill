@@ -1,12 +1,12 @@
 <template>
-    <div v-if="matchesTournament" class="container p-4 mx-auto">
-        <TournamentTitle :title="$t('tournament')" :isAdmin="isAdmin" />
+    <div v-if="matchesTournament" class="flex flex-col">
+        <TournamentTitle :title="$t('scheduled_matches')" :isAdmin="isAdmin" />
         <div class="w-full p-6 mb-6 border-2 rounded-lg shadow-md border-primary shadow-primary">
-            <div class="flex flex-col gap-6 md:flex-row">
+            <div class="flex flex-col gap-6 mb-4 md:flex-row">
                 <div class="md:w-2/3">
                     <h2 class="mb-4 text-3xl font-semibold">{{ tournamentTeam?.tournament.name }}</h2>
                     <p class="mb-2 text-gray-600">{{ tournamentTeam?.tournament.description }}</p>
-                    <p class="mb-4 text-sm text-gray-500">
+                    <p class="text-sm text-gray-500">
                         <i class="pr-1 fa-solid fa-calendar-day"></i>
                         {{ new Date(tournamentTeam?.tournament.start_date!).toLocaleDateString('fr-FR', {
                             weekday: 'long',
@@ -18,21 +18,30 @@
                 </div>
                 <div v-if="tournamentTeam?.team" class="md:w-1/3">
                     <TeamCard :team="tournamentTeam.team" :isMyTeam="true" :isUserHasAlreadyTeam="true"
-                        :joinTeam="handleJoinTeam" />
+                        :joinTeam="seeTeam" />
                 </div>
             </div>
-            <!-- <TeamManagement :isUserHasAlreadyTeam="isUserHasAlreadyTeam" :tournamentTeams="tournamentTeams"
-                :openModal="openModal" :isAdmin="isAdmin" :isMatches="tournamentTeams?.tournament.isMatches"
-                :seeMatches="seeMatchs" :handleCreateMatches="handleCreateMatches" /> -->
+            <button class="px-4 py-2 text-white rounded-lg cursor-pointer bg-secondary hover:bg-secondary-dark"
+                @click="seeTeam">{{ $t('see_teams') }}<i class="pl-2 fa-solid fa-people-group"></i>
+            </button>
         </div>
 
         <!-- Table des matchs -->
-        <h2 class="mb-2 text-xl font-bold">Matchs Planifiés</h2>
-        <div v-for="(tour, index) in matchesTournament" :key="index">
-            <h3 class="text-lg font-semibold">Tour {{ index + 1 }}</h3>
-            <div class="relative grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                <MatchCard v-for="match in tour.matches" :key="match.round" :match="match"
-                    v-if="matchesTournament && matchesTournament.length" />
+        <div v-for="(tour, index) in matchesTournament" :key="index" class="items-center w-full">
+
+            <div class="flex items-center justify-between p-2 my-4 text-white rounded-md bg-primary">
+                <h3 class="text-2xl font-semibold ">{{ $t('round') }} {{ index
+                    + 1
+                    }}
+                </h3>
+                <div>{{ tour.matches.length }} {{ $t(tour.matches.length > 1 ? 'matches' : 'match') }}</div>
+            </div>
+
+
+            <div class="grid w-full gap-4 mx-auto">
+                <div class="flex justify-center" v-for="match in tour.matches" :key="match.round">
+                    <MatchCard :match="match" :isAdmin="isAdmin" />
+                </div>
             </div>
         </div>
     </div>
@@ -49,6 +58,8 @@ import TournamentTitle from '~/components/tournaments/TournamentTitle.vue';
 import type { ITournamentWithTeam } from '~/models/Tournament';
 import { Role } from '~/models/User';
 import TeamCard from '~/components/teams/TeamCard.vue';
+import { useRouter } from 'vue-router';
+
 
 
 const route = useRoute();
@@ -56,7 +67,7 @@ const authStore = useAuthStore();
 const matchesTournament = ref<IMatchesTournament[]>([]);
 const tournamentTeam = ref<ITournamentWithTeam>();
 const isAdmin = ref<boolean>(false);
-
+const router = useRouter();
 
 
 // Fetch matches from the API
@@ -95,7 +106,8 @@ const fetchTournamentTeams = async () => {
     }
 };
 
-const handleJoinTeam = () => {
-
+const seeTeam = () => {
+    const tournamentId = route.params.id;
+    router.push(`/tournaments/${tournamentId}`);
 }
 </script>

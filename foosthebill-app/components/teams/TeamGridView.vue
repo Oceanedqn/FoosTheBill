@@ -1,8 +1,8 @@
 <template>
-    <div v-if="teams.length" class="grid w-full max-w-6xl grid-cols-2 gap-6 md:grid-cols-4">
+    <div v-if="props.teams.length" class="grid w-full max-w-6xl grid-cols-2 gap-6 md:grid-cols-4">
         <div v-for="team in teams" :key="team!.id">
-            <TeamCard :team="team!" :isMyTeam="team!.isMyTeam" :isUserHasAlreadyTeam="isUserHasAlreadyTeam"
-                :joinTeam="handleJoinTeam" />
+            <TeamCard :team="team!" :isMyTeam="team!.isMyTeam" :isUserHasAlreadyTeam="props.isUserHasAlreadyTeam"
+                :joinTeam="props.handleJoinTeam" />
         </div>
     </div>
     <div v-else>{{ $t('no_team') }}</div>

@@ -42,7 +42,6 @@ export const createTournament = async (newTournament: CreateTournament): Promise
  * @returns {Promise<GenericResponse>} - A promise that resolves to the response from the API if successful, or throws an error if the request fails.
  */
 export const createMatchesTournament = async (tournamentId: string, teams: ITeam[], token: string): Promise<BasicTournament> => {
-    console.log("creatematchestournament service front : ", tournamentId)
     try {
         const response = await $fetch(`${API_URL}/tournaments/${tournamentId}/matches`, {
             method: 'POST',
