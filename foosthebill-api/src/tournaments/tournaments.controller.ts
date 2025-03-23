@@ -237,26 +237,6 @@ export class TournamentsController {
 
 
     /**
-    * Checks if a user is already part of a team in a specific tournament.
-    * 
-    * @param tournamentId - Tournament ID.
-    * @param req - Request object containing user details (used to extract user ID).
-    * @returns true if the user is in a team, otherwise false.
-    */
-    @Get(':id/teams/isInTeam')
-    @UseGuards(AuthGuard)
-    async checkIfUserInTeam(@Param('id') tournamentId: string, @Request() req) {
-        const userId = req.user.id;
-        const isInTeam = await this.teamsService.isUserInTeam(userId, tournamentId);
-        return {
-            statusCode: HttpStatus.CREATED,
-            message: 'Check if user in team successfully',
-            data: isInTeam,
-        };
-    }
-
-
-    /**
     * Creates matches for a tournament based on the teams provided.
     * Only authenticated and authorized users (with the required roles) can create matches.
     * 

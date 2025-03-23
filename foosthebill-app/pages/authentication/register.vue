@@ -62,10 +62,10 @@ const handleRegister = async () => {
     try {
         await authStore.register(credentials.value, router);
         await redirectToLogin();
-
+        showSuccessToast('register_ok');
     } catch (error) {
         console.error('Register failed:', error);
-        alert('Invalid credentials');
+        showAlertToast('register_error');
     }
 }
 

@@ -49,12 +49,10 @@
 
         <!-- Modal Directement sur la Page -->
         <ModalCreateTeam v-if="showModalTeam" :show="showModalTeam" :closeModalTeam="closeModalTeam"
-            :fetchTournamentTeams="fetchTournamentTeams" :checkIfUserHasAlreadyInTeam="checkIfUserHasAlreadyInTeam"
-            :users="users" />
+            :fetchTournamentTeams="fetchTournamentTeams" :users="users" />
 
         <ModalCreateTeams v-if="showModalTeams" :show="showModalTeams" :closeModalTeams="closeModalTeams"
-            :fetchTournamentTeams="fetchTournamentTeams" :checkIfUserHasAlreadyInTeam="checkIfUserHasAlreadyInTeam"
-            :users="users" />
+            :fetchTournamentTeams="fetchTournamentTeams" :users="users" />
     </div>
 </template>
 
@@ -63,7 +61,7 @@ import { ref, onMounted, watch } from 'vue';
 import type { IUser } from '~/models/User';
 import { Role } from '~/models/User';
 import { useRouter, useRoute } from 'vue-router';
-import { getTournamentTeams, checkIfUserInTeam, getUsersNotInTournament, createMatchesTournament } from '~/services/tournament.service';
+import { getTournamentTeams, getUsersNotInTournament, createMatchesTournament } from '~/services/tournament.service';
 import { joinExistingTeam } from '~/services/team.service';
 import { useAuthStore } from '~/stores/auth.store';
 import TournamentTitle from '~/components/tournaments/TournamentTitle.vue';
@@ -125,9 +123,9 @@ const handleCreateMatches = async () => {
             await getTournamentTeams(tournamentId, token);
             tournamentTeams.value!.tournament.isMatches = true;
             await handleGetRankings()
-            showSuccessToast("");
+            showSuccessToast('create_matches_ok');
         } catch (error) {
-            console.error('Error creating matches:', error);
+            showAlertToast('create_matches_error');
         }
     }
 
@@ -170,7 +168,7 @@ const fetchTournamentTeams = async () => {
             tournamentTeams.value = await getTournamentTeams(tournamentId, token);
             fetchMyTeam();
             filterTournamentTeams();
-            await checkIfUserHasAlreadyInTeam();
+            await fetchUsers();
         } catch (error) {
             console.error('Error fetching teams:', error);
         }
@@ -193,15 +191,6 @@ const fetchUsers = async () => {
         }
     }
 }
-
-// Check if the user is in a team
-const checkIfUserHasAlreadyInTeam = async () => {
-    const tournamentId = route.params.id as string;
-    const token = authStore.accessToken;
-    const response = await checkIfUserInTeam(tournamentId, token!);
-    isUserHasAlreadyTeam.value = response;
-    fetchUsers();
-};
 
 // Watch for changes to the access token
 watch(() => authStore.accessToken, async (newToken) => {
@@ -239,7 +228,6 @@ const handleJoinTeam = async (teamId: string) => {
     try {
         await joinExistingTeam(teamId);
         await fetchTournamentTeams();
-        await checkIfUserHasAlreadyInTeam();
         await fetchUsers();
     } catch (error) {
         console.error('Error joining team:', error);

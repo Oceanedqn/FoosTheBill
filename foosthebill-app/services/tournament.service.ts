@@ -196,28 +196,3 @@ export const getUsersNotInTournament = async (tournamentId: string, token: strin
         throw new Error('Failed to retrieve users');
     }
 };
-
-
-/**
- * Checks if a user is already part of a team in a specific tournament.
- * 
- * @param {string} tournamentId - The ID of the tournament.
- * @param {string} token - The authentication token.
- * @returns {Promise<{ isInTeam: boolean }>} - Indicates whether the user is in a team for the tournament.
- * @throws {Error} - Throws an error if the request fails.
- */
-export const checkIfUserInTeam = async (tournamentId: string, token: string): Promise<boolean> => {
-    try {
-        const response = await $fetch(`${API_URL}/tournaments/${tournamentId}/teams/isInTeam`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        }) as ApiResponse<boolean>;
-
-        return response.data;
-    } catch (error) {
-        throw new Error('Failed to check if the user is in a team for the tournament');
-    }
-};

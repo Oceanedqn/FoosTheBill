@@ -77,15 +77,17 @@ const updateScores = async (isClosed: boolean) => {
         };
 
         try {
-            await updateScore(props.match.id, matchUpdate); // Call your update API method
-            // Optionally, you can also update the match object directly in the UI
+            await updateScore(props.match.id, matchUpdate);
+            if (isClosed) {
+                showSuccessToast('close_match_ok');
+            } else {
+                showSuccessToast('update_match_ok');
+            }
             props.match.score_team_1 = updatedScore.value.team1;
             props.match.score_team_2 = updatedScore.value.team2;
             props.fetchMatches();
         } catch (error) {
-            console.error('Error updating score:', error);
-        } finally {
-            isUpdating.value = false; // Hide loading state
+            showAlertToast('update_match_error');
         }
     }
 };
