@@ -39,8 +39,8 @@
 
             <div class="flex justify-center w-full">
                 <div class="flex flex-wrap justify-center w-full max-w-6xl gap-4">
-                    <MatchCard v-for="match in tour.matches" :key="match.round" class="w-full max-w-xs" :match="match"
-                        :isAdmin="isAdmin" />
+                    <MatchCard v-for="match in tour.matches" :key="match.id" class="w-full max-w-xs" :match="match"
+                        :isAdmin="isAdmin" :fetchMatches="fetchMatches" />
                 </div>
             </div>
         </div>

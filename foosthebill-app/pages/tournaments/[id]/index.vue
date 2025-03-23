@@ -39,13 +39,12 @@
         <!-- Teams List Section -->
         <div class="w-full max-w-6xl mb-4">
             <!-- Teams List Section - Grid View -->
-            <TeamGridView v-if="isGridView && filteredTeams.length"
-                :teams="filteredTeams.filter(t => t.id !== myTeam?.id)" :isUserHasAlreadyTeam="isUserHasAlreadyTeam"
-                :handleJoinTeam="handleJoinTeam" />
+            <TeamGridView v-if="isGridView && filteredTeams.length" :teams="filteredTeams"
+                :isUserHasAlreadyTeam="isUserHasAlreadyTeam" :handleJoinTeam="handleJoinTeam" />
             <!-- Teams List Section - Table View -->
-            <TeamTableView v-if="!isGridView" :teams="filteredTeams.filter(t => t.id !== myTeam?.id)"
-                :isUserHasAlreadyTeam="isUserHasAlreadyTeam" :handleJoinTeam="handleJoinTeam"
-                :isMatches="tournamentTeams.tournament.isMatches" />
+            <TeamTableView v-if="!isGridView" :teams="filteredTeams" :isUserHasAlreadyTeam="isUserHasAlreadyTeam"
+                :handleJoinTeam="handleJoinTeam" :isMatches="tournamentTeams.tournament.isMatches"
+                :tournamentRankings="tournamentRankings" />
         </div>
 
         <!-- Modal Directement sur la Page -->
@@ -78,6 +77,8 @@ import type { ITournamentWithTeams } from '~/models/Tournament';
 import type { ITeam } from '~/models/Team';
 import ViewToggleButton from '~/components/ViewToggleButton.vue';
 import { showAlertToast } from "@/utils/toast.utils";
+import { getRankingsByTournamentId } from '~/services/ranking.service';
+import type { ITournamentRankings } from '~/models/Ranking';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -93,6 +94,8 @@ const isUserHasAlreadyTeam = ref<boolean>(false);
 const myTeam = ref<ITeam>();
 const isGridView = ref<boolean>(false);
 
+const tournamentRankings = ref<ITournamentRankings>()
+
 
 // Fetch tournament details and teams when the component is mounted
 onMounted(async () => {
@@ -103,6 +106,8 @@ onMounted(async () => {
     if (!tournamentTeams.value?.tournament.isMatches) {
         await fetchUsers();
     }
+
+    await handleGetRankings();
     whichView();
 });
 
@@ -119,12 +124,25 @@ const handleCreateMatches = async () => {
             await createMatchesTournament(tournamentId, tournamentTeams.value!.teams, token);
             await getTournamentTeams(tournamentId, token);
             tournamentTeams.value!.tournament.isMatches = true;
+            await handleGetRankings()
             showSuccessToast("");
         } catch (error) {
             console.error('Error creating matches:', error);
         }
     }
 
+}
+
+const handleGetRankings = async () => {
+    const tournamentId = route.params.id as string;
+    const token = authStore.accessToken;
+    if (tournamentTeams.value!.tournament.isMatches == true && token) {
+        try {
+            tournamentRankings.value = await getRankingsByTournamentId(tournamentId);
+        } catch (error) {
+            console.error('Error fetching rankings:', error);
+        }
+    }
 }
 
 watch(isGridView, (newValue) => {
@@ -182,6 +200,7 @@ const checkIfUserHasAlreadyInTeam = async () => {
     const token = authStore.accessToken;
     const response = await checkIfUserInTeam(tournamentId, token!);
     isUserHasAlreadyTeam.value = response;
+    fetchUsers();
 };
 
 // Watch for changes to the access token
@@ -221,6 +240,7 @@ const handleJoinTeam = async (teamId: string) => {
         await joinExistingTeam(teamId);
         await fetchTournamentTeams();
         await checkIfUserHasAlreadyInTeam();
+        await fetchUsers();
     } catch (error) {
         console.error('Error joining team:', error);
     }
@@ -239,6 +259,7 @@ const openModalTeam = () => {
 // Close modal
 const closeModalTeam = () => {
     showModalTeam.value = false;
+    fetchUsers();
 };
 
 const openModalTeams = () => {

@@ -58,7 +58,7 @@
   "match": "Match",
   "matches": "Matches",
   "scheduled": "Scheduled",
-  "update_score": "Update score",
+  "update_score": "Update",
   "not_enough_teams": "Not enough teams",
 
   "error": "Error",
@@ -67,5 +67,6 @@
   "info": "Info",
   "create_teams":"Create teams",
   "add":"Add",
-  "optional":"optional"
+  "optional":"optional",
+  "end_match":"Closing"
 }

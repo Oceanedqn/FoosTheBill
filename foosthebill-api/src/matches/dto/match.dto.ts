@@ -14,6 +14,7 @@ export class MatchDto {
     score_team_2: number;
     team1: Team;
     team2: Team;
+    isClosed: boolean;
 
 }
 
@@ -24,6 +25,7 @@ export class MatchResponseDto {
     score_team_2: number;
     team1: TeamResponseDto;
     team2: TeamResponseDto;
+    isClosed: boolean;
 }
 
 export class CreateMatchesDto {
@@ -31,7 +33,12 @@ export class CreateMatchesDto {
     teams: TeamResponseDto[]
 }
 
+export class UpdateEndMatch {
+    isClosed: boolean
+}
+
 export class UpdateMatchDto {
     score_team_1: number;
     score_team_2: number;
+    isClosed: boolean;
 }

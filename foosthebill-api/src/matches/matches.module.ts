@@ -9,11 +9,12 @@ import { TeamsModule } from 'src/teams/teams.module';
 import { MatchResultsService } from 'src/match-results/match-results.service';
 import { MatchResult } from 'src/match-results/match-result.entity';
 import { UsersModule } from 'src/users/users.module';
+import { RankingsModule } from 'src/rankings/rankings.module';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([Match, MatchResult]),
-        forwardRef(() => TournamentsModule), forwardRef(() => UsersModule)
+        forwardRef(() => TournamentsModule), forwardRef(() => RankingsModule), forwardRef(() => UsersModule)
     ],
     providers: [MatchesService, MatchResultsService],
     controllers: [MatchesController],

@@ -18,18 +18,6 @@ export class RankingsController {
         }
     }
 
-    @Get()
-    async findAll() {
-        try {
-            const rankings = await this.rankingsService.findAll();
-            return { code: HttpStatus.OK, message: 'Rankings fetched successfully', data: rankings };
-        } catch (error) {
-            throw error instanceof InternalServerErrorException
-                ? new HttpException({ code: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error fetching rankings', error: error.message }, HttpStatus.INTERNAL_SERVER_ERROR)
-                : error;
-        }
-    }
-
     @Get(':id')
     async findOne(@Param('id') id: string) {
         try {
@@ -41,22 +29,6 @@ export class RankingsController {
             }
             throw new HttpException(
                 { code: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error fetching ranking', error: error.message },
-                HttpStatus.INTERNAL_SERVER_ERROR
-            );
-        }
-    }
-
-    @Put(':id')
-    async update(@Param('id') id: string, @Body() ranking: Ranking) {
-        try {
-            await this.rankingsService.update(id, ranking);
-            return { code: HttpStatus.OK, message: 'Ranking updated successfully' };
-        } catch (error) {
-            if (error instanceof InternalServerErrorException) {
-                throw error;
-            }
-            throw new HttpException(
-                { code: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error updating ranking', error: error.message },
                 HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
