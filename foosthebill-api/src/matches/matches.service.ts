@@ -2,29 +2,32 @@ import { Injectable, NotFoundException, InternalServerErrorException, forwardRef
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Match } from './match.entity';
-import { CreateMatchesDto, MatchDto, MatchResponseDto, MatchesResponseDto, UpdateMatchDto } from './dto/match.dto';
+import { CreateMatchesDto, MatchDto, MatchResponseDto, MatchesResponseDto, UpdateEndMatch, UpdateMatchDto } from './dto/match.dto';
 import { TournamentsService } from 'src/tournaments/tournaments.service';
 import { TeamResponseDto } from 'src/teams/dto/team.dto';
 import { mapToMatchesResponseDto, mapToMatchResponseDto } from 'src/utils/map-dto.utils';
 import { MatchResult } from 'src/match-results/match-result.entity';
+import { Ranking } from 'src/rankings/ranking.entity';
+import { RankingsService } from 'src/rankings/rankings.service';
 
 @Injectable()
 export class MatchesService {
     constructor(
         @InjectRepository(Match) private matchesRepository: Repository<Match>,
         @Inject(forwardRef(() => TournamentsService)) private readonly tournamentsService: TournamentsService,
+        @Inject(forwardRef(() => RankingsService)) private readonly rankingsService: RankingsService,
         @InjectRepository(MatchResult) private matchResultsRepository: Repository<MatchResult>,
     ) { }
 
     /**
- * Creates matches for a given tournament based on the provided teams.
- * 
- * @param createMatchesDto - Data Transfer Object containing tournament ID and the list of teams to participate.
- * @param userId - The ID of the user making the request.
- * @returns A promise that resolves to an array of `MatchesResponseDto`, which represents the matches created for the tournament.
- * @throws NotFoundException - If the tournament is not found.
- * @throws InternalServerErrorException - If there is an error during the creation of the matches.
- */
+     * Creates matches for a given tournament based on the provided teams.
+     * 
+     * @param createMatchesDto - Data Transfer Object containing tournament ID and the list of teams to participate.
+     * @param userId - The ID of the user making the request.
+     * @returns A promise that resolves to an array of `MatchesResponseDto`, which represents the matches created for the tournament.
+     * @throws NotFoundException - If the tournament is not found.
+     * @throws InternalServerErrorException - If there is an error during the creation of the matches.
+     */
     async createMatches(createMatchesDto: CreateMatchesDto, userId: string): Promise<MatchesResponseDto[]> {
         try {
             const tournament = await this.tournamentsService.findOne(createMatchesDto.tournamentId, userId);
@@ -48,6 +51,19 @@ export class MatchesService {
             const totalRounds = teams.length - 1;
             const matchResponses: MatchesResponseDto[] = [];
 
+
+            for (const team of teams) {
+                if (team.id !== "empty") {
+                    await this.rankingsService.create({
+                        tournament: tournament,
+                        team: team,
+                        position: 0,
+                        points: 0,
+                    } as unknown as Ranking);
+                }
+            }
+
+
             // Generate the matches while respecting the rotation of the teams
             for (let round = 0; round < totalRounds; round++) {
                 const matchRounds: MatchDto[] = [];
@@ -64,7 +80,8 @@ export class MatchesService {
                             team2: team2,
                             score_team_1: 0,
                             score_team_2: 0,
-                            round: round + 1
+                            round: round + 1,
+                            isClosed: false
                         });
 
                         const savedMatch = await this.matchesRepository.save(match);
@@ -76,14 +93,14 @@ export class MatchesService {
                             round: round + 1,
                             score_team_1: savedMatch.score_team_1,
                             score_team_2: savedMatch.score_team_2,
+                            isClosed: false
                         });
                     }
                 }
-
                 // Map the round matches to the MatchResponseDto
                 matchResponses.push({
                     round: round + 1, // ID du round
-                    matches: matchRounds.map(match => mapToMatchResponseDto(match, "")),
+                    matches: matchRounds.map(match => mapToMatchResponseDto(match, userId)),
                 });
 
                 // Team rotation: the first team stays fixed, while the others rotate
@@ -133,7 +150,7 @@ export class MatchesService {
  */
     async findOne(id: string): Promise<Match> {
         try {
-            const match = await this.matchesRepository.findOne({ where: { id } });
+            const match = await this.matchesRepository.findOne({ where: { id }, relations: ["tournament", "team1", "team2"] });
             if (!match) {
                 throw new NotFoundException(`Match with id ${id} not found`);
             }
@@ -145,15 +162,15 @@ export class MatchesService {
 
 
     /**
- * Updates an existing match.
- * 
- * @param id - The ID of the match to update.
- * @param matchDto - The match object containing the updated data.
- * @returns A promise that resolves when the match is successfully updated.
- * @throws NotFoundException - If the match with the given ID is not found.
- * @throws InternalServerErrorException - If there is an error updating the match in the repository.
- */
-    async update(id: string, matchDto: UpdateMatchDto): Promise<void> {
+     * Updates an existing match.
+     * 
+     * @param id - The ID of the match to update.
+     * @param matchUpdate - The match object containing the updated data.
+     * @returns A promise that resolves when the match is successfully updated.
+     * @throws NotFoundException - If the match with the given ID is not found.
+     * @throws InternalServerErrorException - If there is an error updating the match in the repository.
+     */
+    async update(id: string, matchUpdate: UpdateMatchDto): Promise<void> {
         try {
             const match = await this.findOne(id);
             if (!match) {
@@ -163,15 +180,20 @@ export class MatchesService {
             // Create a new entry in MatchResult before updating the match
             const matchResult = this.matchResultsRepository.create({
                 match: match,
-                score_team_1: matchDto.score_team_1,
-                score_team_2: matchDto.score_team_2,
+                score_team_1: matchUpdate.score_team_1,
+                score_team_2: matchUpdate.score_team_2,
                 recorded_date: new Date(),
             });
 
             await this.matchResultsRepository.save(matchResult);
 
             // Update the match with the new values
-            await this.matchesRepository.update(id, matchDto);
+            await this.matchesRepository.update(id, matchUpdate);
+
+            if (matchUpdate.isClosed) {
+                await this.rankingsService.update(match.tournament.id, match.team1.id, match.team2.id, matchUpdate.score_team_1, matchUpdate.score_team_2);
+            }
+
         } catch (error) {
             throw new InternalServerErrorException('Error updating match', error.message);
         }

@@ -33,6 +33,14 @@
                             </button>
                         </div>
                     </td>
+                    <td v-if="props.isMatches && tournamentRankings" class="px-4 py-1 text-center">
+                        <!-- Display points if the team is in the rankings -->
+                        {{ getScore(team.id) }}
+                    </td>
+                    <td v-if="props.isMatches && tournamentRankings" class="px-4 py-1 text-center">
+                        <!-- Display ranking position if the team is in the rankings -->
+                        {{ getRankingPosition(team.id) }}
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -42,6 +50,7 @@
 
 <script setup lang="ts">
 import type { ITeam } from '~/models/Team';
+import type { ITournamentRankings } from '~/models/Ranking';
 
 const props = defineProps({
     teams: {
@@ -60,6 +69,31 @@ const props = defineProps({
         type: Boolean,
         required: true,
         default: false
+    },
+    tournamentRankings: {
+        type: Object as () => ITournamentRankings,
+        required: false
     }
 });
+
+// How to obtain the team's ranking score
+function getScore(teamId: string): number | string {
+    if (props.tournamentRankings) {
+        const ranking = props.tournamentRankings!.rankings.find(ranking => ranking.team.id === teamId);
+        return ranking ? ranking.points : '-';
+    }
+    return ''
+
+}
+
+// How to obtain the team's position in the rankings
+function getRankingPosition(teamId: string): number | string {
+    if (props.tournamentRankings) {
+        const ranking = props.tournamentRankings!.rankings.find(ranking => ranking.team.id === teamId);
+        return ranking ? ranking.position : '-';
+    }
+    return ''
+
+
+}
 </script>

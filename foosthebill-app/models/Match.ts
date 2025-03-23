@@ -1,9 +1,9 @@
 // models/Match.ts
-import { Team } from './Team';
+import { type ITeam } from './Team';
 
 export interface CreateMatchesTournament {
     tournamentId: string;
-    teams: Team[]
+    teams: ITeam[]
 };
 
 export interface IMatchesTournament {
@@ -16,11 +16,12 @@ export interface IMatchTournament {
     round: number;
     score_team_1: number;
     score_team_2: number;
-    team1: Team;
-    team2: Team;
+    team1: ITeam;
+    team2: ITeam;
 }
 
 export interface IMatchUpdate {
     score_team_1: number;
     score_team_2: number;
+    isClosed: boolean;
 }

@@ -9,6 +9,7 @@ import { TeamsService } from '../teams/teams.service';
 import { CreateTeamDto, TeamResponseDto } from 'src/teams/dto/team.dto';
 import { MatchesService } from 'src/matches/matches.service';
 import { CreateMatchesDto } from 'src/matches/dto/match.dto';
+import { RankingsService } from 'src/rankings/rankings.service';
 
 @Controller('tournaments')
 @UseFilters(new AllExceptionsFilter())
@@ -16,7 +17,8 @@ export class TournamentsController {
     constructor(
         private readonly tournamentsService: TournamentsService,
         private readonly teamsService: TeamsService,
-        private readonly matchesService: MatchesService
+        private readonly matchesService: MatchesService,
+        private readonly rankingsService: RankingsService
     ) { }
 
     /**
@@ -297,6 +299,26 @@ export class TournamentsController {
             statusCode: HttpStatus.OK,
             message: 'Matches fetch successfully',
             data: matches,
+        };
+    }
+
+    /**
+     * Retrieves all matches for a specific tournament.
+     * 
+     * @param tournamentId - Tournament ID.
+     * @returns A list of all matches in the tournament.
+     * @throws UnauthorizedException - If the user is not authenticated.
+     * @throws InternalServerErrorException - If an error occurs during retrieval.
+     */
+    @Get(':id/rankings')
+    @UseGuards(AuthGuard)
+    async findAllRanking(@Param('id') tournamentId: string, @Request() req) {
+        const userId = req.user.id;
+        const rankings = await this.rankingsService.findAllByTournamentId(tournamentId, userId);
+        return {
+            statusCode: HttpStatus.OK,
+            message: 'Rankings fetch successfully',
+            data: rankings,
         };
     }
 }

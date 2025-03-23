@@ -1,4 +1,6 @@
 import { MatchDto, MatchesResponseDto, MatchResponseDto } from 'src/matches/dto/match.dto';
+import { RankingsResponseDto } from 'src/rankings/dto/ranking.dto';
+import { Ranking } from 'src/rankings/ranking.entity';
 import { TeamResponseDto, TeamsWithTournamentReponseDto, TeamWithTournamentReponseDto } from 'src/teams/dto/team.dto';
 import { Team } from 'src/teams/team.entity';
 import { TournamentResponseDto } from 'src/tournaments/dto/tournament.dto';
@@ -100,6 +102,7 @@ export function mapToMatchResponseDto(match: MatchDto, currentUserId: string): M
         score_team_2: match.score_team_2,
         team1: mapToTeamResponseDto(match.team1, currentUserId),
         team2: mapToTeamResponseDto(match.team2, currentUserId),
+        isClosed: match.isClosed
     };
 }
 
@@ -120,11 +123,22 @@ export function mapToMatchesResponseDto(matches: MatchDto[]): MatchesResponseDto
             score_team_2: match.score_team_2,
             team1: match.team1,
             team2: match.team2,
+            isClosed: match.isClosed
         });
     });
 
     return Object.keys(groupedMatches).map(round => ({
         round: parseInt(round),
         matches: groupedMatches[parseInt(round)].map(match => mapToMatchResponseDto(match, "")),
+    }));
+}
+
+
+export function mapToRankingsResponseDto(rankings: Ranking[], currentUserId: string): RankingsResponseDto[] {
+    return rankings.map((ranking, index) => ({
+        id: ranking.id,
+        position: index + 1,
+        points: ranking.points,
+        team: mapToTeamResponseDto(ranking.team, currentUserId),
     }));
 }

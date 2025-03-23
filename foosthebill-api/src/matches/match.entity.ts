@@ -23,6 +23,9 @@ export class Match {
     round: number;
 
     @Column()
+    isClosed: boolean;
+
+    @Column()
     score_team_1: number;
 
     @Column()
