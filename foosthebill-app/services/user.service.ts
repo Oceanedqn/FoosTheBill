@@ -18,7 +18,6 @@ export const getUsers = async (token: string): Promise<User> => {
                 'Content-Type': 'application/json',
             },
         }) as ApiResponse<User>;
-
         return response.data;
     } catch (error) {
         throw new Error('Failed to retrieve users');

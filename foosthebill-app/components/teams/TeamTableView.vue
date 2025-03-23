@@ -94,6 +94,5 @@ function getRankingPosition(teamId: string): number | string {
     }
     return ''
 
-
 }
 </script>

@@ -49,7 +49,7 @@ const credentials = ref({
 const handleLogin = async () => {
     try {
         await authStore.login(credentials.value, router);
-        showSuccessToast('invalid_credentials');
+        showSuccessToast('connection_ok');
     } catch (error) {
         showAlertToast('invalid_credentials');
     }

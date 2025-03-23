@@ -7,7 +7,7 @@
                 <div class="relative mb-4">
 
                     <label for="name" class="block text-sm font-semibold text-gray-700">{{ $t('name') }}</label>
-                    <input v-model="newTeam.name" type="text" :placeholder="$t('team_name')"
+                    <input v-model="newTeam.name" type="text" :placeholder="$t('team_name')" required
                         class="w-full px-4 py-2 mb-2 border rounded-lg" />
 
                     <label for="participant2" class="block text-sm font-semibold text-gray-700">{{ $t('participant') }}
@@ -53,7 +53,6 @@ const props = defineProps({
     show: Boolean,
     closeModalTeam: { type: Function as PropType<() => void>, required: false },
     fetchTournamentTeams: { type: Function as PropType<() => void>, required: false },
-    checkIfUserHasAlreadyInTeam: Function,
     users: Array as () => IUser[],
 });
 
@@ -72,8 +71,6 @@ const filterUsers = () => {
         filteredUsers.value = [];
         return;
     }
-
-    // Check if 'props.users' is defined and is an array
     if (Array.isArray(props.users)) {
         filteredUsers.value = props.users.filter(user => {
             const fullName = `${user.name} ${user.firstname}`.toLowerCase();

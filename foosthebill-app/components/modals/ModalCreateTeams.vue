@@ -47,9 +47,9 @@
                 </div>
 
                 <div class="my-4">
-                    <h3 class="font-semibold text-md">{{ $t('Liste des équipes créées') }}</h3>
+                    <h3 v-if="teams.length" class="font-semibold text-md">{{ $t('created_teams_list') }}</h3>
                     <!-- Barre de recherche pour filtrer les équipes -->
-                    <div class="mb-4">
+                    <div v-if="teams.length > 1" class="mb-4">
                         <input v-model="searchQuery" type="text" placeholder="Rechercher une équipe..."
                             class="w-full px-4 py-2 border rounded-lg" />
                     </div>
@@ -81,7 +81,7 @@
                         class="px-4 py-2 bg-gray-300 rounded-lg cursor-pointer hover:bg-gray-400">
                         {{ $t('cancel') }}
                     </button>
-                    <button type="button" @click="handleCreateTeam"
+                    <button type="button" @click="handleCreateTeams"
                         class="px-4 py-2 text-white rounded-lg cursor-pointer bg-primary hover:bg-primary-dark">
                         {{ $t('create') }}
                     </button>
@@ -102,7 +102,6 @@ const props = defineProps({
     show: Boolean,
     closeModalTeams: { type: Function as PropType<() => void>, required: false },
     fetchTournamentTeams: { type: Function as PropType<() => void>, required: false },
-    checkIfUserHasAlreadyInTeam: Function,
     users: Array as () => IUser[],
 });
 
@@ -190,20 +189,20 @@ const selectUser = (user: IUser, participant: 'participant1' | 'participant2') =
     filteredUsers.value = []; // Clear filtered users after selection
 };
 
-const handleCreateTeam = async () => {
+const handleCreateTeams = async () => {
     if (teams.value.length == 0) {
-        showAlertToast('Il faut ajouter au moins une équipe');
+        showWarningToast('add_one_team');
         return;
     }
     const tournamentId = route.params.id as string;
     try {
         await createTeams(mapToCreateTeams(teams.value), tournamentId);
+        showSuccessToast('create_teams_ok');
         if (props.fetchTournamentTeams) {
             await props.fetchTournamentTeams();
         }
     } catch (error) {
-        console.error('Erreur lors de la création', error);
-        alert('Échec de la création de l\'équipe. Veuillez réessayer plus tard.');
+        showAlertToast('create_teams_error');
     } finally {
         if (props.closeModalTeams) {
             props.closeModalTeams();
