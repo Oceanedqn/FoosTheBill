@@ -106,7 +106,6 @@ export class MatchesService {
  * @throws InternalServerErrorException - If there is an error fetching the matches from the repository.
  */
     async findAll(tournamentId: string): Promise<MatchesResponseDto[]> {
-        console.log(tournamentId);
         try {
             const matches = await this.matchesRepository.find({
                 where: { tournament: { id: tournamentId } },

@@ -193,13 +193,38 @@ export class TournamentsController {
      * @returns A success message and the created team details.
      */
     @UseGuards(AuthGuard)
-    @Post(':id/teams')
+    @Post(':id/team')
     async createTeam(@Param('id') id: string, @Body() createTournamentDto: CreateTeamDto, @Request() req) {
         const userId = req.user.id;
         createTournamentDto.participant1 = userId;
         createTournamentDto.tournament_id = id;
 
         const createdTeam = await this.teamsService.createTeamByTournamentId(createTournamentDto, userId);
+
+        return {
+            statusCode: HttpStatus.CREATED,
+            message: 'Team created successfully',
+            data: createdTeam,
+        };
+    }
+
+    /**
+     * Creates a new teams within a tournament.
+     * 
+     * @param id - Tournament ID.
+     * @param createTournamentDto - DTO containing team details.
+     * @param req - Request object containing user details (used to extract user ID).
+     * @returns A success message and the created team details.
+     */
+    @UseGuards(AuthGuard, RolesGuard)
+    @Post(':id/teams')
+    async createTeams(@Param('id') id: string, @Body() createTeams: CreateTeamDto[], @Request() req) {
+        const userId = req.user.id;
+        createTeams.forEach(team => {
+            team.tournament_id = id;
+        });
+
+        const createdTeam = await this.teamsService.createTeamsByTournamentId(createTeams, userId);
 
         return {
             statusCode: HttpStatus.CREATED,

@@ -3,18 +3,20 @@
         <div class="p-6 bg-white rounded-lg shadow-lg w-96">
             <h2 class="mb-4 text-xl font-semibold">{{ $t('create_team') }}</h2>
             <form @submit.prevent="handleCreateTeam">
-                <div class="mb-4">
-                    <label for="name" class="block text-sm font-semibold text-gray-700">{{ $t('name') }}</label>
-                    <input v-model="newTeam.name" type="text" :placeholder="$t('team_name')"
-                        class="w-full px-4 py-2 mb-4 border rounded-lg" />
-                </div>
 
                 <div class="relative mb-4">
-                    <label for="participant2" class="block text-sm font-semibold text-gray-700">{{ $t('participant') }} 2 (optionnel)</label>
+
+                    <label for="name" class="block text-sm font-semibold text-gray-700">{{ $t('name') }}</label>
+                    <input v-model="newTeam.name" type="text" :placeholder="$t('team_name')"
+                        class="w-full px-4 py-2 mb-2 border rounded-lg" />
+
+                    <label for="participant2" class="block text-sm font-semibold text-gray-700">{{ $t('participant') }}
+                        2 ({{ $t('optional') }})</label>
                     <input v-model="query" type="text" placeholder="Rechercher un utilisateur..."
                         class="w-full px-4 py-2 mb-4 border rounded-lg" @input="filterUsers" />
 
-                    <div v-if="filteredUsers.length > 0" class="absolute w-full mt-1 bg-white border rounded-lg shadow-lg">
+                    <div v-if="filteredUsers.length > 0"
+                        class="absolute w-full mt-1 bg-white border rounded-lg shadow-lg">
                         <ul>
                             <li v-for="user in filteredUsers" :key="user.id" @click="selectUser(user)"
                                 class="px-4 py-2 cursor-pointer hover:bg-gray-200">
@@ -25,7 +27,7 @@
                 </div>
 
                 <div class="flex justify-end space-x-2">
-                    <button @click="closeModal"
+                    <button @click="closeModalTeam"
                         class="px-4 py-2 bg-gray-300 rounded-lg cursor-pointer hover:bg-gray-400">
                         {{ $t('cancel') }}
                     </button>
@@ -39,27 +41,30 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { createTeam } from '~/services/team.service';
+import { type IUser } from '~/models/User';
+import { type CreateTeam } from '~/models/Team';
+
 
 const props = defineProps({
     show: Boolean,
-    closeModal: Function,
-    fetchTournamentTeams: Function,
+    closeModalTeam: { type: Function as PropType<() => void>, required: false },
+    fetchTournamentTeams: { type: Function as PropType<() => void>, required: false },
     checkIfUserHasAlreadyInTeam: Function,
-    users: Array,
+    users: Array as () => IUser[],
 });
 
 const route = useRoute();
-const newTeam = ref({
+const newTeam = ref<CreateTeam>({
     name: '',
     participant2: null,
 });
 
 const query = ref('');
-const filteredUsers = ref([]);
+const filteredUsers = ref<IUser[]>([]);
 
 // Filter users by input
 const filterUsers = () => {
@@ -80,27 +85,30 @@ const filterUsers = () => {
 };
 
 // Select a user from the filtered list
-const selectUser = (user) => {
+const selectUser = (user: IUser) => {
     newTeam.value.participant2 = user.id;
     query.value = `${user.name} ${user.firstname}`;
-    filteredUsers.value = []; 
+    filteredUsers.value = [];
 };
-
 
 const handleCreateTeam = async () => {
     if (!newTeam.value.name.trim()) {
         alert('Le nom de l\'équipe est requis');
         return;
     }
-    const tournamentId = route.params.id;
+    const tournamentId = route.params.id as string;
     try {
         await createTeam(newTeam.value, tournamentId);
-        await props.fetchTournamentTeams();
+        if (props.fetchTournamentTeams) {
+            await props.fetchTournamentTeams();
+        }
     } catch (error) {
         console.error('Erreur lors de la création', error);
         alert('Échec de la création de l\'équipe. Veuillez réessayer plus tard.');
     } finally {
-        props.closeModal();
+        if (props.closeModalTeam) {
+            props.closeModalTeam();
+        }
     }
 };
 </script>

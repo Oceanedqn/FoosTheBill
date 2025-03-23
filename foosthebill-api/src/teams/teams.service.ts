@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Team } from './team.entity';
 import { User } from '../users/user.entity';
-import { CreateTeamDto, TeamResponseDto, TeamsWithTournamentReponseDto } from './dto/team.dto';
-import { mapToTeamResponseDto, mapToTeamsWithTournamentResponseDto } from 'src/utils/map-dto.utils';
+import { CreateTeamDto, TeamResponseDto, TeamWithTournamentReponseDto } from './dto/team.dto';
+import { mapToTeamResponseDto, mapToTeamWithTournamentResponseDto } from 'src/utils/map-dto.utils';
 import { Tournament } from 'src/tournaments/tournament.entity';
 import { UsersService } from 'src/users/users.service';
 import { TournamentsService } from 'src/tournaments/tournaments.service';
@@ -20,17 +20,17 @@ export class TeamsService {
     ) { }
 
     /**
- * Creates a new team with one or two participants and associates it with a tournament.
- * Checks if the participants are already in a team for the specified tournament before creation.
- * 
- * @param createTeamDto - Data Transfer Object containing the team name, participant 1 ID, participant 2 ID (optional), and tournament ID.
- * @param userId - The ID of the user who is requesting the creation of the team, typically for authorization purposes.
- * @returns A promise that resolves to a `TeamsWithTournamentReponseDto` containing the created team and tournament information.
- * @throws NotFoundException - If the tournament or any participant is not found.
- * @throws ConflictException - If any participant is already part of a team in the tournament.
- * @throws InternalServerErrorException - If an error occurs during the team creation process.
- */
-    async createTeamByTournamentId(createTeamDto: CreateTeamDto, userId: string): Promise<TeamsWithTournamentReponseDto> {
+    * Creates a new team with one or two participants and associates it with a tournament.
+    * Checks if the participants are already in a team for the specified tournament before creation.
+    * 
+    * @param createTeamDto - Data Transfer Object containing the team name, participant 1 ID, participant 2 ID (optional), and tournament ID.
+    * @param userId - The ID of the user who is requesting the creation of the team, typically for authorization purposes.
+    * @returns A promise that resolves to a `TeamWithTournamentReponseDto` containing the created team and tournament information.
+    * @throws NotFoundException - If the tournament or any participant is not found.
+    * @throws ConflictException - If any participant is already part of a team in the tournament.
+    * @throws InternalServerErrorException - If an error occurs during the team creation process.
+    */
+    async createTeamByTournamentId(createTeamDto: CreateTeamDto, userId: string): Promise<TeamWithTournamentReponseDto> {
         try {
             const existingTeamForPlayer1 = await this.isUserInTeam(createTeamDto.participant1, createTeamDto.tournament_id);
             if (existingTeamForPlayer1) {
@@ -61,9 +61,37 @@ export class TeamsService {
             await this.teamsRepository.save(team);
 
             // Return structured response with relevant data
-            return mapToTeamsWithTournamentResponseDto(team, createTeamDto.participant1);
+            return mapToTeamWithTournamentResponseDto(team, createTeamDto.participant1);
         } catch (error) {
             console.error("Error creating team:", error); // Log error for debugging
+            throw new InternalServerErrorException(error.message);
+        }
+    }
+
+
+    /**
+     * Creates a new team with one or two participants and associates it with a tournament.
+     * Checks if the participants are already in a team for the specified tournament before creation.
+     * 
+     * @param createTeamDtos - An array of Data Transfer Objects containing the team name, participant 1 ID, participant 2 ID (optional), and tournament ID.
+     * @param userId - The ID of the user who is requesting the creation of the team, typically for authorization purposes.
+     * @returns A promise that resolves to a `TeamWithTournamentReponseDto` containing the created team and tournament information.
+     * @throws NotFoundException - If the tournament or any participant is not found.
+     * @throws ConflictException - If any participant is already part of a team in the tournament.
+     * @throws InternalServerErrorException - If an error occurs during the team creation process.
+     */
+    async createTeamsByTournamentId(createTeamsDto: CreateTeamDto[], userId: string): Promise<TeamWithTournamentReponseDto[]> {
+        try {
+            const createdTeams: TeamWithTournamentReponseDto[] = [];
+
+            for (const createTeamDto of createTeamsDto) {
+                const createdTeam = await this.createTeamByTournamentId(createTeamDto, userId);
+                createdTeams.push(createdTeam);
+            }
+
+            return createdTeams;
+        } catch (error) {
+            console.error("Error creating teams:", error); // Log error for debugging
             throw new InternalServerErrorException(error.message);
         }
     }

@@ -14,9 +14,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits } from 'vue';
-
-// Props pour obtenir isGridView du parent
 const props = defineProps({
     isGridView: {
         type: Boolean,
@@ -24,7 +21,6 @@ const props = defineProps({
     }
 });
 
-// Emit un événement pour mettre à jour la vue dans le parent
 const emit = defineEmits(['update:isGridView']);
 
 const setGridView = (value: boolean) => {
