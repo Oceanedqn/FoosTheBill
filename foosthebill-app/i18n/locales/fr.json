@@ -72,7 +72,7 @@
   "create_teams": "Créer des équipes",
   "add": "Ajouter",
   "optional": "Optionnel",
-  "end_match": "Clôturer le match",
+  "end_match": "Clôturer",
 
   "connection_ok": "Connexion réussie",
   "invalid_credentials": "Informations d'identification invalides",
@@ -83,6 +83,8 @@
   "name_description_required": "Le nom et la description du tournoi sont requis",
   "create_teams_ok": "Création des équipes réussie",
   "create_teams_error": "Problème lors de la création des équipes",
+   "create_team_ok": "Création de l'équipe réussie",
+  "create_team_error": "Problème lors de la création de l'équipe",
   "create_matches_ok": "Création des matchs réussie",
   "create_matches_error": "Problème lors de la création des matchs",
   "update_match_ok": "Mise à jour du score du match réussie",

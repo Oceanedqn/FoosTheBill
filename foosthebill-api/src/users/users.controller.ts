@@ -2,7 +2,7 @@ import { Controller, Get, Post, Param, Body, Put, Delete, HttpStatus, NotFoundEx
 import { UsersService } from './users.service';
 import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
+import { ICreateUser, IUpdateUser } from './dto/user.dto';
 
 @Controller('users')
 @UseFilters(new AllExceptionsFilter())
@@ -18,7 +18,7 @@ export class UsersController {
      * @throws ConflictException - If a user with the same email already exists.
      */
     @Post()
-    async create(@Body() createUserDto: CreateUserDto) {
+    async create(@Body() createUserDto: ICreateUser) {
         const user = await this.usersService.create(createUserDto);
         return {
             statusCode: HttpStatus.CREATED,
@@ -75,7 +75,7 @@ export class UsersController {
      */
     @UseGuards(AuthGuard)
     @Put(':id')
-    async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    async update(@Param('id') id: string, @Body() updateUserDto: IUpdateUser) {
         const user = await this.usersService.findOne(id);
         if (!user) {
             throw new NotFoundException("Error updating user");

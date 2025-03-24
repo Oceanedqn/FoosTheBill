@@ -18,35 +18,4 @@ export class RankingsController {
         }
     }
 
-    @Get(':id')
-    async findOne(@Param('id') id: string) {
-        try {
-            const ranking = await this.rankingsService.findOne(id);
-            return { code: HttpStatus.OK, message: 'Ranking fetched successfully', data: ranking };
-        } catch (error) {
-            if (error instanceof NotFoundException) {
-                throw error;
-            }
-            throw new HttpException(
-                { code: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error fetching ranking', error: error.message },
-                HttpStatus.INTERNAL_SERVER_ERROR
-            );
-        }
-    }
-
-    @Delete(':id')
-    async remove(@Param('id') id: string) {
-        try {
-            await this.rankingsService.remove(id);
-            return { code: HttpStatus.OK, message: 'Ranking deleted successfully' };
-        } catch (error) {
-            if (error instanceof InternalServerErrorException) {
-                throw error;
-            }
-            throw new HttpException(
-                { code: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error deleting ranking', error: error.message },
-                HttpStatus.INTERNAL_SERVER_ERROR
-            );
-        }
-    }
 }

@@ -1,6 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, ManyToMany, JoinTable, OneToMany } from 'typeorm';
 import { Tournament } from '../tournaments/tournament.entity';
 import { Team } from 'src/teams/team.entity';
+import { MatchTeam } from 'src/match-team/match-team.entity';
+import { MatchResult } from 'src/match-results/match-result.entity';
 
 @Entity()
 export class Match {
@@ -11,25 +13,17 @@ export class Match {
     @JoinColumn({ name: 'tournament_id' })
     tournament: Tournament;
 
-    @ManyToOne(() => Team)
-    @JoinColumn({ name: 'team_1_id' })
-    team1: Team;
+    @OneToMany(() => MatchTeam, matchTeam => matchTeam.match)  // Relation inverse avec MatchTeam
+    matchTeams: MatchTeam[];
 
-    @ManyToOne(() => Team)
-    @JoinColumn({ name: 'team_2_id' })
-    team2: Team;
+    @OneToMany(() => MatchResult, (matchResult) => matchResult.match)
+    matchResults: MatchResult[];
 
     @Column()
     round: number;
 
-    @Column()
+    @Column({ default: false })
     isClosed: boolean;
-
-    @Column()
-    score_team_1: number;
-
-    @Column()
-    score_team_2: number;
 
     @CreateDateColumn()
     creation_date: Date;

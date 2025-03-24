@@ -88,7 +88,7 @@
 import { Role } from '~/models/User';
 import { ref, onMounted, watch } from 'vue';
 import { useAuthStore } from '~/stores/auth.store';
-import { createTournament, getTournaments } from '~/services/tournament.service';
+import { getTournaments } from '~/services/tournament.service';
 import TournamentTitle from '~/components/tournaments/TournamentTitle.vue';
 import TournamentCard from '~/components/tournaments/TournamentCard.vue';
 import ModalCreateTournament from '~/components/modals/ModalCreateTournament.vue';
@@ -98,11 +98,6 @@ import type { ITournament } from '~/models/Tournament';
 
 const authStore = useAuthStore();
 const isModalOpen = ref(false);
-const newTournament = ref({
-    name: '',
-    description: '',
-    start_date: '',
-});
 const searchQuery = ref('');
 const tournaments = ref<ITournament[]>([]);
 
@@ -156,7 +151,7 @@ const fetchTournaments = async () => {
 
 // Filter tournaments where the user is the organizer
 const organizingTournaments = computed(() => {
-    return tournaments.value.filter(tournament => tournament.admin.id === userId.value);
+    return tournaments.value.filter(tournament => tournament.adminId === userId.value);
 });
 
 // Filter tournaments where the user is a participant

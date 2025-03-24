@@ -2,17 +2,15 @@ import { Injectable, NotFoundException, InternalServerErrorException, forwardRef
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Ranking } from './ranking.entity';
-import { RankingsResponseDto, TournamentRankingsResponseDto } from './dto/ranking.dto';
-import { mapToRankingsResponseDto } from 'src/utils/map-dto.utils';
+import { IRanking } from './dto/ranking.dto';
+import { mapToIRanking } from 'src/utils/map-dto.utils';
 import { TournamentsService } from 'src/tournaments/tournaments.service';
 
 @Injectable()
 export class RankingsService {
     constructor(
         @InjectRepository(Ranking)
-        private rankingsRepository: Repository<Ranking>,
-        @Inject(forwardRef(() => TournamentsService))
-        private readonly tournamentsService: TournamentsService
+        private rankingsRepository: Repository<Ranking>
     ) { }
 
     async create(ranking: Ranking): Promise<Ranking> {
@@ -23,88 +21,96 @@ export class RankingsService {
         }
     }
 
-    async findAllByTournamentId(tournamentId: string, userId: string): Promise<TournamentRankingsResponseDto> {
-        const tournament = await this.tournamentsService.findOne(tournamentId, userId);
-
+    async findAllByTournamentId(tournamentId: string, userId: string): Promise<IRanking[]> {
         try {
+            // Retrieve rankings with the appropriate relations
             const rankings = await this.rankingsRepository.find({
                 where: { tournament: { id: tournamentId } },
-                relations: ['tournament', 'team', 'team.participant1', 'team.participant2'],
+                relations: ['team', 'team.players', 'tournament'],
                 order: { points: 'DESC' }
             });
 
-            const mapRankings = mapToRankingsResponseDto(rankings, userId);
+            console.log("Rankings with loaded relations:", rankings);
 
-            const tournamentRankings: TournamentRankingsResponseDto = {
-                tournament: tournament,
-                rankings: mapRankings
+            if (!rankings || rankings.length === 0) {
+                return [];
             }
 
-            return tournamentRankings;
+            const mapRankings = rankings
+                .map(ranking => {
+                    if (!ranking.team || !ranking.team.id) {
+                        console.error('Missing team or team ID for ranking:', ranking.id);
+                        return null;
+                    }
+
+                    if (!ranking.tournament || !ranking.tournament.id) {
+                        console.error('Missing tournament or invalid tournament for ranking:', ranking.id);
+                        return null;
+                    }
+
+                    return mapToIRanking(ranking, userId);
+                })
+                .filter((ranking): ranking is IRanking => ranking !== null);
+
+            return mapRankings;
+
         } catch (error) {
-            throw new InternalServerErrorException('Error fetching rankings', error.message);
+            throw new InternalServerErrorException('Error fetching rankings');
         }
     }
 
-    async findOne(id: string): Promise<Ranking> {
-        try {
-            const ranking = await this.rankingsRepository.findOne({ where: { id } });
-            if (!ranking) {
-                throw new NotFoundException(`Ranking with id ${id} not found`);
-            }
-            return ranking;
-        } catch (error) {
-            if (error instanceof NotFoundException) {
-                throw error;
-            }
-            throw new InternalServerErrorException('Error fetching ranking', error.message);
-        }
-    }
 
-    async update(tournamentId: string, team1Id: string, team2Id: string, score1: number, score2: number): Promise<void> {
+
+    async update(tournamentId: string, team1Id: string, team2Id: string, scoreTeam1: number, scoreTeam2: number): Promise<void> {
+        console.log("Updating rankings for teams:", team1Id, team2Id);
+        console.log("Scores:", scoreTeam1, scoreTeam2);
+
         try {
-            const rankingTeam1 = await this.rankingsRepository.findOne({
-                where: { tournament: { id: tournamentId }, team: { id: team1Id } },
-                relations: ["team", "tournament"]
+            const team1Ranking = await this.rankingsRepository.findOne({
+                where: { tournament: { id: tournamentId }, team: { id: team1Id } }
             });
 
-            const rankingTeam2 = await this.rankingsRepository.findOne({
-                where: { tournament: { id: tournamentId }, team: { id: team2Id } },
-                relations: ["team", "tournament"]
+            const team2Ranking = await this.rankingsRepository.findOne({
+                where: { tournament: { id: tournamentId }, team: { id: team2Id } }
             });
 
-            if (!rankingTeam1 || !rankingTeam2) {
-                throw new NotFoundException('Ranking not found for one of the teams');
+            if (!team1Ranking || !team2Ranking) {
+                throw new NotFoundException('Ranking not found for one or both teams');
             }
 
-            if (score1 > score2) {
-                rankingTeam1.points += 3;
-            } else if (score2 > score1) {
-                rankingTeam2.points += 3;
+            // Calculer les points pour l'équipe 1 en fonction du score
+            if (scoreTeam1 > scoreTeam2) {
+                team1Ranking.points += 3;
+            } else if (scoreTeam2 > scoreTeam1) {
+                team2Ranking.points += 3;
             } else {
-                rankingTeam1.points += 1;
-                rankingTeam2.points += 1;
+                team1Ranking.points += 1;
+                team2Ranking.points += 1;
             }
 
-            await this.rankingsRepository.save([rankingTeam1, rankingTeam2]);
+            await this.rankingsRepository.save([team1Ranking, team2Ranking]);
+            await this.updateRankingPositions(tournamentId);
 
         } catch (error) {
             throw new InternalServerErrorException('Error updating rankings', error.message);
         }
     }
 
-    async remove(id: string): Promise<void> {
+
+    async updateRankingPositions(tournamentId: string): Promise<void> {
         try {
-            const existingRanking = await this.findOne(id);
-            if (!existingRanking) {
-                throw new NotFoundException(`Ranking with id ${id} not found`);
-            }
-            await this.rankingsRepository.delete(id);
+            const rankings = await this.rankingsRepository.find({
+                where: { tournament: { id: tournamentId } },
+                order: { points: 'DESC' },
+            });
+
+            rankings.forEach((ranking, index) => {
+                ranking.position = index + 1;
+            });
+
+            await this.rankingsRepository.save(rankings);
         } catch (error) {
-            if (error instanceof NotFoundException) {
-                throw error;
-            }
-            throw new InternalServerErrorException('Error deleting ranking', error.message);
+            throw new InternalServerErrorException('Error updating ranking positions', error.message);
         }
     }
 }

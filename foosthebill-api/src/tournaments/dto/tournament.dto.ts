@@ -1,35 +1,39 @@
-import { TeamResponseDto } from 'src/teams/dto/team.dto';
-import { UserResponseDto } from 'src/users/dto/user.dto';
+import { IRoundMatches } from 'src/matches/dto/match.dto';
+import { ITeam, ITeamRanking } from 'src/teams/dto/team.dto';
+import { IUser } from 'src/users/dto/user.dto';
 
-export class TournamentResponseDto {
+export interface ITournament {
   id: string;
   name: string;
   description: string;
-  start_date: Date;
-  participant_number: number;
+  startDate: Date;
+  participantNumber: number;
   isRegister: boolean;
   isMatches: boolean;
-  admin: UserResponseDto;
+  adminId: string;
 }
 
-export class TournamentTeamsResponseDto {
-  tournament: TournamentResponseDto;
-  teams: TeamResponseDto[];
+export interface ITournamentDetails {
+  tournament: ITournament,
+  teams: ITeamRanking[],
+  users: IUser[]
 }
 
-export class TournamentTeamResponseDto {
-  tournament: TournamentResponseDto;
-  team: TeamResponseDto;
+export interface ITournamentMatches {
+  tournament: ITournament,
+  myTeam: ITeam | null,
+  roundMatches: IRoundMatches[]
 }
 
-export class CreateTournamentDto {
+export interface ICreateTournament {
   name: string;
   description: string;
   start_date: Date;
   admin_id: string;
 }
 
-export class UpdateTournamentDto {
+// TODO: Create functions
+export class IUpdateTournament {
   name?: string;
   description?: string;
   start_date?: Date;

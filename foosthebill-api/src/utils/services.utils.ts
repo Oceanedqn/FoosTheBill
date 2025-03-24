@@ -1,17 +1,16 @@
 import { Tournament } from 'src/tournaments/tournament.entity';
 
 /**
- * Calculate unique participants in a tournament.
+ * Calculate the number of participants in a tournament.
  * @param tournament - The tournament entity.
- * @returns Set<string> - A set of unique participant IDs.
+ * @returns number - The total number of participants (including duplicates).
  */
-export const calculateParticipants = (tournament: Tournament): Set<string> => {
-  const participants = new Set<string>();
+export const calculateParticipantsCount = (tournament: Tournament): number => {
+    let participantsCount = 0;
 
-  tournament.teams.forEach(team => {
-    if (team.participant1) participants.add(team.participant1.id);
-    if (team.participant2) participants.add(team.participant2.id);
-  });
+    tournament.teams.forEach(team => {
+        participantsCount += team.players.length;
+    });
 
-  return participants;
+    return participantsCount;
 };

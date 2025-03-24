@@ -1,20 +1,21 @@
 import { Role } from '../user.entity'; // Assurez-vous que le Role est importé
 
-export class UserResponseDto {
+export interface IUser {
     id: string;
     name: string;
     firstname: string;
     role: Role;
 }
 
-export class UpdateUserDto {
+// TODO: Create functions
+export interface IUpdateUser {
     name?: string;
     firstname?: string;
     email?: string;
     role?: Role;
 }
 
-export class CreateUserDto {
+export interface ICreateUser {
     name: string;
     firstname: string;
     email: string;

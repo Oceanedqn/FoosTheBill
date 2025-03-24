@@ -3,7 +3,7 @@
         <div class="relative flex flex-col items-center w-full p-3 border-b-2 text-dark border-primary">
             <div
                 class="absolute flex items-center px-2 py-1 text-sm font-semibold text-white transform -translate-y-1/2 rounded-full bg-primary top-1/2 right-2">
-                {{ tournament.participant_number }} <i class="pl-1 fa-solid fa-person"></i>
+                {{ tournament.participantNumber }} <i class="pl-1 fa-solid fa-person"></i>
 
             </div>
             <!-- Tournament name -->
@@ -13,7 +13,7 @@
             <!-- Tournament start date -->
             <p class="mb-4 text-sm text-gray-500">
                 <i class="pr-1 fa-solid fa-calendar-day"></i>
-                {{ formatDate(tournament.start_date) }}
+                {{ formatDate(tournament.startDate) }}
             </p>
 
             <!-- Tournament description -->
@@ -35,10 +35,11 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
+import type { ITournament } from '~/models/Tournament';
 
 const props = defineProps({
     tournament: {
-        type: Object,
+        type: Object as () => ITournament,
         required: false,
     },
 });

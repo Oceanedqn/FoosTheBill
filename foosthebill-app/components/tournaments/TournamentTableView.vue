@@ -14,14 +14,14 @@
         <tr v-for="tournament in tournaments" :key="tournament.id" class="border-b border-gray-300">
           <td class="px-4 py-2 ">{{ tournament.name }}</td>
           <td class="px-4 py-2">
-            {{ formatDate(tournament.start_date) }}
+            {{ formatDate(tournament.startDate) }}
           </td>
           <td class="px-4 py-2">{{ tournament.description.length > 47 ? tournament.description.slice(0,
             47) +
             '...' : tournament.description }}</td>
 
           <td class="px-4 py-2 text-center">
-            {{ tournament.participant_number }}
+            {{ tournament.participantNumber }}
           </td>
           <td class="flex items-center justify-center px-4 py-1 text-center whitespace-nowrap">
 
@@ -38,19 +38,20 @@
   <div v-else>{{ $t('no_tournament') }}</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useRouter } from "vue-router";
+import type { ITournament } from "~/models/Tournament";
 
 const props = defineProps({
   tournaments: {
-    type: Array,
+    type: Array as () => ITournament[],
     required: true,
   },
 });
 
 const router = useRouter();
 
-const formatDate = (startDate) => {
+const formatDate = (startDate: Date) => {
   return new Date(startDate).toLocaleDateString("fr-FR", {
     weekday: "long",
     year: "numeric",
@@ -59,7 +60,7 @@ const formatDate = (startDate) => {
   });
 };
 
-const joinTournament = (tournamentId) => {
+const joinTournament = (tournamentId: string) => {
   router.push(`/tournaments/${tournamentId}`);
 };
 </script>
