@@ -6,6 +6,14 @@ import { Ranking } from './ranking.entity';
 export class RankingsController {
     constructor(private readonly rankingsService: RankingsService) { }
 
+    /**
+     * Creates a new ranking.
+     * 
+     * @param ranking - The ranking data to be created.
+     * @returns A response containing the HTTP status code, success message, and the created ranking data.
+     * @throws InternalServerErrorException - If an error occurs during the creation process.
+     * @throws HttpException - If any other exception occurs.
+     */
     @Post()
     async create(@Body() ranking: Ranking) {
         try {

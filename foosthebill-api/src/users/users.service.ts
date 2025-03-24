@@ -14,10 +14,9 @@ export class UsersService {
 
     /**
      * Hashes a plain text password.
-     * This private method generates a hashed password using bcrypt. The password is first salted
-     * with 10 rounds and then hashed for storage in the database.
+     * This method generates a hashed password using bcrypt, salts it with 10 rounds, and then hashes it.
      * @param password - The plain text password to hash.
-     * @returns Promise<string> - Returns the hashed password as a string.
+     * @returns Promise<string> - The hashed password as a string.
      */
     private async hashPassword(password: string): Promise<string> {
         const salt = await bcrypt.genSalt(10);  // Generate salt
@@ -26,11 +25,10 @@ export class UsersService {
 
     /**
      * Creates a new user.
-     * This function allows the creation of a new user. It checks if the email already exists,
-     * sets the default role to 'PARTICIPANT', hashes the password, and stores the user in the database.
-     * @param createUserDto - Data transfer object containing user details such as email, name, and password.
-     * @returns Promise<UserResponseDto> - Returns the created user data without the password.
-     * @throws ConflictException - If a user with the same email already exists.
+     * Checks if the email already exists, sets the default role to 'PARTICIPANT', hashes the password, and stores the user.
+     * @param createUserDto - Contains the user details (email, name, password).
+     * @returns Promise<IUser> - The created user data without the password.
+     * @throws ConflictException - If the email already exists.
      * @throws InternalServerErrorException - If an error occurs while creating the user.
      */
     async create(createUserDto: ICreateUser): Promise<IUser> {
@@ -57,8 +55,8 @@ export class UsersService {
 
     /**
      * Retrieves all users.
-     * This function fetches all users from the database, excluding their password and creation date.
-     * @returns Promise<UserResponseDto[]> - Returns an array of users without their password or creation date.
+     * Fetches all users from the database, excluding the password and creation date.
+     * @returns Promise<IUser[]> - An array of users without their password or creation date.
      * @throws InternalServerErrorException - If an error occurs while fetching users.
      */
     async findAll(): Promise<IUser[]> {
@@ -76,11 +74,10 @@ export class UsersService {
 
     /**
      * Retrieves a user by their ID.
-     * This function retrieves a user from the database using their ID. If no user is found, 
-     * a NotFoundException is thrown.
-     * @param id - The ID of the user to retrieve.
-     * @returns Promise<UserResponseDto> - Returns the user data without the password and creation date.
-     * @throws NotFoundException - If the user with the given ID does not exist.
+     * Finds a user by their ID. If no user is found, a NotFoundException is thrown.
+     * @param id - The ID of the user.
+     * @returns Promise<IUser> - The user data without the password and creation date.
+     * @throws NotFoundException - If the user with the given ID is not found.
      */
     async findOne(id: string): Promise<IUser> {
         const user = await this.userRepository.findOne({ where: { id } });
@@ -95,10 +92,9 @@ export class UsersService {
 
     /**
      * Retrieves a user by their email.
-     * This function finds a user by their email address. If no user is found, 
-     * a NotFoundException is thrown.
-     * @param email - The email of the user to retrieve.
-     * @returns Promise<User> - Returns the user entity.
+     * Finds a user by their email address. If no user is found, a NotFoundException is thrown.
+     * @param email - The email of the user.
+     * @returns Promise<User> - The user entity.
      * @throws NotFoundException - If the user with the provided email does not exist.
      * @throws InternalServerErrorException - If an error occurs while fetching the user.
      */
@@ -122,12 +118,11 @@ export class UsersService {
 
     /**
      * Updates a user's information (excluding password and creation date).
-     * This function allows users to update their information such as name, email, and role,
-     * excluding sensitive fields like the password and creation date.
-     * @param id - The ID of the user to update.
-     * @param updateUserDto - Data transfer object containing the user information to update.
-     * @returns Promise<void> - Returns nothing upon successful update.
-     * @throws NotFoundException - If the user with the provided ID does not exist.
+     * Allows users to update details like name, email, and role.
+     * @param id - The ID of the user.
+     * @param updateUserDto - Contains the user information to update.
+     * @returns Promise<void> - Nothing is returned upon successful update.
+     * @throws NotFoundException - If the user with the provided ID is not found.
      * @throws InternalServerErrorException - If an error occurs while updating the user.
      */
     async update(id: string, updateUserDto: IUpdateUser): Promise<void> {
@@ -144,11 +139,11 @@ export class UsersService {
 
     /**
      * Updates a user's password.
-     * This function allows a user to update their password. The new password is hashed before being saved to the database.
-     * @param id - The ID of the user to update.
+     * Hashes the new password before saving it to the database.
+     * @param id - The ID of the user.
      * @param newPassword - The new password to set for the user.
-     * @returns Promise<void> - Returns nothing upon successful password update.
-     * @throws NotFoundException - If the user with the provided ID does not exist.
+     * @returns Promise<void> - Nothing is returned upon successful password update.
+     * @throws NotFoundException - If the user with the provided ID is not found.
      * @throws InternalServerErrorException - If an error occurs while updating the password.
      */
     async updatePassword(id: string, newPassword: string): Promise<void> {
@@ -166,9 +161,9 @@ export class UsersService {
 
     /**
      * Deletes a user by their ID.
-     * This function deletes a user from the database. If no user is found, a NotFoundException is thrown.
-     * @param id - The ID of the user to delete.
-     * @returns Promise<void> - Returns nothing upon successful deletion.
+     * Deletes the user from the database. If no user is found, a NotFoundException is thrown.
+     * @param id - The ID of the user.
+     * @returns Promise<void> - Nothing is returned upon successful deletion.
      * @throws NotFoundException - If the user with the provided ID does not exist.
      */
     async remove(id: string): Promise<void> {

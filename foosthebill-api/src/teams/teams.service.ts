@@ -19,16 +19,16 @@ export class TeamsService {
     ) { }
 
     /**
-    * Creates a new team with one or two participants and associates it with a tournament.
-    * Checks if the participants are already in a team for the specified tournament before creation.
-    * 
-    * @param createTeamDto - Data Transfer Object containing the team name, participant 1 ID, participant 2 ID (optional), and tournament ID.
-    * @param userId - The ID of the user who is requesting the creation of the team, typically for authorization purposes.
-    * @returns A promise that resolves to a `TeamWithTournamentReponseDto` containing the created team and tournament information.
-    * @throws NotFoundException - If the tournament or any participant is not found.
-    * @throws ConflictException - If any participant is already part of a team in the tournament.
-    * @throws InternalServerErrorException - If an error occurs during the team creation process.
-    */
+     * Creates a new team with one or two participants and associates it with a tournament.
+     * Checks if the participants are already in a team for the specified tournament before creation.
+     * 
+     * @param createTeamDto - Data Transfer Object containing the team name, participant 1 ID, participant 2 ID (optional), and tournament ID.
+     * @param userId - The ID of the user who is requesting the creation of the team, typically for authorization purposes.
+     * @returns A promise that resolves to a `TeamWithTournamentReponseDto` containing the created team and tournament information.
+     * @throws NotFoundException - If the tournament or any participant is not found.
+     * @throws ConflictException - If any participant is already part of a team in the tournament.
+     * @throws InternalServerErrorException - If an error occurs during the team creation process.
+     */
     async createTeamByTournamentId(createTeamDto: ICreateTeam, userId: string, isOneTeam: boolean): Promise<ITeam> {
         const user = await this.usersService.findOne(userId);
         if (!createTeamDto.players) {
@@ -125,16 +125,16 @@ export class TeamsService {
 
 
     /**
-    * Updates an existing team by adding a second participant.
-    * Checks for conflicts, such as the user already being in the team or the team already having two participants.
-    * 
-    * @param teamId - The ID of the team to update.
-    * @param userId - The ID of the user to be added as the second participant.
-    * @returns A promise that resolves once the team is successfully updated.
-    * @throws NotFoundException - If the team or user is not found.
-    * @throws ConflictException - If the user is already in the team or if the team already has two participants.
-    * @throws InternalServerErrorException - If an error occurs during the update process.
-    */
+      * Updates an existing team by adding a second participant.
+      * Checks for conflicts, such as the user already being in the team or the team already having two participants.
+      * 
+      * @param teamId - The ID of the team to update.
+      * @param userId - The ID of the user to be added as the second participant.
+      * @returns A promise that resolves once the team is successfully updated.
+      * @throws NotFoundException - If the team or user is not found.
+      * @throws ConflictException - If the user is already in the team or if the team already has two participants.
+      * @throws InternalServerErrorException - If an error occurs during the update process.
+      */
     async update(teamId: string, userId: string): Promise<ITeam> {
         const team = await this.teamsRepository.findOne({
             where: { id: teamId },
@@ -201,14 +201,14 @@ export class TeamsService {
 
 
     /**
- * Deletes a team by its ID.
- * 
- * @param id - The ID of the team to delete.
- * @param userId - The ID of the user requesting the deletion (used for authorization checks if needed).
- * @returns A promise that resolves once the team is successfully deleted.
- * @throws NotFoundException - If the team with the given ID is not found.
- * @throws InternalServerErrorException - If an error occurs during the team deletion process.
- */
+     * Deletes a team by its ID.
+     * 
+     * @param id - The ID of the team to delete.
+     * @param userId - The ID of the user requesting the deletion (used for authorization checks if needed).
+     * @returns A promise that resolves once the team is successfully deleted.
+     * @throws NotFoundException - If the team with the given ID is not found.
+     * @throws InternalServerErrorException - If an error occurs during the team deletion process.
+     */
     async remove(id: string, userId: string): Promise<void> {
         try {
             const team = await this.teamsRepository.findOne({
@@ -227,13 +227,13 @@ export class TeamsService {
     }
 
     /**
-  * Checks if a user is already in a team for a specific tournament.
-  *
-  * @param userId - The ID of the user to check.
-  * @param tournamentId - The ID of the tournament in which the user is potentially already part of a team.
-  * @returns A promise that resolves to a boolean: `true` if the user is already part of a team in the tournament, otherwise `false`.
-  * @throws InternalServerErrorException - If an error occurs while checking the team's existence.
-  */
+     * Checks if a user is already in a team for a specific tournament.
+     *
+     * @param userId - The ID of the user to check.
+     * @param tournamentId - The ID of the tournament in which the user is potentially already part of a team.
+     * @returns A promise that resolves to a boolean: `true` if the user is already part of a team in the tournament, otherwise `false`.
+     * @throws InternalServerErrorException - If an error occurs while checking the team's existence.
+     */
     async isUserInTeam(userId: string, tournamentId: string): Promise<boolean> {
         try {
             const existingTeam = await this.teamsRepository
