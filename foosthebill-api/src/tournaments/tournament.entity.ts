@@ -2,6 +2,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, OneToMany } from 'typeorm';
 import { User } from 'src/users/user.entity';
 import { Team } from 'src/teams/team.entity';
+import { Ranking } from 'src/rankings/ranking.entity';
 
 @Entity()
 export class Tournament {
@@ -26,5 +27,8 @@ export class Tournament {
 
     @OneToMany(() => Team, (team) => team.tournament)
     teams: Team[];
+
+    @OneToMany(() => Ranking, (ranking) => ranking.tournament)
+    rankings: Ranking[];
 
 }

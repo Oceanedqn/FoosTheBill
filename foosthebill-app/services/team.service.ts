@@ -1,5 +1,5 @@
 import type { ApiResponse } from "~/models/Response";
-import type { CreateTeam, ITeam } from "~/models/Team";
+import type { ICreateTeam, ITeam } from "~/models/Team";
 
 const API_URL = 'http://localhost:3001';
 
@@ -8,7 +8,7 @@ const API_URL = 'http://localhost:3001';
  * @param {CreateTeam} newTeam - The tournament data to be created.
  * @returns {Promise<GenericResponse>} - The response containing the status code and message.
  */
-export const createTeam = async (createTeam: CreateTeam, tournamentId: string): Promise<ITeam> => {
+export const createTeam = async (createTeam: ICreateTeam, tournamentId: string): Promise<ITeam> => {
     const authStore = useAuthStore();
     const token = authStore.accessToken;
 
@@ -34,7 +34,7 @@ export const createTeam = async (createTeam: CreateTeam, tournamentId: string): 
  * @param {CreateTeams} newTeam - The tournament data to be created.
  * @returns {Promise<GenericResponse>} - The response containing the status code and message.
  */
-export const createTeams = async (createTeams: CreateTeam[], tournamentId: string): Promise<ITeam[]> => {
+export const createTeams = async (createTeams: ICreateTeam[], tournamentId: string): Promise<ITeam[]> => {
     const authStore = useAuthStore();
     const token = authStore.accessToken;
 

@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Param, Body, Put, Delete, HttpException, HttpStatus, NotFoundException, UseFilters, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Param, Put, Delete, HttpStatus, UseFilters, UseGuards } from '@nestjs/common';
 import { TeamsService } from './teams.service';
 import { Request } from '@nestjs/common';
 import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { UpdateTeamDto } from './dto/team.dto';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('teams')
 @UseFilters(new AllExceptionsFilter())
@@ -43,6 +43,14 @@ export class TeamsController {
         return { code: HttpStatus.OK, message: 'Team updated successfully', data: team };
     }
 
+    @Put(':id/quit')
+    async quitTeam(@Param('id') teamId: string, @Request() req) {
+        const userId = req.user.id;
+        const team = await this.teamsService.quitTeam(teamId, userId);
+        return { code: HttpStatus.OK, message: 'Team updated successfully', data: team };
+    }
+
+
     /**
      * Delete a specific team by its ID.
      * This method deletes the team identified by the given ID.
@@ -51,7 +59,7 @@ export class TeamsController {
      * @throws HttpException if there is an error while deleting the team.
      * @throws NotFoundException if the team with the given ID is not found.
      */
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, RolesGuard)
     @Delete(':id')
     async remove(@Param('id') id: string, @Request() req) {
         const userId = req.user.id;

@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Param, Body, Put, HttpException, HttpStatus, UseGuards, UseFilters } from '@nestjs/common';
+import { Controller, Param, Body, Put, HttpException, HttpStatus, UseGuards, UseFilters } from '@nestjs/common';
 import { MatchesService } from './matches.service';
-import { UpdateMatchDto } from './dto/match.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
+import { IUpdateMatch } from './dto/match.dto';
 
 @Controller('matches')
 @UseFilters(new AllExceptionsFilter())
@@ -22,7 +22,7 @@ export class MatchesController {
      */
     @UseGuards(AuthGuard, RolesGuard)
     @Put(':id')
-    async update(@Param('id') id: string, @Body() match: UpdateMatchDto) {
+    async update(@Param('id') id: string, @Body() match: IUpdateMatch) {
         try {
             await this.matchesService.update(id, match);
             return { code: HttpStatus.OK, message: 'Match updated successfully' };

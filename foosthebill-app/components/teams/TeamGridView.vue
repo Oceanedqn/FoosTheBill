@@ -1,8 +1,8 @@
 <template>
     <div v-if="props.teams.length" class="grid w-full max-w-6xl grid-cols-2 gap-6 md:grid-cols-4">
-        <div v-for="team in teams" :key="team!.id">
-            <TeamCard :team="team!" :isMyTeam="team!.isMyTeam" :isUserHasAlreadyTeam="props.isUserHasAlreadyTeam"
-                :joinTeam="props.handleJoinTeam" />
+        <div v-if="teams" v-for="team in teams" :key="team!.id">
+            <TeamCard :team="team" :isMyTeam="team.isMyTeam" :joinTeam="props.handleJoinTeam"
+                :isRegister="isRegister" />
         </div>
     </div>
     <div v-else>{{ $t('no_team') }}</div>
@@ -18,13 +18,13 @@ const props = defineProps({
         type: Array as () => ITeam[],
         required: true,
     },
-    isUserHasAlreadyTeam: {
-        type: Boolean,
-        required: true,
-    },
     handleJoinTeam: {
         type: Function,
         required: true,
     },
+    isRegister: {
+        type: Boolean,
+        required: true
+    }
 });
 </script>

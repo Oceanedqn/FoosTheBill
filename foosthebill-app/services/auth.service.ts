@@ -1,6 +1,6 @@
 import type { LoginCredentials, RegisterCredentials } from "~/models/Authentication";
 import type { ApiResponse, AuthResponse } from "~/models/Response";
-import type { User } from "~/models/User";
+import type { IUser } from "~/models/User";
 
 const API_URL = 'http://localhost:3001';
 
@@ -25,12 +25,12 @@ export const login = async (credentials: LoginCredentials): Promise<AuthResponse
 };
 
 
-export const register = async (userData: RegisterCredentials): Promise<User> => {
+export const register = async (userData: RegisterCredentials): Promise<IUser> => {
   try {
     const response = await $fetch(`${API_URL}/users`, {
       method: 'POST',
       body: userData,
-    }) as ApiResponse<User>; // Assertion du type de la réponse ici
+    }) as ApiResponse<IUser>;
 
     return response.data;
   } catch (error) {
@@ -38,7 +38,7 @@ export const register = async (userData: RegisterCredentials): Promise<User> => 
   }
 };
 
-export const getUserInfo = async (token: string): Promise<User> => {
+export const getUserInfo = async (token: string): Promise<IUser> => {
   try {
     const response = await $fetch(`${API_URL}/auth/me`, {
       method: 'GET',
@@ -46,7 +46,7 @@ export const getUserInfo = async (token: string): Promise<User> => {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-    }) as ApiResponse<User>;
+    }) as ApiResponse<IUser>;
 
     return response.data;
   } catch (error) {

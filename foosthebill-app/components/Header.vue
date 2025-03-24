@@ -4,17 +4,13 @@
             <div class="flex space-x-2">
                 <div class="text-xl font-bold text-primary">Foos the bill</div>
                 <ThemeSwitcher />
-            </div>
 
-            <nav class="flex items-center space-x-4 text-primary">
-                <NuxtLink :to="localePath('/')" :prefetch="false" class="hover:text-primary-dark"><i
-                        class="pr-2 fa-solid fa-house"></i>{{
-                            $t('home')
-                        }}</NuxtLink>
-                <NuxtLink :to="localePath('/tournaments')" :prefetch="false" class="hover:text-primary-dark"><i
-                        class="pr-2 fa-solid fa-trophy"></i>{{ $t('tournament') }}
-                </NuxtLink>
-            </nav>
+                <nav class="flex items-center space-x-4 ml-15 text-primary">
+                    <NuxtLink :to="localePath('/tournaments')" :prefetch="false" class="hover:text-primary-dark"><i
+                            class="pr-2 fa-solid fa-trophy"></i>{{ $t('tournament') }}
+                    </NuxtLink>
+                </nav>
+            </div>
             <nav class="flex items-center space-x-4 text-primary">
                 <button class="p-1 px-3 text-white cursor-pointer hover:bg-primary-dark rounded-4xl bg-primary"
                     @click="logout">

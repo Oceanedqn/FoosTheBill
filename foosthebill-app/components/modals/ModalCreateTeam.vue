@@ -46,24 +46,25 @@ import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { createTeam } from '~/services/team.service';
 import { type IUser } from '~/models/User';
-import { type CreateTeam } from '~/models/Team';
-
+import { type ICreateTeam } from '~/models/Team';
 
 const props = defineProps({
     show: Boolean,
     closeModalTeam: { type: Function as PropType<() => void>, required: false },
-    fetchTournamentTeams: { type: Function as PropType<() => void>, required: false },
+    fetchTournamentDetails: { type: Function as PropType<() => void>, required: false },
     users: Array as () => IUser[],
 });
 
 const route = useRoute();
-const newTeam = ref<CreateTeam>({
+const newTeam = ref<ICreateTeam>({
     name: '',
-    participant2: null,
+    players: [],
+    tournamentId: ''
 });
 
 const query = ref('');
 const filteredUsers = ref<IUser[]>([]);
+const participant2 = ref<IUser | null>(null); // Utilisateur optionnel pour participant2
 
 // Filter users by input
 const filterUsers = () => {
@@ -83,25 +84,25 @@ const filterUsers = () => {
 
 // Select a user from the filtered list
 const selectUser = (user: IUser) => {
-    newTeam.value.participant2 = user.id;
+    participant2.value = user; // On définit participant2 à l'utilisateur sélectionné
     query.value = `${user.name} ${user.firstname}`;
     filteredUsers.value = [];
 };
 
 const handleCreateTeam = async () => {
-    if (!newTeam.value.name.trim()) {
-        alert('Le nom de l\'équipe est requis');
-        return;
+    if (participant2.value) {
+        newTeam.value.players.push(participant2.value);
     }
+
     const tournamentId = route.params.id as string;
     try {
         await createTeam(newTeam.value, tournamentId);
-        if (props.fetchTournamentTeams) {
-            await props.fetchTournamentTeams();
+        showSuccessToast('create_teams_ok');
+        if (props.fetchTournamentDetails) {
+            await props.fetchTournamentDetails();
         }
     } catch (error) {
-        console.error('Erreur lors de la création', error);
-        alert('Échec de la création de l\'équipe. Veuillez réessayer plus tard.');
+        showAlertToast('create_team_error');
     } finally {
         if (props.closeModalTeam) {
             props.closeModalTeam();

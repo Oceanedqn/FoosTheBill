@@ -19,12 +19,14 @@ import { TournamentsModule } from './tournaments/tournaments.module';
 import { User } from './users/user.entity';
 import { UsersModule } from './users/users.module';
 import { getEnv } from './utils/env.utils';
+import { MatchTeamsModule } from './match-team/match-teams.module';
+import { MatchTeam } from './match-team/match-team.entity';
 
 @Module({
   providers: [
     {
       provide: APP_FILTER,
-          useClass: AllExceptionsFilter,
+      useClass: AllExceptionsFilter,
     },
     AuthService,
   ],
@@ -42,6 +44,7 @@ import { getEnv } from './utils/env.utils';
         Tournament,
         Team,
         Match,
+        MatchTeam,
         Ranking,
         MatchResult,
       ],
@@ -53,6 +56,7 @@ import { getEnv } from './utils/env.utils';
     MatchesModule,
     RankingsModule,
     MatchResultsModule,
+    MatchTeamsModule,
     AuthModule,
   ],
   controllers: [AuthController],

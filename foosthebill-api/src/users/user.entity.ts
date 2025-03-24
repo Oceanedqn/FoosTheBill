@@ -1,5 +1,6 @@
 // src/users/user.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Team } from 'src/teams/team.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToMany } from 'typeorm';
 
 export enum Role {
     ADMIN = 'admin',
@@ -25,6 +26,9 @@ export class User {
 
     @Column({ type: 'enum', enum: Role })
     role: Role;
+
+    @ManyToMany(() => Team, (team) => team.players)
+    teams: Team[];
 
     @CreateDateColumn()
     creation_date: Date;

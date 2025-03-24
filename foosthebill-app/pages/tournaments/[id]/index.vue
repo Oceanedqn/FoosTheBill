@@ -1,14 +1,14 @@
 <template>
-    <div v-if="tournamentTeams" class="flex flex-col">
+    <div v-if="tournamentDetails" class="flex flex-col">
         <TournamentTitle :title="$t('tournament')" :isAdmin="isAdmin" />
         <div class="w-full p-6 mb-6 border-2 rounded-lg shadow-md border-primary shadow-primary">
             <div class="flex flex-col gap-6 mb-4 md:flex-row">
                 <div class="md:w-2/3">
-                    <h2 class="mb-4 text-3xl font-semibold">{{ tournamentTeams?.tournament.name }}</h2>
-                    <p class="mb-2 text-gray-600">{{ tournamentTeams?.tournament.description }}</p>
+                    <h2 class="mb-4 text-3xl font-semibold">{{ tournamentDetails?.tournament.name }}</h2>
+                    <p class="mb-2 text-gray-600">{{ tournamentDetails?.tournament.description }}</p>
                     <p class="mb-4 text-sm text-gray-500">
                         <i class="pr-1 fa-solid fa-calendar-day"></i>
-                        {{ new Date(tournamentTeams?.tournament.start_date!).toLocaleDateString('fr-FR', {
+                        {{ new Date(tournamentDetails?.tournament.startDate!).toLocaleDateString('fr-FR', {
                             weekday: 'long',
                             year: 'numeric',
                             month: 'long',
@@ -17,13 +17,12 @@
                     </p>
                 </div>
                 <div v-if="myTeam" class="md:w-1/3">
-                    <TeamCard :team="myTeam" :isMyTeam="true" :isUserHasAlreadyTeam="isUserHasAlreadyTeam"
-                        :joinTeam="handleJoinTeam" />
+                    <TeamCard :team="myTeam" :isMyTeam="true" :joinTeam="handleJoinTeam"
+                        :isRegister="tournamentDetails.tournament.isRegister" />
                 </div>
             </div>
-            <TeamManagement :isUserHasAlreadyTeam="isUserHasAlreadyTeam" :tournamentTeams="tournamentTeams"
-                :openModalTeam="openModalTeam" :openModalTeams="openModalTeams" :isAdmin="isAdmin"
-                :isMatches="tournamentTeams.tournament.isMatches" :seeMatches="seeMatchs"
+            <TeamManagement :tournamentDetails="tournamentDetails" :openModalTeam="openModalTeam"
+                :openModalTeams="openModalTeams" :isAdmin="isAdmin" :seeMatches="seeMatchs"
                 :handleCreateMatches="handleCreateMatches" />
         </div>
 
@@ -40,28 +39,27 @@
         <div class="w-full max-w-6xl mb-4">
             <!-- Teams List Section - Grid View -->
             <TeamGridView v-if="isGridView && filteredTeams.length" :teams="filteredTeams"
-                :isUserHasAlreadyTeam="isUserHasAlreadyTeam" :handleJoinTeam="handleJoinTeam" />
+                :handleJoinTeam="handleJoinTeam" :isRegister="tournamentDetails.tournament.isRegister" />
             <!-- Teams List Section - Table View -->
-            <TeamTableView v-if="!isGridView" :teams="filteredTeams" :isUserHasAlreadyTeam="isUserHasAlreadyTeam"
-                :handleJoinTeam="handleJoinTeam" :isMatches="tournamentTeams.tournament.isMatches"
-                :tournamentRankings="tournamentRankings" />
+            <TeamTableView v-if="!isGridView" :teams="filteredTeams" :handleJoinTeam="handleJoinTeam"
+                :isMatches="tournamentDetails.tournament.isMatches"
+                :isRegister="tournamentDetails.tournament.isRegister" />
         </div>
 
         <!-- Modal Directement sur la Page -->
         <ModalCreateTeam v-if="showModalTeam" :show="showModalTeam" :closeModalTeam="closeModalTeam"
-            :fetchTournamentTeams="fetchTournamentTeams" :users="users" />
+            :fetchTournamentDetails="fetchTournamentDetails" :users="tournamentDetails.users" />
 
         <ModalCreateTeams v-if="showModalTeams" :show="showModalTeams" :closeModalTeams="closeModalTeams"
-            :fetchTournamentTeams="fetchTournamentTeams" :users="users" />
+            :fetchTournamentDetails="fetchTournamentDetails" :users="tournamentDetails.users" />
     </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import type { IUser } from '~/models/User';
 import { Role } from '~/models/User';
 import { useRouter, useRoute } from 'vue-router';
-import { getTournamentTeams, getUsersNotInTournament, createMatchesTournament } from '~/services/tournament.service';
+import { createMatchesTournament, getTournamentDetails } from '~/services/tournament.service';
 import { joinExistingTeam } from '~/services/team.service';
 import { useAuthStore } from '~/stores/auth.store';
 import TournamentTitle from '~/components/tournaments/TournamentTitle.vue';
@@ -71,12 +69,10 @@ import TeamGridView from '~/components/teams/TeamGridView.vue';
 import TeamTableView from '~/components/teams/TeamTableView.vue';
 import ModalCreateTeam from '~/components/modals/ModalCreateTeam.vue';
 import ModalCreateTeams from '~/components/modals/ModalCreateTeams.vue';
-import type { ITournamentWithTeams } from '~/models/Tournament';
-import type { ITeam } from '~/models/Team';
+import type { ITeam, ITeamRanking, ITeamScore } from '~/models/Team';
 import ViewToggleButton from '~/components/ViewToggleButton.vue';
 import { showAlertToast } from "@/utils/toast.utils";
-import { getRankingsByTournamentId } from '~/services/ranking.service';
-import type { ITournamentRankings } from '~/models/Ranking';
+import type { ITournamentDetails } from '~/models/Tournament';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -84,33 +80,22 @@ const route = useRoute();
 const showModalTeam = ref<boolean>(false);
 const showModalTeams = ref<boolean>(false);
 const isAdmin = ref<boolean>(false);
-const tournamentTeams = ref<ITournamentWithTeams>();
-const users = ref<IUser[]>([]);
-const filteredTeams = ref<ITeam[]>([]);
+const tournamentDetails = ref<ITournamentDetails>();
+const filteredTeams = ref<ITeamRanking[]>([]);
 const searchQuery = ref<string>('');
-const isUserHasAlreadyTeam = ref<boolean>(false);
 const myTeam = ref<ITeam>();
 const isGridView = ref<boolean>(false);
 
-const tournamentRankings = ref<ITournamentRankings>()
 
-
-// Fetch tournament details and teams when the component is mounted
 onMounted(async () => {
     await authStore.initialize();
     isAdmin.value = authStore.user?.role === Role.ADMIN;
-
-    await fetchTournamentTeams();
-    if (!tournamentTeams.value?.tournament.isMatches) {
-        await fetchUsers();
-    }
-
-    await handleGetRankings();
+    await fetchTournamentDetails();
     whichView();
 });
 
 const handleCreateMatches = async () => {
-    if (tournamentTeams.value && tournamentTeams.value?.teams.length < 2) {
+    if (tournamentDetails.value && tournamentDetails.value?.teams.length < 2) {
         showAlertToast("not_enough_teams");
         return;
     }
@@ -119,28 +104,15 @@ const handleCreateMatches = async () => {
     const token = authStore.accessToken;
     if (token) {
         try {
-            await createMatchesTournament(tournamentId, tournamentTeams.value!.teams, token);
-            await getTournamentTeams(tournamentId, token);
-            tournamentTeams.value!.tournament.isMatches = true;
-            await handleGetRankings()
+            await createMatchesTournament(tournamentId, tournamentDetails.value!.teams, token);
+            await getTournamentDetails(tournamentId, token);
+            tournamentDetails.value!.tournament.isMatches = true;
             showSuccessToast('create_matches_ok');
         } catch (error) {
             showAlertToast('create_matches_error');
         }
     }
 
-}
-
-const handleGetRankings = async () => {
-    const tournamentId = route.params.id as string;
-    const token = authStore.accessToken;
-    if (tournamentTeams.value!.tournament.isMatches == true && token) {
-        try {
-            tournamentRankings.value = await getRankingsByTournamentId(tournamentId);
-        } catch (error) {
-            console.error('Error fetching rankings:', error);
-        }
-    }
 }
 
 watch(isGridView, (newValue) => {
@@ -160,15 +132,14 @@ const whichView = () => {
 };
 
 // Fetch all teams of a tournament
-const fetchTournamentTeams = async () => {
+const fetchTournamentDetails = async () => {
     const tournamentId = route.params.id as string;
     const token = authStore.accessToken;
     if (token) {
         try {
-            tournamentTeams.value = await getTournamentTeams(tournamentId, token);
+            tournamentDetails.value = await getTournamentDetails(tournamentId, token);
             fetchMyTeam();
             filterTournamentTeams();
-            await fetchUsers();
         } catch (error) {
             console.error('Error fetching teams:', error);
         }
@@ -176,27 +147,14 @@ const fetchTournamentTeams = async () => {
 };
 
 const fetchMyTeam = () => {
-    const myTeamFiltered = tournamentTeams.value?.teams.find(team => team.isMyTeam);
+    const myTeamFiltered = tournamentDetails.value?.teams.find(team => team.isMyTeam);
     myTeam.value = myTeamFiltered;
 };
-
-const fetchUsers = async () => {
-    const tournamentId = route.params.id as string;
-    const token = authStore.accessToken;
-    if (token) {
-        try {
-            users.value = await getUsersNotInTournament(tournamentId, token);
-        } catch (error) {
-            console.error('Error fetching users:', error);
-        }
-    }
-}
 
 // Watch for changes to the access token
 watch(() => authStore.accessToken, async (newToken) => {
     if (newToken) {
-        await fetchTournamentTeams();
-        await fetchUsers();
+        await fetchTournamentDetails();
     }
 });
 
@@ -204,20 +162,19 @@ watch(() => authStore.accessToken, async (newToken) => {
 const filterTournamentTeams = () => {
     if (searchQuery.value.trim() === '') {
         // If the search query is empty, show all teams
-        filteredTeams.value = [...tournamentTeams.value!.teams];
+        filteredTeams.value = [...tournamentDetails.value!.teams];
     } else {
         // Filter teams based on team name or player names
-        filteredTeams.value = tournamentTeams.value!.teams.filter((team) => {
+        filteredTeams.value = tournamentDetails.value!.teams.filter((team) => {
             const searchTerm = searchQuery.value.toLowerCase();
             return (
                 // Search by team name
                 team.name.toLowerCase().includes(searchTerm) ||
-                // Search by participant1's name and firstname
-                (team.participant1?.name && team.participant1.name.toLowerCase().includes(searchTerm)) ||
-                (team.participant1?.firstname && team.participant1.firstname.toLowerCase().includes(searchTerm)) ||
-                // Search by participant2's name and firstname
-                (team.participant2?.name && team.participant2.name.toLowerCase().includes(searchTerm)) ||
-                (team.participant2?.firstname && team.participant2.firstname.toLowerCase().includes(searchTerm))
+                // Search by any user's name and firstname in the team
+                team.players.some((user) =>
+                    (user.name && user.name.toLowerCase().includes(searchTerm)) ||
+                    (user.firstname && user.firstname.toLowerCase().includes(searchTerm))
+                )
             );
         });
     }
@@ -227,8 +184,7 @@ const filterTournamentTeams = () => {
 const handleJoinTeam = async (teamId: string) => {
     try {
         await joinExistingTeam(teamId);
-        await fetchTournamentTeams();
-        await fetchUsers();
+        await fetchTournamentDetails();
     } catch (error) {
         console.error('Error joining team:', error);
     }
@@ -247,7 +203,6 @@ const openModalTeam = () => {
 // Close modal
 const closeModalTeam = () => {
     showModalTeam.value = false;
-    fetchUsers();
 };
 
 const openModalTeams = () => {
@@ -257,6 +212,5 @@ const openModalTeams = () => {
 // Close modal
 const closeModalTeams = () => {
     showModalTeams.value = false;
-    fetchUsers();
 };
 </script>

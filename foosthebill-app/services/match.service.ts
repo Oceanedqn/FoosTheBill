@@ -1,11 +1,12 @@
-import type { IMatchTournament, IMatchUpdate } from "~/models/Match";
+
+import type { IMatch, IUpdateMatch } from "~/models/Match";
 import type { ApiResponse } from "~/models/Response";
 
 const API_URL = 'http://localhost:3001';
 
 
 
-export const updateScore = async (matchId: string, matchUpdate: IMatchUpdate): Promise<IMatchTournament> => {
+export const updateScore = async (matchId: string, matchUpdate: IUpdateMatch): Promise<IMatch> => {
     const authStore = useAuthStore();
     const token = authStore.accessToken;
 
@@ -17,7 +18,7 @@ export const updateScore = async (matchId: string, matchUpdate: IMatchUpdate): P
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
-        }) as ApiResponse<IMatchTournament>;
+        }) as ApiResponse<IMatch>;
 
         return response.data;
     } catch (error) {

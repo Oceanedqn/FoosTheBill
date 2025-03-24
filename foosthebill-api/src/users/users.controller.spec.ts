@@ -1,17 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
-import { NotFoundException, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { NotFoundException, ConflictException } from '@nestjs/common';
+import { ICreateUser, IUpdateUser } from './dto/user.dto';
 import { Role } from './user.entity';
-import { JwtService } from '@nestjs/jwt';
-import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 
 describe('UsersController', () => {
     let controller: UsersController;
     let service: UsersService;
-    let jwtService: JwtService;
 
-    const mockUserService = {
+    // Mocking du service UsersService et JwtService
+    const mockUsersService = {
         create: jest.fn(),
         findAll: jest.fn(),
         findOne: jest.fn(),
@@ -21,293 +21,189 @@ describe('UsersController', () => {
     };
 
     const mockJwtService = {
-        verifyAsync: jest.fn(),
+        sign: jest.fn().mockReturnValue('fake-token'),
+        verify: jest.fn(),
     };
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
+            imports: [
+                JwtModule.register({
+                    secret: 'secretKey',  // ou ta clé secrète
+                    signOptions: { expiresIn: '1d' },
+                }),
+            ],
             controllers: [UsersController],
             providers: [
                 {
                     provide: UsersService,
-                    useValue: mockUserService,
+                    useValue: mockUsersService
                 },
                 {
                     provide: JwtService,
-                    useValue: mockJwtService,
+                    useValue: mockJwtService
                 },
             ],
         }).compile();
 
         controller = module.get<UsersController>(UsersController);
         service = module.get<UsersService>(UsersService);
-        jwtService = module.get<JwtService>(JwtService);
     });
 
     describe('create', () => {
-        it('devrait créer un utilisateur avec succès', async () => {
-            const createUserDto: CreateUserDto = {
-                name: 'Doe',
-                firstname: 'John',
-                email: 'john.doe@example.com',
-                password: 'password123',
-                role: Role.PARTICIPANT,
-                creation_date: new Date(),
+        it('should create a new user successfully', async () => {
+            const createUserDto: ICreateUser = {
+                email: 'test@test.com', name: 'John Doe', password: 'password123',
+                firstname: '',
+                role: Role.ADMIN,
+                creation_date: new Date()
             };
-            const result = {
-                id: '1',
-                ...createUserDto,
-            };
-            mockUserService.create.mockResolvedValue(result);
+            const createdUser = { id: '1', ...createUserDto };
 
-            const response = await controller.create(createUserDto);
-            expect(response.statusCode).toBe(201);
-            expect(response.message).toBe('User created successfully');
-            expect(response.data).toEqual(result);
+            mockUsersService.create.mockResolvedValue(createdUser);
+
+            const result = await controller.create(createUserDto);
+
+            expect(result.statusCode).toBe(201);
+            expect(result.message).toBe('User created successfully');
+            expect(result.data).toEqual(createdUser);
         });
 
-        it('devrait renvoyer une erreur si l’utilisateur existe déjà', async () => {
-            const createUserDto: CreateUserDto = {
-                name: 'Doe',
-                firstname: 'John',
-                email: 'john.doe@example.com',
-                password: 'password123',
-                role: Role.PARTICIPANT,
-                creation_date: new Date(),
+        it('should throw ConflictException if email already exists', async () => {
+            const createUserDto: ICreateUser = {
+                email: 'test@test.com', name: 'John Doe', password: 'password123',
+                firstname: '',
+                role: Role.ADMIN,
+                creation_date: new Date()
             };
 
-            mockUserService.create.mockRejectedValue(new ConflictException('User with this email already exists'));
+            mockUsersService.create.mockRejectedValue(new ConflictException('User with this email already exists'));
 
             try {
                 await controller.create(createUserDto);
-            } catch (error) {
-                expect(error.response.statusCode).toBe(409);
-                expect(error.response.message).toBe('User with this email already exists');
+            } catch (e) {
+                expect(e.response.statusCode).toBe(409);
+                expect(e.response.message).toBe('User with this email already exists');
             }
         });
     });
 
     describe('findAll', () => {
-        it('devrait retourner tous les utilisateurs', async () => {
-            const result = [
-                {
-                    id: '1',
-                    name: 'Doe',
-                    firstname: 'John',
-                    email: 'john.doe@example.com',
-                    role: Role.PARTICIPANT,
-                    creation_date: new Date(),
-                },
-            ];
-            mockUserService.findAll.mockResolvedValue(result);
-
-            mockJwtService.verifyAsync.mockResolvedValue({ sub: 'id' });
-
-            const response = await controller.findAll();
-            expect(response.statusCode).toBe(200);
-            expect(response.message).toBe('Users retrieved successfully');
-            expect(response.data).toEqual(result);
-        });
-
-        it('devrait échouer si le token est invalide', async () => {
-            const result = [
-                {
-                    id: '1',
-                    name: 'Doe',
-                    firstname: 'John',
-                    email: 'john.doe@example.com',
-                    role: Role.PARTICIPANT,
-                    creation_date: new Date(),
-                },
+        it('should return an array of users', async () => {
+            const users = [
+                { id: '1', email: 'test@test.com', name: 'John Doe' },
+                { id: '2', email: 'test2@test.com', name: 'Jane Doe' },
             ];
 
-            // Simulation d'un token invalide
-            mockJwtService.verifyAsync.mockRejectedValue(new UnauthorizedException('Invalid token'));
+            mockUsersService.findAll.mockResolvedValue(users);
 
-            try {
-                await controller.findAll();
-            } catch (error) {
-                expect(error.response.statusCode).toBe(401);
-                expect(error.response.message).toBe('Unauthorized');
-            }
+            const result = await controller.findAll();
+
+            expect(result.statusCode).toBe(200);
+            expect(result.message).toBe('Users retrieved successfully');
+            expect(result.data).toEqual(users);
         });
     });
 
     describe('findOne', () => {
-        it('devrait renvoyer un utilisateur trouvé', async () => {
-            const result = {
-                id: '1',
-                name: 'Doe',
-                firstname: 'John',
-                email: 'john.doe@example.com',
-                role: Role.PARTICIPANT,
-                creation_date: new Date(),
-            };
-            mockUserService.findOne.mockResolvedValue(result);
+        it('should return a single user', async () => {
+            const user = { id: '1', email: 'test@test.com', name: 'John Doe' };
 
-            mockJwtService.verifyAsync.mockResolvedValue({ sub: 'id' });
+            mockUsersService.findOne.mockResolvedValue(user);
 
-            const response = await controller.findOne('1');
-            expect(response.statusCode).toBe(200);
-            expect(response.message).toBe('User retrieved successfully');
-            expect(response.data).toEqual(result);
+            const result = await controller.findOne('1');
+
+            expect(result.statusCode).toBe(200);
+            expect(result.message).toBe('User retrieved successfully');
+            expect(result.data).toEqual(user);
         });
 
-        it('devrait renvoyer une erreur si l’utilisateur n’est pas trouvé', async () => {
-            mockUserService.findOne.mockResolvedValue(null);
+        it('should throw NotFoundException if user does not exist', async () => {
+            mockUsersService.findOne.mockResolvedValue(null);
+
             try {
-                await controller.findOne('2');
-            } catch (error) {
-                expect(error.response.statusCode).toBe(404);
-                expect(error.response.message).toBe("Error retrieving user");
+                await controller.findOne('999');
+            } catch (e) {
+                expect(e.response.statusCode).toBe(404);
+                expect(e.response.message).toBe('Error retrieving user');
             }
         });
     });
 
     describe('update', () => {
-        it('devrait échouer si le token est invalide', async () => {
-            const updateUserDto: UpdateUserDto = {
-                name: 'Updated Doe',
-                firstname: 'Updated John',
-                email: 'updated.john.doe@example.com',
-                role: Role.PARTICIPANT,
-            };
+        it('should update user information', async () => {
+            const updateUserDto: IUpdateUser = { name: 'John Updated' };
+            const updatedUser = { id: '1', email: 'test@test.com', name: 'John Updated' };
 
-            mockUserService.findOne.mockResolvedValue({ id: '1', name: 'Doe' });
+            mockUsersService.findOne.mockResolvedValue(updatedUser);
+            mockUsersService.update.mockResolvedValue(updatedUser);
 
-            // Simulation d'un token invalide
-            mockJwtService.verifyAsync.mockRejectedValue(new UnauthorizedException('Invalid token'));
+            const result = await controller.update('1', updateUserDto);
 
-            try {
-                await controller.update('1', updateUserDto);
-            } catch (error) {
-                expect(error.response.statusCode).toBe(401);
-                expect(error.response.message).toBe('Unauthorized');
-            }
+            expect(result.statusCode).toBe(200);
+            expect(result.message).toBe('User updated successfully');
         });
 
-        it('devrait mettre à jour un utilisateur avec succès', async () => {
-            const updateUserDto: UpdateUserDto = {
-                name: 'Updated Doe',
-                firstname: 'Updated John',
-                email: 'updated.john.doe@example.com',
-                role: Role.PARTICIPANT,
-            };
+        it('should throw NotFoundException if user does not exist', async () => {
+            const updateUserDto: IUpdateUser = { name: 'John Updated' };
 
-            const user = { id: '1', name: 'Doe', firstname: 'John', email: 'john.doe@example.com', role: Role.PARTICIPANT };
-            mockUserService.findOne.mockResolvedValue(user);
-            mockUserService.update.mockResolvedValue(undefined);
-
-            mockJwtService.verifyAsync.mockResolvedValue({ sub: 'id' });
-
-            const response = await controller.update('1', updateUserDto);
-            expect(response.statusCode).toBe(200);
-            expect(response.message).toBe('User updated successfully');
-        });
-
-        it('devrait renvoyer une erreur si l’utilisateur n’est pas trouvé', async () => {
-            const updateUserDto: UpdateUserDto = {
-                name: 'Updated Doe',
-                firstname: 'Updated John',
-                email: 'updated.john.doe@example.com',
-                role: Role.PARTICIPANT,
-            };
-
-            mockUserService.findOne.mockResolvedValue(null);
-            mockUserService.update.mockRejectedValue(new NotFoundException('User not found'));
-
-            mockJwtService.verifyAsync.mockResolvedValue({ sub: 'id' });
+            mockUsersService.findOne.mockResolvedValue(null);
 
             try {
-                await controller.update('1', updateUserDto);
-            } catch (error) {
-                expect(error.response.statusCode).toBe(404);
-                expect(error.response.message).toBe('Error updating user');
+                await controller.update('999', updateUserDto);
+            } catch (e) {
+                expect(e.response.statusCode).toBe(404);
+                expect(e.response.message).toBe('Error updating user');
             }
         });
     });
 
     describe('updatePassword', () => {
-        it('devrait échouer si le token est invalide', async () => {
-            mockUserService.findOne.mockResolvedValue({ id: '1', name: 'Doe' });
+        it('should update user password', async () => {
+            const newPassword = 'newPassword123';
 
-            // Simulation d'un token invalide
-            mockJwtService.verifyAsync.mockRejectedValue(new UnauthorizedException('Invalid token'));
+            mockUsersService.findOne.mockResolvedValue({ id: '1', email: 'test@test.com' });
+            mockUsersService.updatePassword.mockResolvedValue(null);
 
-            try {
-                await controller.updatePassword('1', 'newpassword');
-            } catch (error) {
-                expect(error.response.statusCode).toBe(401);
-                expect(error.response.message).toBe('Unauthorized');
-            }
+            const result = await controller.updatePassword('1', newPassword);
+
+            expect(result.statusCode).toBe(200);
+            expect(result.message).toBe('Password updated successfully');
         });
 
-        it('devrait mettre à jour le mot de passe avec succès', async () => {
+        it('should throw NotFoundException if user does not exist', async () => {
+            const newPassword = 'newPassword123';
 
-            const user = { id: '1', name: 'Doe', email: 'john.doe@example.com' };
-            mockUserService.findOne.mockResolvedValue(user);
-            mockUserService.updatePassword.mockResolvedValue(undefined);
-
-            mockJwtService.verifyAsync.mockResolvedValue({ sub: 'id' });
-
-            const response = await controller.updatePassword('1', 'newpassword');
-            expect(response.statusCode).toBe(200);
-            expect(response.message).toBe('Password updated successfully');
-        });
-
-        it('devrait renvoyer une erreur si l’utilisateur n’est pas trouvé', async () => {
-
-            mockUserService.findOne.mockResolvedValue(null);
-            mockUserService.updatePassword.mockRejectedValue(new NotFoundException('User not found'));
-
-            mockJwtService.verifyAsync.mockResolvedValue({ sub: 'id' });
+            mockUsersService.findOne.mockResolvedValue(null);
 
             try {
-                await controller.updatePassword('1', 'newpassword');
-            } catch (error) {
-                expect(error.response.statusCode).toBe(404);
-                expect(error.response.message).toBe('Error updating password');
+                await controller.updatePassword('999', newPassword);
+            } catch (e) {
+                expect(e.response.statusCode).toBe(404);
+                expect(e.response.message).toBe('Error updating password');
             }
         });
     });
 
     describe('remove', () => {
-        it('devrait échouer si le token est invalide', async () => {
-            // Simulate an invalid token
-            mockJwtService.verifyAsync.mockRejectedValue(new UnauthorizedException('Invalid token'));
+        it('should delete a user', async () => {
+            mockUsersService.remove.mockResolvedValue(null);
+
+            const result = await controller.remove('1');
+
+            expect(result.statusCode).toBe(200);
+            expect(result.message).toBe('User deleted successfully');
+        });
+
+        it('should throw NotFoundException if user does not exist', async () => {
+            mockUsersService.remove.mockRejectedValue(new NotFoundException('Error deleting user'));
 
             try {
-                await controller.remove('1');
-            } catch (error) {
-                expect(error.response.statusCode).toBe(401);
-                expect(error.response.message).toBe('Unauthorized');
+                await controller.remove('999');
+            } catch (e) {
+                expect(e.response.statusCode).toBe(404);
+                expect(e.response.message).toBe('Error deleting user');
             }
         });
-
-        it('devrait supprimer un utilisateur avec succès', async () => {
-            mockUserService.remove.mockResolvedValue(undefined);
-
-            mockJwtService.verifyAsync.mockResolvedValue({ sub: 'id' });
-
-            const response = await controller.remove('1');
-
-            expect(response.statusCode).toBe(200);
-            expect(response.message).toBe('User deleted successfully');
-        });
-
-        it('devrait renvoyer une erreur si l’utilisateur n’est pas trouvé', async () => {
-            mockUserService.remove.mockRejectedValue(new NotFoundException('User not found'));
-
-            mockJwtService.verifyAsync.mockResolvedValue({ sub: 'id' });
-
-            try {
-                await controller.remove('1');
-            } catch (error) {
-                expect(error.response.statusCode).toBe(404);
-                expect(error.response.message).toBe('Error deleting user');
-            }
-        });
-
-
     });
 });

@@ -11,7 +11,7 @@
 
                 <div class="mb-4">
                     <label for="description" class="block text-sm font-semibold text-gray-700">{{ $t('description')
-                    }}</label>
+                        }}</label>
                     <textarea v-model="newTournament.description" id="description"
                         class="w-full p-2 border border-gray-300 rounded-lg" :placeholder="$t('description')"
                         required></textarea>
@@ -19,7 +19,7 @@
 
                 <div class="mb-4">
                     <label for="start_date" class="block text-sm font-semibold text-gray-700">{{ $t('start_date')
-                    }}</label>
+                        }}</label>
                     <input v-model="newTournament.start_date" id="start_date" type="datetime-local"
                         class="w-full p-2 border border-gray-300 rounded-lg" :min="getTodayDateTime()" required />
                 </div>
@@ -70,6 +70,11 @@ const getTodayDateTime = () => {
 const handleCreateTournament = async () => {
     try {
         await createTournament(newTournament.value);
+        newTournament.value = {
+            name: '',
+            description: '',
+            start_date: ''
+        };
         showSuccessToast('create_tournament_ok');
         await props.fetchTournaments();
     } catch (error) {

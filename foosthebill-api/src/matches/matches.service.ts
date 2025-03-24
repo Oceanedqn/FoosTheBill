@@ -1,14 +1,18 @@
 import { Injectable, NotFoundException, InternalServerErrorException, forwardRef, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Match } from './match.entity';
-import { CreateMatchesDto, MatchDto, MatchResponseDto, MatchesResponseDto, UpdateEndMatch, UpdateMatchDto } from './dto/match.dto';
+import { ICreateMatches, IMatch, IRoundMatches, IUpdateMatch } from './dto/match.dto';
 import { TournamentsService } from 'src/tournaments/tournaments.service';
-import { TeamResponseDto } from 'src/teams/dto/team.dto';
-import { mapToMatchesResponseDto, mapToMatchResponseDto } from 'src/utils/map-dto.utils';
 import { MatchResult } from 'src/match-results/match-result.entity';
 import { Ranking } from 'src/rankings/ranking.entity';
 import { RankingsService } from 'src/rankings/rankings.service';
+import { mapToIMatch, mapToITeam, mapToITeamScore } from 'src/utils/map-dto.utils';
+import { Match } from './match.entity';
+import { ITeam } from 'src/teams/dto/team.dto';
+import { MatchTeamsService } from 'src/match-team/match-teams.service';
+import { MatchTeam } from 'src/match-team/match-team.entity';
+import { Tournament } from 'src/tournaments/tournament.entity';
+import { ITournament } from 'src/tournaments/dto/tournament.dto';
 
 @Injectable()
 export class MatchesService {
@@ -17,6 +21,8 @@ export class MatchesService {
         @Inject(forwardRef(() => TournamentsService)) private readonly tournamentsService: TournamentsService,
         @Inject(forwardRef(() => RankingsService)) private readonly rankingsService: RankingsService,
         @InjectRepository(MatchResult) private matchResultsRepository: Repository<MatchResult>,
+        @InjectRepository(MatchTeam) private matchTeamsRepository: Repository<MatchTeam>,
+        @Inject(forwardRef(() => MatchTeamsService)) private readonly matchTeamsService: MatchTeamsService,
     ) { }
 
     /**
@@ -28,137 +34,229 @@ export class MatchesService {
      * @throws NotFoundException - If the tournament is not found.
      * @throws InternalServerErrorException - If there is an error during the creation of the matches.
      */
-    async createMatches(createMatchesDto: CreateMatchesDto, userId: string): Promise<MatchesResponseDto[]> {
+    async createMatches(createMatchesDto: ICreateMatches, userId: string): Promise<IRoundMatches[]> {
         try {
+            // Récupérer le tournoi
             const tournament = await this.tournamentsService.findOne(createMatchesDto.tournamentId, userId);
             if (!tournament) {
                 throw new NotFoundException('Tournament not found');
             }
 
-            let teams = [...createMatchesDto.teams];
+            const teams = this.adjustTeamsForOddNumber(createMatchesDto.teams);
+            const roundMatches = await this.generateRoundMatches(tournament, teams);
 
-            // Check if the number of teams is odd and add a dummy team
-            const isOdd = teams.length % 2 !== 0;
-            if (isOdd) {
-                teams.push({
-                    id: "empty",
-                    name: "No team",
-                    participant1: null,
-                    participant2: null,
-                } as unknown as TeamResponseDto);
-            }
+            await this.createInitialRankings(tournament, teams)
 
-            const totalRounds = teams.length - 1;
-            const matchResponses: MatchesResponseDto[] = [];
-
-
-            for (const team of teams) {
-                if (team.id !== "empty") {
-                    await this.rankingsService.create({
-                        tournament: tournament,
-                        team: team,
-                        position: 0,
-                        points: 0,
-                    } as unknown as Ranking);
-                }
-            }
-
-
-            // Generate the matches while respecting the rotation of the teams
-            for (let round = 0; round < totalRounds; round++) {
-                const matchRounds: MatchDto[] = [];
-
-                for (let i = 0; i < teams.length / 2; i++) {
-                    const team1 = teams[i];
-                    const team2 = teams[teams.length - 1 - i];
-
-                    // Do not save a match for a fictitious team
-                    if (team1.id !== "empty" && team2.id !== "empty") {
-                        const match = this.matchesRepository.create({
-                            tournament: tournament,
-                            team1: team1,
-                            team2: team2,
-                            score_team_1: 0,
-                            score_team_2: 0,
-                            round: round + 1,
-                            isClosed: false
-                        });
-
-                        const savedMatch = await this.matchesRepository.save(match);
-
-                        matchRounds.push({
-                            id: savedMatch.id,
-                            team1: savedMatch.team1,
-                            team2: savedMatch.team2,
-                            round: round + 1,
-                            score_team_1: savedMatch.score_team_1,
-                            score_team_2: savedMatch.score_team_2,
-                            isClosed: false
-                        });
-                    }
-                }
-                // Map the round matches to the MatchResponseDto
-                matchResponses.push({
-                    round: round + 1, // ID du round
-                    matches: matchRounds.map(match => mapToMatchResponseDto(match, userId)),
-                });
-
-                // Team rotation: the first team stays fixed, while the others rotate
-                teams = [teams[0], ...teams.slice(2), teams[1]];
-            }
-
-            return matchResponses;
+            return roundMatches;
         } catch (error) {
             console.error("Error in createMatches:", error);
             throw new InternalServerErrorException('Error creating match', error.message);
         }
     }
 
+    private async createMatch(tournament: ITournament, round: number, team1: ITeam, team2: ITeam): Promise<IMatch> {
+        try {
+            // Créer un match
+            const match = this.matchesRepository.create({
+                tournament,
+                round: round + 1,  // On commence les rounds à 1
+                isClosed: false,
+            });
+
+            const savedMatch = await this.matchesRepository.save(match);
+
+            // Vérification de la sauvegarde du match
+            if (!savedMatch) {
+                throw new InternalServerErrorException("Failed to save the match.");
+            }
+
+            // Créer et sauvegarder matchTeam1 pour l'équipe 1
+            const matchTeam1 = this.matchTeamsRepository.create({
+                match: savedMatch, // Associer le match à l'équipe 1
+                team: team1,  // Associer l'équipe 1
+                score: 0,     // Initialiser les scores
+            });
+
+            // Sauvegarder le matchTeam1
+            const savedMatchTeam1 = await this.matchTeamsRepository.save(matchTeam1);
+
+            // Vérification de la sauvegarde du matchTeam1
+            if (!savedMatchTeam1) {
+                throw new InternalServerErrorException("Failed to save match team 1.");
+            }
+
+            // Créer et sauvegarder matchTeam2 pour l'équipe 2
+            const matchTeam2 = this.matchTeamsRepository.create({
+                match: savedMatch, // Associer le match à l'équipe 2
+                team: team2,  // Associer l'équipe 2
+                score: 0,     // Initialiser les scores
+            });
+
+            // Sauvegarder le matchTeam2
+            const savedMatchTeam2 = await this.matchTeamsRepository.save(matchTeam2);
+
+            // Vérification de la sauvegarde du matchTeam2
+            if (!savedMatchTeam2) {
+                throw new InternalServerErrorException("Failed to save match team 2.");
+            }
+
+            // Ajouter les matchTeams au match
+            savedMatch.matchTeams = [savedMatchTeam1, savedMatchTeam2];
+
+
+            // Retourner le match avec les équipes et les scores
+            return {
+                id: savedMatch.id,
+                round: round + 1,  // Round index commence à 1
+                teams: [
+                    mapToITeamScore(savedMatch.matchTeams[0].team, tournament.adminId, 0),
+                    mapToITeamScore(savedMatch.matchTeams[1].team, tournament.adminId, 0),
+                ],
+                isClosed: false,
+            };
+        } catch (error) {
+            console.error("Error creating match:", error);
+            throw new InternalServerErrorException('Error creating match', error.message);
+        }
+    }
+
+    private async generateRoundMatches(tournament: ITournament, teams: ITeam[]): Promise<IRoundMatches[]> {
+        const roundMatches: IRoundMatches[] = [];
+        const totalRounds = teams.length - 1;
+        let modifiedTeams = [...teams];
+
+        if (modifiedTeams.length % 2 !== 0) {
+            modifiedTeams.push({
+                id: "empty", name: "Empty",
+                isMyTeam: false,
+                players: []
+            } as ITeam);
+        }
+
+        // Générer les matchs pour chaque round
+        for (let round = 0; round < totalRounds; round++) {
+            const matchRounds: IMatch[] = [];
+
+            // Créer les matchs pour ce round
+            for (let i = 0; i < modifiedTeams.length / 2; i++) {
+                const team1 = modifiedTeams[i];
+                const team2 = modifiedTeams[modifiedTeams.length - 1 - i];
+
+                // Si une équipe est "empty", ne pas créer de match
+                if (team1.id !== "empty" && team2.id !== "empty") {
+                    const match = await this.createMatch(tournament, round, team1, team2);
+                    matchRounds.push(match);
+                }
+            }
+
+            roundMatches.push({
+                round: round + 1,
+                matches: matchRounds,
+            });
+
+            // Rotation des équipes pour le prochain round
+            modifiedTeams = [modifiedTeams[0], ...modifiedTeams.slice(2), modifiedTeams[1]];
+        }
+
+        return roundMatches;
+    }
+
+    private adjustTeamsForOddNumber(teams: ITeam[]): ITeam[] {
+        // Si le nombre d'équipes est impair, ajouter une équipe fictive
+        const isOdd = teams.length % 2 !== 0;
+        if (isOdd) {
+            teams.push({
+                id: "empty", name: "No team", players: []
+            } as unknown as ITeam);  // L'équipe fictive "empty"
+        }
+        return teams;
+    }
+
+    private async createInitialRankings(tournament: ITournament, teams: ITeam[]): Promise<void> {
+        for (const team of teams) {
+            if (team.id !== "empty") {
+                const ranking = await this.rankingsService.create({
+                    tournament,
+                    team,
+                    position: 0,
+                    points: 0,
+                } as unknown as Ranking);
+
+                if (!ranking) {
+                    console.log("Error creating ranking for team:", team.name, team.id);
+                }
+            }
+        }
+    }
+
+
+
 
     /**
- * Retrieves all matches for a given tournament.
- * 
- * @param tournamentId - The ID of the tournament whose matches are to be fetched.
- * @returns A promise that resolves to an array of `MatchesResponseDto` containing all the matches for the tournament.
- * @throws InternalServerErrorException - If there is an error fetching the matches from the repository.
- */
-    async findAll(tournamentId: string): Promise<MatchesResponseDto[]> {
+    * Retrieves all matches for a given tournament.
+    * 
+    * @param tournamentId - The ID of the tournament whose matches are to be fetched.
+    * @returns A promise that resolves to an array of `MatchesResponseDto` containing all the matches for the tournament.
+    * @throws InternalServerErrorException - If there is an error fetching the matches from the repository.
+    */
+    async findAll(tournamentId: string, userId: string): Promise<IRoundMatches[]> {
         try {
+            // Fetch all matches for the tournament, including related matchTeams, their teams, and players
             const matches = await this.matchesRepository.find({
                 where: { tournament: { id: tournamentId } },
                 relations: [
-                    'team1', 'team2',
-                    'team1.participant1', 'team1.participant2',
-                    'team2.participant1', 'team2.participant2'
+                    'matchTeams',           // Charger les matchTeams
+                    'matchTeams.team',      // Charger les équipes pour chaque matchTeam
+                    'matchTeams.team.players', // Charger les joueurs pour chaque équipe
                 ],
             });
 
-            return mapToMatchesResponseDto(matches);
-        } catch (error) {
-            throw new InternalServerErrorException('Error fetching matches', error.message);
-        }
-    }
-
-
-    /**
- * Retrieves a single match based on its ID.
- * 
- * @param id - The ID of the match to retrieve.
- * @returns A promise that resolves to a `Match` object.
- * @throws NotFoundException - If the match with the given ID is not found.
- * @throws InternalServerErrorException - If there is an error fetching the match from the repository.
- */
-    async findOne(id: string): Promise<Match> {
-        try {
-            const match = await this.matchesRepository.findOne({ where: { id }, relations: ["tournament", "team1", "team2"] });
-            if (!match) {
-                throw new NotFoundException(`Match with id ${id} not found`);
+            if (!matches || matches.length === 0) {
+                throw new NotFoundException(`No matches found for tournament with ID: ${tournamentId}`);
             }
-            return match;
+
+            // Organize matches by round
+            const roundMatches: Record<number, IMatch[]> = {};  // Group matches by round number
+
+            matches.forEach((match) => {
+                // Initialize the round if not already present
+                if (!roundMatches[match.round]) {
+                    roundMatches[match.round] = [];
+                }
+
+                // Initialize scores object for the match
+                const scores: Record<string, number> = {};
+
+                // Loop through each matchTeam and directly use the score from matchTeam
+                match.matchTeams.forEach((matchTeam) => {
+                    // Use the score directly from the matchTeam
+                    scores[matchTeam.team.id] = matchTeam.score;
+                });
+
+                // Ensure each match has two teams (matchTeams)
+                const teams = match.matchTeams.map((mt) => mt.team);
+
+                // Map the match to the required format, using the correct scores
+                const mappedMatch = mapToIMatch(match, userId, scores, teams);  // Map each team with its actual score
+
+                // Add the mapped match to the roundMatches object
+                roundMatches[match.round].push(mappedMatch);
+            });
+
+            // Convert the object into an array of IRoundMatches, sorted by round number
+            const result: IRoundMatches[] = Object.entries(roundMatches)
+                .map(([round, matches]) => ({
+                    round: parseInt(round, 10),  // Ensure round is a number
+                    matches,
+                }))
+                .sort((a, b) => a.round - b.round);  // Sort rounds in ascending order
+
+            return result; // Return the sorted round matches
         } catch (error) {
-            throw new InternalServerErrorException('Error fetching match', error.message);
+            throw new InternalServerErrorException('Error fetching matches');
         }
     }
+
 
 
     /**
@@ -170,55 +268,97 @@ export class MatchesService {
      * @throws NotFoundException - If the match with the given ID is not found.
      * @throws InternalServerErrorException - If there is an error updating the match in the repository.
      */
-    async update(id: string, matchUpdate: UpdateMatchDto): Promise<void> {
+    async update(id: string, matchUpdate: IUpdateMatch): Promise<void> {
         try {
-            const match = await this.findOne(id);
+
+            // Récupérer le match avec les équipes associées
+            const match = await this.matchesRepository.findOne({
+                where: { id },
+                relations: ['matchTeams', 'matchTeams.team', 'matchResults', 'matchResults.team'], // Charger les résultats de match
+            });
+
             if (!match) {
                 throw new NotFoundException(`Match with id ${id} not found`);
             }
 
-            // Create a new entry in MatchResult before updating the match
-            const matchResult = this.matchResultsRepository.create({
-                match: match,
-                score_team_1: matchUpdate.score_team_1,
-                score_team_2: matchUpdate.score_team_2,
-                recorded_date: new Date(),
-            });
-
-            await this.matchResultsRepository.save(matchResult);
-
-            // Update the match with the new values
-            await this.matchesRepository.update(id, matchUpdate);
-
-            if (matchUpdate.isClosed) {
-                await this.rankingsService.update(match.tournament.id, match.team1.id, match.team2.id, matchUpdate.score_team_1, matchUpdate.score_team_2);
+            // Vérifier que le match a bien deux équipes
+            if (match.matchTeams.length !== 2) {
+                throw new InternalServerErrorException('Match must have exactly two teams');
             }
 
+            // Récupérer les MatchTeams associés aux équipes via les IDs des équipes
+            const matchTeam1 = match.matchTeams.find(mt => mt.team.id === matchUpdate.team_1_id);
+            const matchTeam2 = match.matchTeams.find(mt => mt.team.id === matchUpdate.team_2_id);
+
+            if (!matchTeam1 || !matchTeam2) {
+                throw new NotFoundException('One or both teams not found in the match');
+            }
+
+            // Mise à jour des scores pour chaque équipe
+            matchTeam1.score = matchUpdate.score_team_1;
+            matchTeam2.score = matchUpdate.score_team_2;
+
+            // Sauvegarder les scores mis à jour
+            await this.matchTeamsRepository.save([matchTeam1, matchTeam2]);
+
+            // Mettre à jour l'état du match (si nécessaire)
+            match.isClosed = matchUpdate.isClosed;
+
+            // Sauvegarder le match mis à jour
+            await this.matchesRepository.save(match);
+
+            // Créer ou mettre à jour les résultats du match dans matchResults
+            const matchResult1 = match.matchResults.find(result => result.team.id === matchTeam1.team.id);
+            const matchResult2 = match.matchResults.find(result => result.team.id === matchTeam2.team.id);
+
+            // Si un matchResult existe déjà, on le met à jour, sinon on le crée
+            if (matchResult1) {
+                matchResult1.score = matchUpdate.score_team_1;
+                await this.matchResultsRepository.save(matchResult1);
+            } else {
+                // Créer un nouveau résultat pour la première équipe
+                const newResult1 = this.matchResultsRepository.create({
+                    match: match,
+                    team: matchTeam1.team,
+                    score: matchUpdate.score_team_1,
+                    recorded_date: new Date(),
+                });
+                await this.matchResultsRepository.save(newResult1);
+            }
+
+            if (matchResult2) {
+                matchResult2.score = matchUpdate.score_team_2;
+                await this.matchResultsRepository.save(matchResult2);
+            } else {
+                // Créer un nouveau résultat pour la deuxième équipe
+                const newResult2 = this.matchResultsRepository.create({
+                    match: match,
+                    team: matchTeam2.team,
+                    score: matchUpdate.score_team_2,
+                    recorded_date: new Date(),
+                });
+                await this.matchResultsRepository.save(newResult2);
+            }
+
+            // Si le match est fermé, mettre à jour les classements
+            if (matchUpdate.isClosed) {
+
+                // Mettre à jour les classements après la fermeture du match
+                await this.rankingsService.update(
+                    matchUpdate.tournament_id,
+                    match.matchTeams[0].team.id, // Première équipe
+                    match.matchTeams[1].team.id, // Deuxième équipe
+                    match.matchTeams[0].score,
+                    match.matchTeams[1].score
+                );
+
+            }
         } catch (error) {
+            console.error('Error during match update:', error);  // Log de l'erreur
             throw new InternalServerErrorException('Error updating match', error.message);
         }
     }
 
-
-    /**
- * Deletes a match by its ID.
- * 
- * @param id - The ID of the match to delete.
- * @returns A promise that resolves to the result of the deletion operation.
- * @throws NotFoundException - If the match with the given ID is not found.
- * @throws InternalServerErrorException - If there is an error deleting the match from the repository.
- */
-    async remove(id: string): Promise<any> {
-        try {
-            const result = await this.matchesRepository.delete(id);
-            if (result.affected === 0) {
-                throw new NotFoundException(`Match with id ${id} not found`);
-            }
-            return result;
-        } catch (error) {
-            throw new InternalServerErrorException('Error deleting match', error.message);
-        }
-    }
 
 
     /**

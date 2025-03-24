@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Role, User } from './user.entity';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto, UpdateUserDto, UserResponseDto } from './dto/user.dto';
+import { ICreateUser, IUpdateUser, IUser } from './dto/user.dto';
 
 @Injectable()
 export class UsersService {
@@ -33,7 +33,7 @@ export class UsersService {
      * @throws ConflictException - If a user with the same email already exists.
      * @throws InternalServerErrorException - If an error occurs while creating the user.
      */
-    async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
+    async create(createUserDto: ICreateUser): Promise<IUser> {
         try {
             const existingUser = await this.userRepository.findOne({ where: { email: createUserDto.email } });
             if (existingUser) {
@@ -46,7 +46,7 @@ export class UsersService {
 
             const createdUser = await this.userRepository.save(createUserDto);
             const { password, creation_date, ...userWithoutPassword } = createdUser;  // Remove sensitive fields
-            return userWithoutPassword as UserResponseDto;
+            return userWithoutPassword as IUser;
         } catch (error) {
             if (error instanceof ConflictException) {
                 throw error;  // If the email already exists, rethrow the ConflictException
@@ -61,12 +61,12 @@ export class UsersService {
      * @returns Promise<UserResponseDto[]> - Returns an array of users without their password or creation date.
      * @throws InternalServerErrorException - If an error occurs while fetching users.
      */
-    async findAll(): Promise<UserResponseDto[]> {
+    async findAll(): Promise<IUser[]> {
         try {
             const users = await this.userRepository.find();
             return users.map(user => {
                 const { password, creation_date, ...userWithoutPassword } = user;  // Remove sensitive fields
-                return userWithoutPassword as UserResponseDto;
+                return userWithoutPassword as IUser;
             });
         } catch (error) {
             throw new InternalServerErrorException('Error fetching users', error.message);  // Handle any errors
@@ -82,7 +82,7 @@ export class UsersService {
      * @returns Promise<UserResponseDto> - Returns the user data without the password and creation date.
      * @throws NotFoundException - If the user with the given ID does not exist.
      */
-    async findOne(id: string): Promise<UserResponseDto> {
+    async findOne(id: string): Promise<IUser> {
         const user = await this.userRepository.findOne({ where: { id } });
 
         if (!user) {
@@ -90,7 +90,7 @@ export class UsersService {
         }
 
         const { password, creation_date, ...userWithoutPassword } = user;  // Remove sensitive fields
-        return userWithoutPassword as UserResponseDto;
+        return userWithoutPassword as IUser;
     }
 
     /**
@@ -130,7 +130,7 @@ export class UsersService {
      * @throws NotFoundException - If the user with the provided ID does not exist.
      * @throws InternalServerErrorException - If an error occurs while updating the user.
      */
-    async update(id: string, updateUserDto: UpdateUserDto): Promise<void> {
+    async update(id: string, updateUserDto: IUpdateUser): Promise<void> {
         const existingUser = await this.userRepository.findOne({ where: { id } });
         if (!existingUser) {
             throw new NotFoundException(`User not found`);  // If the user does not exist, throw an exception

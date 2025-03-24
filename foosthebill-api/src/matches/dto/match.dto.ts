@@ -1,44 +1,28 @@
-import { TeamResponseDto } from "src/teams/dto/team.dto";
-import { Team } from "src/teams/team.entity";
-import { TournamentResponseDto } from "src/tournaments/dto/tournament.dto";
+import { ITeam, ITeamScore } from "src/teams/dto/team.dto";
 
-export class MatchesResponseDto {
+export interface IRoundMatches {
     round: number;
-    matches: MatchResponseDto[];
+    matches: IMatch[];
 }
 
-export class MatchDto {
+export interface IMatch {
     id: string;
     round: number;
-    score_team_1: number;
-    score_team_2: number;
-    team1: Team;
-    team2: Team;
-    isClosed: boolean;
-
-}
-
-export class MatchResponseDto {
-    id: string;
-    round: number;
-    score_team_1: number;
-    score_team_2: number;
-    team1: TeamResponseDto;
-    team2: TeamResponseDto;
+    teams: ITeamScore[]
     isClosed: boolean;
 }
 
-export class CreateMatchesDto {
+export interface ICreateMatches {
     tournamentId: string;
-    teams: TeamResponseDto[]
+    teams: ITeam[]
 }
 
-export class UpdateEndMatch {
-    isClosed: boolean
-}
 
-export class UpdateMatchDto {
+export interface IUpdateMatch {
+    team_1_id: string;
+    team_2_id: string;
     score_team_1: number;
     score_team_2: number;
     isClosed: boolean;
+    tournament_id: string;
 }

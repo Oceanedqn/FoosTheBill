@@ -1,27 +1,28 @@
 // models/Match.ts
-import { type ITeam } from './Team';
+import { type ITeam, type ITeamScore } from './Team';
 
-export interface CreateMatchesTournament {
-    tournamentId: string;
-    teams: ITeam[]
-};
-
-export interface IMatchesTournament {
+export interface IRoundMatches {
     round: number;
-    matches: IMatchTournament[];
+    matches: IMatch[];
 }
 
-export interface IMatchTournament {
+export interface IMatch {
     id: string;
     round: number;
-    score_team_1: number;
-    score_team_2: number;
-    team1: ITeam;
-    team2: ITeam;
+    teams: ITeamScore[]
+    isClosed: boolean;
 }
 
-export interface IMatchUpdate {
+export interface ICreateMatches {
+    tournamentId: string;
+    teams: ITeam[]
+}
+
+export interface IUpdateMatch {
+    team_1_id: string;
+    team_2_id: string;
     score_team_1: number;
     score_team_2: number;
     isClosed: boolean;
+    tournament_id: string
 }

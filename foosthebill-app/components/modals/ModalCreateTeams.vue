@@ -58,11 +58,10 @@
                             <tbody>
                                 <tr v-for="team in filteredTeams" :key="team.name" class="h-12 odd:bg-gray-200">
                                     <td class="px-1">{{ team.name }}</td>
-                                    <td class="px-4">{{ team.participant1!.name }} {{ team.participant1!.firstname }}
-                                    </td>
+                                    <td class="px-4">{{ team.players[0].name }} {{ team.players[0].firstname }}</td>
                                     <td class="px-4">
-                                        <span v-if="team.participant2">
-                                            {{ team.participant2.name }} {{ team.participant2.firstname }}
+                                        <span v-if="team.players[1]">
+                                            {{ team.players[1].name }} {{ team.players[1].firstname }}
                                         </span>
                                     </td>
                                     <td class="px-4">
@@ -95,32 +94,31 @@
 import { ref, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { type IUser } from '~/models/User';
-import { type CreateTeams, type CreateTeamsService } from '~/models/Team';
+import { type ICreateTeam } from '~/models/Team';
 import { createTeams } from '~/services/team.service';
 
 const props = defineProps({
     show: Boolean,
     closeModalTeams: { type: Function as PropType<() => void>, required: false },
-    fetchTournamentTeams: { type: Function as PropType<() => void>, required: false },
+    fetchTournamentDetails: { type: Function as PropType<() => void>, required: false },
     users: Array as () => IUser[],
 });
 
 const route = useRoute();
-const newTeam = ref<CreateTeams>({
+const newTeam = ref<ICreateTeam>({
     name: '',
-    participant1: null,
-    participant2: null,
+    tournamentId: '',
+    players: [],
 });
 
-const teams = ref<CreateTeams[]>([]);
+const teams = ref<ICreateTeam[]>([]);
 
 const query1 = ref('');
 const query2 = ref('');
 const filteredUsers = ref<IUser[]>([]);
-const localUsers = ref<IUser[]>(props.users ?? []); // Si props.users est undefined, initialise avec un tableau vide
+const localUsers = ref<IUser[]>(props.users ?? []);
 const activeParticipant = ref<'participant1' | 'participant2' | null>(null);
 
-// Champ de recherche pour filtrer les équipes
 const searchQuery = ref('');
 
 const filteredTeams = computed(() => {
@@ -130,9 +128,9 @@ const filteredTeams = computed(() => {
     }
 
     return teams.value.filter(team => {
-        const participant1Name = `${team.participant1?.name} ${team.participant1?.firstname}`.toLowerCase();
-        const participant2Name = team.participant2
-            ? `${team.participant2?.name} ${team.participant2?.firstname}`.toLowerCase()
+        const participant1Name = `${team.players[0]?.name} ${team.players[0]?.firstname}`.toLowerCase();
+        const participant2Name = team.players[1]
+            ? `${team.players[1]?.name} ${team.players[1]?.firstname}`.toLowerCase()
             : '';
 
         return participant1Name.includes(query) || participant2Name.includes(query);
@@ -148,58 +146,62 @@ const filterUsers = (participant: 'participant1' | 'participant2') => {
         return;
     }
 
-    // Filtrer uniquement les utilisateurs dans localUsers
     filteredUsers.value = localUsers.value.filter(user => {
         const fullName = `${user.name} ${user.firstname}`.toLowerCase();
         return fullName.includes(query.toLowerCase());
     });
 
-    // Enlever les utilisateurs déjà sélectionnés de la liste
-    if (participant === 'participant1' && newTeam.value.participant1) {
-        filteredUsers.value = filteredUsers.value.filter(user => user.id !== newTeam.value.participant1!.id);
+    if (participant === 'participant1' && newTeam.value.players.length > 0) {
+        filteredUsers.value = filteredUsers.value.filter(user => user.id !== newTeam.value.players[0].id);
     }
-    if (participant === 'participant2' && newTeam.value.participant2) {
-        filteredUsers.value = filteredUsers.value.filter(user => user.id !== newTeam.value.participant2!.id);
+    if (participant === 'participant2' && newTeam.value.players.length > 1) {
+        filteredUsers.value = filteredUsers.value.filter(user => user.id !== newTeam.value.players[1].id);
     }
 };
 
 watch(() => props.users, (newUsers) => {
-    // Vérifiez si newUsers est défini et est un tableau
-    localUsers.value = newUsers ? [...newUsers] : []; // Si newUsers est défini, copiez-le, sinon initialisez avec un tableau vide
-    // Appliquez également un filtre pour retirer les utilisateurs déjà sélectionnés
+    localUsers.value = newUsers ? [...newUsers] : [];
     filterUsers('participant1');
     filterUsers('participant2');
 }, { immediate: true });
 
 const selectUser = (user: IUser, participant: 'participant1' | 'participant2') => {
-    if (participant === 'participant1') {
-        newTeam.value.participant1 = user;
+    if (participant === 'participant1' && newTeam.value.players.length < 2) {
+        newTeam.value.players.push(user);
         query1.value = `${user.name} ${user.firstname}`;
-    } else if (participant === 'participant2') {
-        newTeam.value.participant2 = user;
+    } else if (participant === 'participant2' && newTeam.value.players.length < 2) {
+        newTeam.value.players.push(user);
         query2.value = `${user.name} ${user.firstname}`;
     }
 
-    // Retirer l'utilisateur sélectionné de localUsers
     const index = localUsers.value.findIndex(u => u.id === user.id);
     if (index !== -1) {
         localUsers.value.splice(index, 1);
     }
 
-    filteredUsers.value = []; // Clear filtered users after selection
+    filteredUsers.value = [];
 };
 
+watch([query1, query2], () => {
+    if (!query1.value.trim() && newTeam.value.players[0]) {
+        newTeam.value.players.splice(0, 1);
+    }
+    if (!query2.value.trim() && newTeam.value.players[1]) {
+        newTeam.value.players.splice(1, 1);
+    }
+}, { immediate: true });
+
 const handleCreateTeams = async () => {
-    if (teams.value.length == 0) {
+    if (teams.value.length === 0) {
         showWarningToast('add_one_team');
         return;
     }
     const tournamentId = route.params.id as string;
     try {
-        await createTeams(mapToCreateTeams(teams.value), tournamentId);
+        await createTeams(teams.value, tournamentId);
         showSuccessToast('create_teams_ok');
-        if (props.fetchTournamentTeams) {
-            await props.fetchTournamentTeams();
+        if (props.fetchTournamentDetails) {
+            await props.fetchTournamentDetails();
         }
     } catch (error) {
         showAlertToast('create_teams_error');
@@ -210,35 +212,26 @@ const handleCreateTeams = async () => {
     }
 };
 
-const mapToCreateTeams = (teams: CreateTeams[]): CreateTeamsService[] => {
-    return teams.map(team => ({
-        name: team.name,
-        participant1: team.participant1 ? `${team.participant1.id}` : null,
-        participant2: team.participant2 ? `${team.participant2.id}` : null,
-    }));
-};
-
 const handleAddTeam = async () => {
     teams.value.push(newTeam.value);
     newTeam.value = {
         name: '',
-        participant1: null,
-        participant2: null,
+        tournamentId: '',
+        players: [],
     };
 
     query1.value = '';
     query2.value = '';
 };
 
-const handleDeleteTeam = (teamToDelete: CreateTeams) => {
+const handleDeleteTeam = (teamToDelete: ICreateTeam) => {
     const index = teams.value.findIndex(team =>
         team.name === teamToDelete.name &&
-        team.participant1?.firstname === teamToDelete.participant1?.firstname &&
-        team.participant2?.firstname === teamToDelete.participant2?.firstname
+        team.players[0]?.firstname === teamToDelete.players[0]?.firstname &&
+        team.players[1]?.firstname === teamToDelete.players[1]?.firstname
     );
 
     if (index !== -1) {
-        // Supprimer l'équipe de la liste
         teams.value.splice(index, 1);
     }
 };
