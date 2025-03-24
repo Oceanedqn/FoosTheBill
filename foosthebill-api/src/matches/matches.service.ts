@@ -30,7 +30,7 @@ export class MatchesService {
      * 
      * @param createMatchesDto - Data Transfer Object containing tournament ID and the list of teams to participate.
      * @param userId - The ID of the user making the request.
-     * @returns A promise that resolves to an array of `MatchesResponseDto`, which represents the matches created for the tournament.
+     * @returns A promise that resolves to an array of `IRoundMatches`, which represents the matches created for the tournament.
      * @throws NotFoundException - If the tournament is not found.
      * @throws InternalServerErrorException - If there is an error during the creation of the matches.
      */
@@ -54,6 +54,17 @@ export class MatchesService {
         }
     }
 
+
+    /**
+     * Creates a match between two teams for a given tournament.
+     * 
+     * @param tournament - The tournament in which the match is created.
+     * @param round - The round number for the match.
+     * @param team1 - The first team to compete.
+     * @param team2 - The second team to compete.
+     * @returns A promise that resolves to an `IMatch` representing the created match with associated teams and scores.
+     * @throws InternalServerErrorException - If there is an error while creating the match.
+     */
     private async createMatch(tournament: ITournament, round: number, team1: ITeam, team2: ITeam): Promise<IMatch> {
         try {
             // Créer un match
@@ -120,6 +131,15 @@ export class MatchesService {
         }
     }
 
+
+    /**
+     * Generates the round matches for a tournament based on the provided teams.
+     * 
+     * @param tournament - The tournament for which round matches will be generated.
+     * @param teams - The list of teams participating in the tournament.
+     * @returns A promise that resolves to an array of `IRoundMatches` representing the round-based matches.
+     * @throws InternalServerErrorException - If an error occurs during match generation.
+     */
     private async generateRoundMatches(tournament: ITournament, teams: ITeam[]): Promise<IRoundMatches[]> {
         const roundMatches: IRoundMatches[] = [];
         const totalRounds = teams.length - 1;
@@ -161,6 +181,13 @@ export class MatchesService {
         return roundMatches;
     }
 
+
+    /**
+     * Adjusts the teams for odd numbers by adding a fictional "empty" team if necessary.
+     * 
+     * @param teams - The list of teams to adjust.
+     * @returns The adjusted list of teams.
+     */
     private adjustTeamsForOddNumber(teams: ITeam[]): ITeam[] {
         // Si le nombre d'équipes est impair, ajouter une équipe fictive
         const isOdd = teams.length % 2 !== 0;
@@ -172,6 +199,14 @@ export class MatchesService {
         return teams;
     }
 
+
+    /**
+     * Creates initial rankings for each team in the tournament.
+     * 
+     * @param tournament - The tournament for which rankings will be created.
+     * @param teams - The list of teams to be ranked.
+     * @returns A promise that resolves when the initial rankings have been created.
+     */
     private async createInitialRankings(tournament: ITournament, teams: ITeam[]): Promise<void> {
         for (const team of teams) {
             if (team.id !== "empty") {
@@ -181,10 +216,6 @@ export class MatchesService {
                     position: 0,
                     points: 0,
                 } as unknown as Ranking);
-
-                if (!ranking) {
-                    console.log("Error creating ranking for team:", team.name, team.id);
-                }
             }
         }
     }
@@ -193,12 +224,12 @@ export class MatchesService {
 
 
     /**
-    * Retrieves all matches for a given tournament.
-    * 
-    * @param tournamentId - The ID of the tournament whose matches are to be fetched.
-    * @returns A promise that resolves to an array of `MatchesResponseDto` containing all the matches for the tournament.
-    * @throws InternalServerErrorException - If there is an error fetching the matches from the repository.
-    */
+     * Retrieves all matches for a given tournament.
+     * 
+     * @param tournamentId - The ID of the tournament whose matches are to be fetched.
+     * @returns A promise that resolves to an array of `IRoundMatches` containing all the matches for the tournament.
+     * @throws InternalServerErrorException - If there is an error fetching the matches from the repository.
+     */
     async findAll(tournamentId: string, userId: string): Promise<IRoundMatches[]> {
         try {
             // Fetch all matches for the tournament, including related matchTeams, their teams, and players
@@ -362,12 +393,12 @@ export class MatchesService {
 
 
     /**
- * Checks whether matches have already been created for a given tournament.
- * 
- * @param tournamentId - The ID of the tournament to check for existing matches.
- * @returns A promise that resolves to a boolean: `true` if matches have been created, `false` otherwise.
- * @throws InternalServerErrorException - If there is an error checking the matches in the repository.
- */
+     * Checks whether matches have already been created for a given tournament.
+     * 
+     * @param tournamentId - The ID of the tournament to check for existing matches.
+     * @returns A promise that resolves to a boolean: `true` if matches have been created, `false` otherwise.
+     * @throws InternalServerErrorException - If there is an error checking the matches in the repository.
+     */
     async isMatchesCreated(tournamentId: string): Promise<boolean> {
         try {
 

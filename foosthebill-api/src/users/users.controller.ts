@@ -44,12 +44,12 @@ export class UsersController {
     }
 
     /**
-     * Retrieves a specific user by ID.
-     * This route fetches a single user by their ID. If no user is found, it throws a NotFoundException.
-     * @param id - The ID of the user to retrieve.
-     * @returns { statusCode: HttpStatus.OK, message: string, data: UserResponseDto }
-     * @throws NotFoundException - If the user with the provided ID does not exist.
-     */
+    * Retrieves a specific user by ID.
+    * This route fetches a single user by their ID. If no user is found, it throws a NotFoundException.
+    * @param id - The ID of the user to retrieve.
+    * @returns { statusCode: HttpStatus.OK, message: string, data: UserResponseDto }
+    * @throws NotFoundException - If the user with the provided ID does not exist.
+    */
     @UseGuards(AuthGuard)
     @Get(':id')
     async findOne(@Param('id') id: string) {

@@ -125,9 +125,6 @@ describe('TournamentsService', () => {
             expect(result).toHaveProperty('start_date');
             expect(result.startDate).toEqual(new Date('2025-03-25T05:00:24.999Z'));
             expect(result.adminId).toEqual('admin-id');
-
-            // Log pour vérifier le contenu de `result`
-            console.log(result); // Ajoutons un log pour vérifier les propriétés du résultat
         });
     });
 
