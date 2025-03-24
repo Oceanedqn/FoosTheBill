@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia';
 import type { AuthResponse } from '~/models/Response';
-import type { User } from '~/models/User';
+import type { IUser } from '~/models/User';
 import { getUserInfo, login, register } from '~/services/auth.service';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: null as User | null,
+    user: null as IUser | null,
     accessToken: null as string | null,
   }),
 
@@ -35,7 +35,7 @@ export const useAuthStore = defineStore('auth', {
         localStorage.setItem('accessToken', this.accessToken);
 
         await this.fetchUserInfo();
-        router.push('/');
+        router.push('/tournaments');
       } catch (error) {
         console.error('Login failed:', error);
         throw error;
