@@ -57,6 +57,9 @@ export class TournamentsService {
       await this.tournamentsRepository.save(tournament);
       return mapToITournament(tournament, false, false, 0);
     } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       throw new InternalServerErrorException(error.message);
     }
   }
