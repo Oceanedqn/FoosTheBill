@@ -13,12 +13,12 @@ export class MatchesController {
 
 
     /**
-     * Met à jour les informations d'un match existant.
+     * Updates the information of an existing match.
      * 
-     * @param id L'ID du match à mettre à jour.
-     * @param match Les nouvelles données du match sous forme de `UpdateMatchDto`.
-     * @returns Un objet de réponse avec le statut HTTP 200 et un message de succès si la mise à jour réussit.
-     * @throws HttpException Si une erreur se produit lors de la mise à jour, renvoie un statut HTTP 500 avec un message d'erreur.
+     * @param id - The ID of the match to update.
+     * @param match - The updated match data as an `IUpdateMatch` object.
+     * @returns An object with an HTTP status code 200 and a success message if the update is successful.
+     * @throws HttpException - If an error occurs during the update, throws an HTTP status 500 with an error message.
      */
     @UseGuards(AuthGuard, RolesGuard)
     @Put(':id')

@@ -83,9 +83,8 @@ export function mapToIMatch(match: Match, userId: string, scores: Record<string,
         id: match.id,
         round: match.round,
         teams: teams.map(team => {
-            const score = scores[team.id] || 0; // Vérifier que le score est bien assigné
-            console.log(`Mapping team ${team.id} with score ${score}`);
-            return mapToITeamScore(team, userId, score); // Passer le score individuel de chaque équipe
+            const score = scores[team.id] || 0;
+            return mapToITeamScore(team, userId, score);
         }),
         isClosed: match.isClosed
     };

@@ -13,6 +13,15 @@ export class RankingsService {
         private rankingsRepository: Repository<Ranking>
     ) { }
 
+
+    /**
+     * Creates a new ranking.
+     * This method saves the provided ranking to the database.
+     * 
+     * @param ranking - The ranking to be created.
+     * @returns A promise containing the created ranking.
+     * @throws InternalServerErrorException - If there is an error while creating the ranking.
+     */
     async create(ranking: Ranking): Promise<Ranking> {
         try {
             return await this.rankingsRepository.save(ranking);
@@ -21,6 +30,17 @@ export class RankingsService {
         }
     }
 
+
+    /**
+     * Fetches all rankings for a specific tournament.
+     * This method retrieves the rankings for a tournament, ordered by points in descending order,
+     * and maps them to the IRanking DTO format.
+     * 
+     * @param tournamentId - The ID of the tournament.
+     * @param userId - The ID of the user for additional context (e.g., checking if a user is part of the team).
+     * @returns A promise containing the list of rankings for the given tournament.
+     * @throws InternalServerErrorException - If there is an error while fetching the rankings.
+     */
     async findAllByTournamentId(tournamentId: string, userId: string): Promise<IRanking[]> {
         try {
             // Retrieve rankings with the appropriate relations
@@ -29,8 +49,6 @@ export class RankingsService {
                 relations: ['team', 'team.players', 'tournament'],
                 order: { points: 'DESC' }
             });
-
-            console.log("Rankings with loaded relations:", rankings);
 
             if (!rankings || rankings.length === 0) {
                 return [];
@@ -60,11 +78,20 @@ export class RankingsService {
     }
 
 
-
+    /**
+     * Updates the rankings based on the match results.
+     * This method updates the rankings by awarding points to the teams based on the match scores.
+     * 
+     * @param tournamentId - The ID of the tournament in which the match took place.
+     * @param team1Id - The ID of the first team.
+     * @param team2Id - The ID of the second team.
+     * @param scoreTeam1 - The score of the first team.
+     * @param scoreTeam2 - The score of the second team.
+     * @returns A promise indicating that the rankings have been updated.
+     * @throws NotFoundException - If the rankings for one or both teams are not found.
+     * @throws InternalServerErrorException - If there is an error while updating the rankings.
+     */
     async update(tournamentId: string, team1Id: string, team2Id: string, scoreTeam1: number, scoreTeam2: number): Promise<void> {
-        console.log("Updating rankings for teams:", team1Id, team2Id);
-        console.log("Scores:", scoreTeam1, scoreTeam2);
-
         try {
             const team1Ranking = await this.rankingsRepository.findOne({
                 where: { tournament: { id: tournamentId }, team: { id: team1Id } }
@@ -96,7 +123,14 @@ export class RankingsService {
         }
     }
 
-
+    /**
+     * Updates the ranking positions based on the current points.
+     * This method recalculates the positions of all teams in the tournament based on the points in descending order.
+     * 
+     * @param tournamentId - The ID of the tournament whose rankings are to be updated.
+     * @returns A promise indicating that the ranking positions have been updated.
+     * @throws InternalServerErrorException - If there is an error while updating the ranking positions.
+     */
     async updateRankingPositions(tournamentId: string): Promise<void> {
         try {
             const rankings = await this.rankingsRepository.find({
