@@ -33,6 +33,8 @@ Exécutez la commande suivante pour installer les dépendances nécessaires au b
 - DB_NAME=foosthebill
 Voici le contenu du fichier .env :
 
+(ne pas oublier de créer la base de données et d'adapter le .ENV en fonction)
+
 4. Démarrer le Serveur Backend
 Une fois les dépendances installées et le fichier .env configuré, lancez le serveur backend avec :
 
@@ -66,3 +68,9 @@ Cela démarrera le frontend en mode développement, et il devrait être disponib
 Vous devriez maintenant pouvoir accéder à votre application en allant à l'URL du frontend (http://localhost:3080), et le frontend devrait communiquer avec le backend (http://localhost:3001).
 
 -> Les fichiers `.env` fournis sont des exemples, veuillez les adapter avec vos informations.
+
+# Utiliser les fonctionnalités admin
+Une fois le compte crée, allez dans la base de données pour changer le role à "admin" dans la table user. 
+
+![image](https://github.com/user-attachments/assets/2934562e-ab27-42e6-a144-b1118ead197d)
+
