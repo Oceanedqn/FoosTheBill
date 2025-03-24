@@ -98,6 +98,8 @@ export class TournamentsService {
         );
       });
 
+      teams.sort((a, b) => a.position - b.position);
+
       const registeredUsers = tournament.teams.flatMap(team => team.players);
       const users = await this.usersService.findAll();
       const notRegisteredUsers = users.filter(user => !registeredUsers.some(registeredUser => registeredUser.id === user.id));
