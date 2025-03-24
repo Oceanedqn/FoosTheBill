@@ -8,7 +8,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
      * If a logged-in user attempts to access these pages, they are redirected to the homepage.
      */
     if (authStore.isLoggedIn && (to.path === '/authentication/login' || to.path === '/authentication/register')) {
-        return navigateTo('/'); // Redirect to the homepage
+        return navigateTo('/tournaments'); // Redirect to the homepage
     }
 
     /**

@@ -182,6 +182,15 @@ const selectUser = (user: IUser, participant: 'participant1' | 'participant2') =
     filteredUsers.value = [];
 };
 
+watch([query1, query2], () => {
+    if (!query1.value.trim() && newTeam.value.players[0]) {
+        newTeam.value.players.splice(0, 1);
+    }
+    if (!query2.value.trim() && newTeam.value.players[1]) {
+        newTeam.value.players.splice(1, 1);
+    }
+}, { immediate: true });
+
 const handleCreateTeams = async () => {
     if (teams.value.length === 0) {
         showWarningToast('add_one_team');
