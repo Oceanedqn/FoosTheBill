@@ -23,11 +23,12 @@
             </p>
 
             <!-- Button to join or view tournament -->
-            <button @click="joinTournament(tournament.id)"
-                class="w-full px-4 py-2 mt-auto text-white rounded-lg cursor-pointer bg-primary-light hover:bg-primary-dark">
-                {{ tournament.isRegister ? $t('see_matches') : $t('join') }}
+            <button @click="joinTournament(tournament)"
+                class="px-4 py-2 mt-auto text-white rounded-lg cursor-pointer bg-primary-light hover:bg-primary-dark">
+                {{ tournament.isMatches ? $t('see_matches') : (tournament.isRegister ? $t('see_tournament') :
+                    $t('join')) }}
                 <i class="ml-1 fa-solid"
-                    :class="tournament.isRegister ? 'fa-calendar-days' : 'fa-hand-point-right'"></i>
+                    :class="tournament.isMatches ? 'fa-calendar-days' : (tournament.isRegister ? 'fa-trophy' : 'fa-hand-point-right')"></i>
             </button>
         </div>
     </div>
@@ -55,9 +56,13 @@ const formatDate = (startDate: string | Date): string => {
     });
 };
 
-const joinTournament = (tournamentId: string): void => {
-    router.push(`/tournaments/${tournamentId}`);
-};
+const joinTournament = (tournament: ITournament) => {
+    if (tournament.isMatches) {
+        router.push(`/tournaments/${tournament.id}/matches`);
+    } else {
+        router.push(`/tournaments/${tournament.id}`);
+    }
+}
 </script>
 
 <style scoped>

@@ -36,6 +36,7 @@
   "tournament_name": "Tournament Name",
   "date": "Date",
   "actions": "Actions",
+  "see_tournament":"See tournament",
 
   "create_team": "Create My Team",
   "create_matches": "Generate Matches",

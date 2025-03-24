@@ -25,10 +25,12 @@
           </td>
           <td class="flex items-center justify-center px-4 py-1 text-center whitespace-nowrap">
 
-            <button @click="joinTournament(tournament.id)"
+            <button @click="joinTournament(tournament)"
               class="px-4 py-1 mt-auto text-white rounded-lg cursor-pointer bg-primary-light hover:bg-primary-dark">
-              {{ tournament.isRegister ? $t('see_matches') : $t('join') }}
-              <i class="ml-1 fa-solid" :class="tournament.isRegister ? 'fa-calendar-days' : 'fa-hand-point-right'"></i>
+              {{ tournament.isMatches ? $t('see_matches') : (tournament.isRegister ? $t('see_tournament') :
+                $t('join')) }}
+              <i class="ml-1 fa-solid"
+                :class="tournament.isMatches ? 'fa-calendar-days' : (tournament.isRegister ? 'fa-trophy' : 'fa-hand-point-right')"></i>
             </button>
           </td>
         </tr>
@@ -60,7 +62,11 @@ const formatDate = (startDate: Date) => {
   });
 };
 
-const joinTournament = (tournamentId: string) => {
-  router.push(`/tournaments/${tournamentId}`);
+const joinTournament = (tournament: ITournament) => {
+  if (tournament.isMatches) {
+    router.push(`/tournaments/${tournament.id}/matches`);
+  } else {
+    router.push(`/tournaments/${tournament.id}`);
+  }
 };
 </script>

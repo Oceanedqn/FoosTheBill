@@ -36,7 +36,7 @@
 import { ref, onMounted } from 'vue'
 
 // Thème actif
-const theme = ref('ocean-theme')
+const theme = ref('clementine-theme')
 const isModalOpen = ref(false)
 
 const themes = [
@@ -70,7 +70,7 @@ const selectTheme = (newTheme) => {
 
 // Charger le thème sauvegardé au démarrage
 onMounted(() => {
-    const savedTheme = localStorage.getItem('theme') || 'ocean-theme'
+    const savedTheme = localStorage.getItem('theme') || 'clementine-theme'
     theme.value = savedTheme
     document.documentElement.setAttribute('data-theme', savedTheme)
 })
