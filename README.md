@@ -10,7 +10,7 @@ Ce guide vous expliquera comment configurer le projet en local, y compris l'inst
 1. Clonez le dépôt sur votre machine locale en utilisant la commande suivante :
 
 
-   git clone [https://votre-url-du-dépôt.git](https://github.com/Oceanedqn/FoosTheBill.git)
+   git clone (https://github.com/Oceanedqn/FoosTheBill.git)
 
 ## Configuration du Backend
 1. Allez dans le Répertoire Backend
