@@ -91,6 +91,8 @@
   "update_match_ok": "Mise à jour du score du match réussie",
   "update_match_error": "Problème lors de la mise à jour du match",
   "close_match_ok": "Clôture du match réussie",
-  "add_one_team": "Il faut ajouter au moins une équipe"
+  "add_one_team": "Il faut ajouter au moins une équipe",
+  "quit_team_ok": "Équipe quittée avec succès",
+  "quit_team_error": "Impossible de quitter l'équipe en raison d'une erreur"
 
 }

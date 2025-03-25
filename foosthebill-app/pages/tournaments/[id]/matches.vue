@@ -17,7 +17,7 @@
                     </p>
                 </div>
                 <div v-if="tournamentMatches?.myTeam" class="md:w-1/3">
-                    <TeamCard :team="tournamentMatches.myTeam" :isMyTeam="true" :joinTeam="seeTeam" />
+                    <TeamCard :team="tournamentMatches.myTeam" :isMatches="tournamentMatches.tournament.isMatches" :isMyTeam="true" :joinTeam="seeTeam" />
                 </div>
             </div>
             <button class="px-4 py-2 text-white rounded-lg cursor-pointer bg-secondary hover:bg-secondary-dark"
@@ -66,15 +66,11 @@ const tournamentId = route.params.id as string;
 
 // Fetch matches from the API
 const fetchMatches = async () => {
-    const token = authStore.accessToken;
-
-    if (token) {
-        try {
-            const response = await getTournamentMatches(tournamentId, token);
-            tournamentMatches.value = response;
-        } catch (error) {
-            console.error('Error fetching teams:', error);
-        }
+    try {
+        const response = await getTournamentMatches(tournamentId);
+        tournamentMatches.value = response;
+    } catch (error) {
+        console.error('Error fetching teams:', error);
     }
 };
 

@@ -192,6 +192,10 @@ export class TeamsService {
             // Retirer le joueur de l'équipe
             team.players.splice(playerIndex, 1); // Retirer le joueur du tableau des joueurs
 
+            if(team.players.length == 0){
+                await this.remove(teamId, playerId)
+            }
+
             // Sauvegarder les modifications dans la base de données
             await this.teamsRepository.save(team);
         } catch (error) {

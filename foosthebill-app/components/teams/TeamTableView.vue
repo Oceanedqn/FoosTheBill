@@ -26,7 +26,7 @@
                             {{ team.players[1]?.name }} {{ team.players[1]?.firstname }}
                         </span>
                         <div v-else class="flex items-center justify-center">
-                            <button v-if="!isRegister" @click="props.handleJoinTeam(team.id)"
+                            <button v-if="!isRegister && !isMatches" @click="props.handleJoinTeam(team.id)"
                                 class="flex items-center justify-center px-4 py-1 text-white rounded-lg cursor-pointer bg-primary-light hover:bg-primary-dark">
                                 <i class="pr-1 fa-solid fa-user-plus"></i>
                                 <span class="hidden sm:inline">{{ $t('join_team') }}</span>
