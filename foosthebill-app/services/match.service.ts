@@ -1,8 +1,7 @@
 
+import { API_URL } from "~/constants/url.constants";
 import type { IMatch, IUpdateMatch } from "~/models/Match";
 import type { ApiResponse } from "~/models/Response";
-
-const API_URL = 'http://localhost:3001';
 
 
 

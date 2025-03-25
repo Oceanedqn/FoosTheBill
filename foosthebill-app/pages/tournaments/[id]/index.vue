@@ -18,7 +18,7 @@
                 </div>
                 <div v-if="myTeam" class="md:w-1/3">
                     <TeamCard :team="myTeam" :isMyTeam="true" :joinTeam="handleJoinTeam"
-                        :isRegister="tournamentDetails.tournament.isRegister" />
+                        :isRegister="tournamentDetails.tournament.isRegister" :isMatches="tournamentDetails.tournament.isMatches" :handleQuitTeam="handleQuitTeam" />
                 </div>
             </div>
             <TeamManagement :tournamentDetails="tournamentDetails" :openModalTeam="openModalTeam"
@@ -39,7 +39,7 @@
         <div class="w-full max-w-6xl mb-4">
             <!-- Teams List Section - Grid View -->
             <TeamGridView v-if="isGridView && filteredTeams.length" :teams="filteredTeams"
-                :handleJoinTeam="handleJoinTeam" :isRegister="tournamentDetails.tournament.isRegister" />
+                :handleJoinTeam="handleJoinTeam" :isRegister="tournamentDetails.tournament.isRegister" :isMatches="tournamentDetails.tournament.isMatches" />
             <!-- Teams List Section - Table View -->
             <TeamTableView v-if="!isGridView" :teams="filteredTeams" :handleJoinTeam="handleJoinTeam"
                 :isMatches="tournamentDetails.tournament.isMatches"
@@ -60,7 +60,7 @@ import { ref, onMounted, watch } from 'vue';
 import { Role } from '~/models/User';
 import { useRouter, useRoute } from 'vue-router';
 import { createMatchesTournament, getTournamentDetails } from '~/services/tournament.service';
-import { joinExistingTeam } from '~/services/team.service';
+import { joinExistingTeam, quitTeam } from '~/services/team.service';
 import { useAuthStore } from '~/stores/auth.store';
 import TournamentTitle from '~/components/tournaments/TournamentTitle.vue';
 import TeamCard from '~/components/teams/TeamCard.vue';
@@ -71,7 +71,7 @@ import ModalCreateTeam from '~/components/modals/ModalCreateTeam.vue';
 import ModalCreateTeams from '~/components/modals/ModalCreateTeams.vue';
 import type { ITeam, ITeamRanking, ITeamScore } from '~/models/Team';
 import ViewToggleButton from '~/components/ViewToggleButton.vue';
-import { showAlertToast } from "@/utils/toast.utils";
+import { showAlertToast, showSuccessToast } from "@/utils/toast.utils";
 import type { ITournamentDetails } from '~/models/Tournament';
 
 const router = useRouter();
@@ -101,19 +101,30 @@ const handleCreateMatches = async () => {
     }
 
     const tournamentId = route.params.id as string;
-    const token = authStore.accessToken;
-    if (token) {
-        try {
-            await createMatchesTournament(tournamentId, tournamentDetails.value!.teams, token);
-            await getTournamentDetails(tournamentId, token);
-            tournamentDetails.value!.tournament.isMatches = true;
-            showSuccessToast('create_matches_ok');
-        } catch (error) {
-            showAlertToast('create_matches_error');
-        }
+    try {
+        await createMatchesTournament(tournamentId, tournamentDetails.value!.teams);
+        await fetchTournamentDetails();
+        tournamentDetails.value!.tournament.isMatches = true;
+        showSuccessToast('create_matches_ok');
+    } catch (error) {
+        showAlertToast('create_matches_error');
     }
 
+
 }
+
+const handleQuitTeam = async (teamId: string) => {
+    console.log("handleQuitTeam called");
+    console.log("Team ID:", teamId);
+    try {
+        await quitTeam(teamId);
+        await fetchTournamentDetails();
+        showSuccessToast('quit_team_ok');
+    } catch (error) {
+        console.error('Error quitting team:', error);
+        showAlertToast('quit_team_error');
+    }
+};
 
 watch(isGridView, (newValue) => {
     localStorage.setItem('viewType', newValue ? 'grid' : 'table');
@@ -134,16 +145,14 @@ const whichView = () => {
 // Fetch all teams of a tournament
 const fetchTournamentDetails = async () => {
     const tournamentId = route.params.id as string;
-    const token = authStore.accessToken;
-    if (token) {
-        try {
-            tournamentDetails.value = await getTournamentDetails(tournamentId, token);
-            fetchMyTeam();
-            filterTournamentTeams();
-        } catch (error) {
-            console.error('Error fetching teams:', error);
-        }
+    try {
+        tournamentDetails.value = await getTournamentDetails(tournamentId);
+        fetchMyTeam();
+        filterTournamentTeams();
+    } catch (error) {
+        console.error('Error fetching teams:', error);
     }
+    
 };
 
 const fetchMyTeam = () => {

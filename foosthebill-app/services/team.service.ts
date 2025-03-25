@@ -1,7 +1,6 @@
 import type { ApiResponse } from "~/models/Response";
 import type { ICreateTeam, ITeam } from "~/models/Team";
-
-const API_URL = 'http://localhost:3001';
+import {API_URL} from "~/constants/url.constants"
 
 /**
  * Creates a new team by sending a POST request to the API.
@@ -11,7 +10,6 @@ const API_URL = 'http://localhost:3001';
 export const createTeam = async (createTeam: ICreateTeam, tournamentId: string): Promise<ITeam> => {
     const authStore = useAuthStore();
     const token = authStore.accessToken;
-
     try {
         const response = await $fetch(`${API_URL}/tournaments/${tournamentId}/team`, {
             method: 'POST',
@@ -58,7 +56,6 @@ export const createTeams = async (createTeams: ICreateTeam[], tournamentId: stri
 export const joinExistingTeam = async (teamId: string): Promise<ITeam> => {
     const authStore = useAuthStore();
     const token = authStore.accessToken;
-
     try {
         const response = await $fetch(`${API_URL}/teams/${teamId}`, {
             method: 'PUT',
@@ -72,6 +69,26 @@ export const joinExistingTeam = async (teamId: string): Promise<ITeam> => {
         return response.data;
     } catch (error) {
         throw new Error('Failed to create team');
+    }
+}
+
+export const quitTeam = async (teamId: string, ): Promise<ITeam> => {
+    const authStore = useAuthStore();
+    const token = authStore.accessToken;
+
+    try {
+        const response = await $fetch(`${API_URL}/teams/${teamId}/quit`, {
+            method: 'PUT',
+            body: '',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        }) as ApiResponse<ITeam>;
+
+        return response.data;
+    } catch (error) {
+        throw new Error('Failed to quit team');
     }
 }
 

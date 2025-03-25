@@ -58,6 +58,7 @@ export class TeamsController {
      * @throws NotFoundException - If the team is not found.
      * @throws ConflictException - If the user is not part of the team.
      */
+    @UseGuards(AuthGuard)
     @Put(':id/quit')
     async quitTeam(@Param('id') teamId: string, @Request() req) {
         const userId = req.user.id;

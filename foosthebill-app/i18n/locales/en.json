@@ -91,5 +91,7 @@
   "update_match_ok": "Match Score Update Successful",
   "update_match_error": "Error During Match Update",
   "close_match_ok": "Match Closed Successfully",
-  "add_one_team": "You must add at least one team"
+  "add_one_team": "You must add at least one team",
+  "quit_team_ok": "Team left success",
+  "quit_team_error": "Error during quit team"
 }
