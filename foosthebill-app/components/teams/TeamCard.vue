@@ -5,7 +5,7 @@
         <button v-if="team.isMyTeam" @click="handleQuitTeam?.(team.id)" class="px-2 py-1 mr-1 rounded-full bg-primary">
           <i class="cursor-pointer fa-solid fa-right-to-bracket"></i>
         </button>
-        <button isAdmin @click="handleRemoveTeam?.(team.id)" class="px-2 py-1 rounded-full bg-secondary">
+        <button v-if="isAdmin" @click="handleRemoveTeam?.(team.id)" class="px-2 py-1 rounded-full bg-secondary">
           <i class="cursor-pointer fa-solid fa-trash"></i>
         </button>
       </div>
