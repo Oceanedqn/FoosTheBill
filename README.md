@@ -57,7 +57,6 @@ Exécutez la commande suivante pour installer les dépendances nécessaires au f
 Copiez le fichier d'exemple d'environnement et renommez-le en .env :
 
 - NUXT_SESSION_PASSWORD=c999ff4c98f0420c9c8ab1893ae250f4
-- API_URL=http://localhost:3001
 
 4. Démarrer le Serveur Frontend
 Une fois les dépendances installées et le fichier .env configuré, lancez le serveur frontend avec :
