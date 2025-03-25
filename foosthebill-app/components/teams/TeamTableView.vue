@@ -6,6 +6,7 @@
                     <th class="px-4 py-2 text-center">{{ $t('team_name') }}</th>
                     <th class="px-4 py-2 text-center">{{ $t('player') }} 1</th>
                     <th class="px-4 py-2 text-center">{{ $t('player') }} 2</th>
+                    <th v-if="!isMatches" class="px-4 py-2 text-right"></th>
                     <th v-if="isMatches" class="px-4 py-2 text-center">{{ $t('score') }}</th>
                     <th v-if="isMatches" class="px-4 py-2 text-center">{{ $t('classement') }}</th>
                 </tr>
@@ -19,6 +20,7 @@
                         <i class="pr-2 fa-solid fa-user"></i>
                         <!-- Affichage du premier joueur de l'équipe -->
                         {{ team.players[0]?.name }} {{ team.players[0]?.firstname }}
+
                     </td>
                     <td class="flex items-center justify-center px-4 py-1 whitespace-nowrap">
                         <span v-if="team.players[1]">
@@ -34,6 +36,17 @@
                             </button>
                         </div>
                     </td>
+                    <td v-if="!isMatches">
+                        <div class="flex justify-end pr-6 items-right">
+                            <button v-if="team.isMyTeam" @click="handleQuitTeam?.(team.id)" class="mr-3">
+                            <i class="cursor-pointer fa-solid fa-right-to-bracket"></i>
+                        </button>
+                        <button v-if="isAdmin" @click="handleRemoveTeam?.(team.id)">
+                            <i class="cursor-pointer fa-solid fa-trash"></i>
+                        </button>
+                        </div>
+                    </td>
+                    
                     <!-- Affichage du score -->
                     <td v-if="isMatches" class="px-4 py-1 text-center">
                         <!-- Affichage du score de l'équipe -->
@@ -73,5 +86,18 @@ const props = defineProps({
         required: true,
         default: false
     },
+    isAdmin: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
+    handleQuitTeam: {
+        type: Function,
+        required: true
+    },
+    handleRemoveTeam: {
+        type: Function,
+        required: true
+    }
 });
 </script>

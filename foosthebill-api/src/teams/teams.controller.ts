@@ -80,8 +80,7 @@ export class TeamsController {
     @UseGuards(AuthGuard, RolesGuard)
     @Delete(':id')
     async remove(@Param('id') id: string, @Request() req) {
-        const userId = req.user.id;
-        await this.teamsService.remove(id, userId);
+        await this.teamsService.remove(id);
         return { code: HttpStatus.OK, message: 'Team deleted successfully' };
     }
 }

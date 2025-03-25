@@ -5,7 +5,6 @@ import type { IUser } from "~/models/User";
 
 
 export const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
-  console.log("API URL",API_URL)
   try {
     const reponse = await $fetch(`${API_URL}/auth/login`, {
       method: 'POST',

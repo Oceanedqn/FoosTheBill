@@ -17,8 +17,9 @@
                     </p>
                 </div>
                 <div v-if="myTeam" class="md:w-1/3">
-                    <TeamCard :team="myTeam" :isMyTeam="true" :joinTeam="handleJoinTeam"
-                        :isRegister="tournamentDetails.tournament.isRegister" :isMatches="tournamentDetails.tournament.isMatches" :handleQuitTeam="handleQuitTeam" />
+                    <TeamCard :team="myTeam" :isMyTeam="true" :handleJoinTeam="handleJoinTeam"
+                        :isRegister="tournamentDetails.tournament.isRegister" :isMatches="tournamentDetails.tournament.isMatches" 
+                        :handleQuitTeam="handleQuitTeam" :handleRemoveTeam="handleRemoveTeam" :isAdmin="isAdmin" />
                 </div>
             </div>
             <TeamManagement :tournamentDetails="tournamentDetails" :openModalTeam="openModalTeam"
@@ -39,11 +40,12 @@
         <div class="w-full max-w-6xl mb-4">
             <!-- Teams List Section - Grid View -->
             <TeamGridView v-if="isGridView && filteredTeams.length" :teams="filteredTeams"
-                :handleJoinTeam="handleJoinTeam" :isRegister="tournamentDetails.tournament.isRegister" :isMatches="tournamentDetails.tournament.isMatches" />
+                :handleJoinTeam="handleJoinTeam" :isRegister="tournamentDetails.tournament.isRegister" :handleQuitTeam="handleQuitTeam"
+                :isMatches="tournamentDetails.tournament.isMatches" :handleRemoveTeam="handleRemoveTeam" :isAdmin="isAdmin" />
             <!-- Teams List Section - Table View -->
             <TeamTableView v-if="!isGridView" :teams="filteredTeams" :handleJoinTeam="handleJoinTeam"
-                :isMatches="tournamentDetails.tournament.isMatches"
-                :isRegister="tournamentDetails.tournament.isRegister" />
+                :isMatches="tournamentDetails.tournament.isMatches" :handleRemoveTeam="handleRemoveTeam" :handleQuitTeam="handleQuitTeam"
+                :isRegister="tournamentDetails.tournament.isRegister" :isAdmin="isAdmin" />
         </div>
 
         <!-- Modal Directement sur la Page -->
@@ -60,7 +62,7 @@ import { ref, onMounted, watch } from 'vue';
 import { Role } from '~/models/User';
 import { useRouter, useRoute } from 'vue-router';
 import { createMatchesTournament, getTournamentDetails } from '~/services/tournament.service';
-import { joinExistingTeam, quitTeam } from '~/services/team.service';
+import { joinExistingTeam, quitTeam, removeTeam } from '~/services/team.service';
 import { useAuthStore } from '~/stores/auth.store';
 import TournamentTitle from '~/components/tournaments/TournamentTitle.vue';
 import TeamCard from '~/components/teams/TeamCard.vue';
@@ -114,15 +116,22 @@ const handleCreateMatches = async () => {
 }
 
 const handleQuitTeam = async (teamId: string) => {
-    console.log("handleQuitTeam called");
-    console.log("Team ID:", teamId);
     try {
         await quitTeam(teamId);
         await fetchTournamentDetails();
         showSuccessToast('quit_team_ok');
     } catch (error) {
-        console.error('Error quitting team:', error);
         showAlertToast('quit_team_error');
+    }
+};
+
+const handleRemoveTeam = async (teamId: string) => {
+    try {
+        await removeTeam(teamId);
+        await fetchTournamentDetails();
+        showSuccessToast('remove_team_ok');
+    } catch (error) {
+        showAlertToast('remove_team_error');
     }
 };
 
