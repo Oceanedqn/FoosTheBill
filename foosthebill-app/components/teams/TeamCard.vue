@@ -1,6 +1,5 @@
 <template>
-  <div v-if="team"
-    class="relative flex flex-col items-center p-6 bg-white rounded-lg shadow-lg bg-primary hover:shadow-xl">
+  <div v-if="team" class="relative flex flex-col items-center p-6 bg-white rounded-lg shadow-lg bg-primary hover:shadow-xl">
     <div class="relative flex flex-col items-center w-full mb-2">
       <div v-if="!isMatches" class="absolute top-0 right-0 flex items-center text-sm font-semibold text-white ">
         <button v-if="team.isMyTeam" @click="handleQuitTeam?.(team.id)" class="px-2 py-1 mr-1 rounded-full bg-primary">
@@ -12,7 +11,7 @@
       </div>
       </div>
       <div class="flex flex-col p-6">
-      <h3 class="mb-2 text-xl font-semibold">
+      <h3 class="mb-2 text-xl font-semibold text-center">
         {{ team.name }}
       </h3>
       <div class="flex flex-col space-y-2">
