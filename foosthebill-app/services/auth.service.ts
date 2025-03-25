@@ -1,10 +1,11 @@
+import { API_URL } from "~/constants/url.constants";
 import type { LoginCredentials, RegisterCredentials } from "~/models/Authentication";
 import type { ApiResponse, AuthResponse } from "~/models/Response";
 import type { IUser } from "~/models/User";
 
-const API_URL = 'http://localhost:3001';
 
 export const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
+  console.log("API URL",API_URL)
   try {
     const reponse = await $fetch(`${API_URL}/auth/login`, {
       method: 'POST',
@@ -38,7 +39,9 @@ export const register = async (userData: RegisterCredentials): Promise<IUser> =>
   }
 };
 
-export const getUserInfo = async (token: string): Promise<IUser> => {
+export const getUserInfo = async (): Promise<IUser> => {
+  const authStore = useAuthStore();
+  const token = authStore.accessToken;
   try {
     const response = await $fetch(`${API_URL}/auth/me`, {
       method: 'GET',

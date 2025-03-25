@@ -63,7 +63,7 @@ export const useAuthStore = defineStore('auth', {
      */
     async register(credentials: { name: string; firstname: string; email: string; password: string }, router: any) {
       try {
-        const response: User = await register(credentials);
+        const response: IUser = await register(credentials);
 
         if (!response) {
           throw new Error('Invalid credentials');
@@ -105,22 +105,21 @@ export const useAuthStore = defineStore('auth', {
      * @throws {Error} If fetching user info fails.
      */
     async fetchUserInfo() {
-      if (this.accessToken) {
-        try {
-          const response: User = await getUserInfo(this.accessToken);
+      try {
+        const response: IUser = await getUserInfo();
 
-          if (!response) {
-            throw new Error('Invalid credentials');
-          }
-
-          this.user = response;
-          localStorage.setItem('user', JSON.stringify(this.user));
-
-        } catch (error) {
-          console.error('Error fetching user information', error);
-          throw error;
+        if (!response) {
+          throw new Error('Invalid credentials');
         }
+
+        this.user = response;
+        localStorage.setItem('user', JSON.stringify(this.user));
+
+      } catch (error) {
+        console.error('Error fetching user information', error);
+        throw error;
       }
+
     },
   },
 });

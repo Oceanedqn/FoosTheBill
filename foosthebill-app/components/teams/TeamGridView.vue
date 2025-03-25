@@ -2,7 +2,7 @@
     <div v-if="props.teams.length" class="grid w-full max-w-6xl grid-cols-2 gap-6 md:grid-cols-4">
         <div v-if="teams" v-for="team in teams" :key="team!.id">
             <TeamCard :team="team" :isMyTeam="team.isMyTeam" :joinTeam="props.handleJoinTeam"
-                :isRegister="isRegister" />
+                :isRegister="isRegister" :isMatches="isMatches" />
         </div>
     </div>
     <div v-else>{{ $t('no_team') }}</div>
@@ -23,6 +23,10 @@ const props = defineProps({
         required: true,
     },
     isRegister: {
+        type: Boolean,
+        required: true
+    },
+    isMatches: {
         type: Boolean,
         required: true
     }

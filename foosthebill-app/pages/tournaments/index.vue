@@ -137,16 +137,13 @@ const setGridView = (value: boolean) => {
 };
 // Function to fetch tournaments with token
 const fetchTournaments = async () => {
-    const token = authStore.accessToken;
-    if (token) {
-        try {
-            const response = await getTournaments(token);
-            tournaments.value = response;
-            filterTournaments();
-        } catch (error) {
-            console.error('Error fetching tournaments:', error);
-        }
-    }
+    try {
+        const response = await getTournaments();
+        tournaments.value = response;
+        filterTournaments();
+    } catch (error) {
+        console.error('Error fetching tournaments:', error);
+    }    
 };
 
 // Filter tournaments where the user is the organizer
