@@ -39,7 +39,6 @@ export class TeamsService {
             createTeamDto.players.unshift(user);
         }
 
-
         try {
             for (const player of createTeamDto.players) {
                 const existingTeamForPlayer = await this.isUserInTeam(player.id, createTeamDto.tournamentId);
@@ -193,7 +192,7 @@ export class TeamsService {
             team.players.splice(playerIndex, 1); // Retirer le joueur du tableau des joueurs
 
             if(team.players.length == 0){
-                await this.remove(teamId, playerId)
+                await this.remove(teamId)
             }
 
             // Sauvegarder les modifications dans la base de données
@@ -213,17 +212,27 @@ export class TeamsService {
      * @throws NotFoundException - If the team with the given ID is not found.
      * @throws InternalServerErrorException - If an error occurs during the team deletion process.
      */
-    async remove(id: string, userId: string): Promise<void> {
+    async remove(id: string): Promise<void> {
         try {
             const team = await this.teamsRepository.findOne({
                 where: { id },
                 relations: ['players', 'tournament'],
             });
-
+    
             if (!team) {
                 throw new NotFoundException(`Team with id ${id} not found`);
             }
-
+    
+            // Suppression des relations dans la table de liaison
+            if (team.players.length > 0) {
+                await this.teamsRepository
+                    .createQueryBuilder()
+                    .relation(Team, "players")
+                    .of(team)
+                    .remove(team.players);
+            }
+    
+            // Suppression de l'équipe
             await this.teamsRepository.delete(id);
         } catch (error) {
             throw new InternalServerErrorException('Error deleting team', error.message);

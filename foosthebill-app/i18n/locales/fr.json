@@ -93,6 +93,8 @@
   "close_match_ok": "Clôture du match réussie",
   "add_one_team": "Il faut ajouter au moins une équipe",
   "quit_team_ok": "Équipe quittée avec succès",
-  "quit_team_error": "Impossible de quitter l'équipe en raison d'une erreur"
+  "quit_team_error": "Impossible de quitter l'équipe en raison d'une erreur",
+  "remove_team_ok": "Équipe suprimmée avec succès",
+  "remove_team_error": "Impossible de suprimmer l'équipe en raison d'une erreur"
 
 }
