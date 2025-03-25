@@ -93,5 +93,7 @@
   "close_match_ok": "Match Closed Successfully",
   "add_one_team": "You must add at least one team",
   "quit_team_ok": "Team left success",
-  "quit_team_error": "Error during quit team"
+  "quit_team_error": "Error during quit team",
+  "remove_team_ok": "Team deleted success",
+  "remove_team_error": "Error during delete team"
 }

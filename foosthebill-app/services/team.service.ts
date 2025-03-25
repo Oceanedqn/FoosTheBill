@@ -92,3 +92,23 @@ export const quitTeam = async (teamId: string, ): Promise<ITeam> => {
     }
 }
 
+export const removeTeam = async (teamId: string, ): Promise<ITeam> => {
+    const authStore = useAuthStore();
+    const token = authStore.accessToken;
+
+    try {
+        const response = await $fetch(`${API_URL}/teams/${teamId}`, {
+            method: 'DELETE',
+            body: '',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        }) as ApiResponse<ITeam>;
+
+        return response.data;
+    } catch (error) {
+        throw new Error('Failed to quit team');
+    }
+}
+
