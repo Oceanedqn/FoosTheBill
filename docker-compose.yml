@@ -6,11 +6,13 @@ services:
     container_name: foosthebill-frontend
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     networks:
       - app-network
     environment:
       - NODE_ENV=production
-      - API_URL=http://backend:3001
+      - API_URL=${API_URL}
     depends_on:
       - backend
 
@@ -19,7 +21,7 @@ services:
       context: ./foosthebill-api/
     container_name: foosthebill-backend
     ports:
-      - "3002:3001" 
+      - "3001:3001" 
     networks:
       - app-network
     environment:
