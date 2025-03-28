@@ -1,4 +1,4 @@
-import { API_URL } from "~/constants/url.constants";
+
 import type { ApiResponse } from "~/models/Response";
 import type { ITeam } from "~/models/Team";
 import type { ICreateTournament, ITournament, ITournamentDetails, ITournamentMatches } from "~/models/Tournament";
