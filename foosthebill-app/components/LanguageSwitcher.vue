@@ -2,7 +2,7 @@
     <div>
         <!-- Language selection icon -->
         <button @click="openModal" class="text-2xl">
-            <i class="cursor-pointer fas fa-language text-primary hover:text-primary-light"></i>
+            <i class="cursor-pointer fas fa-language text-primary hover:text-primary-dark"></i>
         </button>
 
         <!-- Language selection modal -->
@@ -17,10 +17,10 @@
 
                 <!-- List of languages -->
                 <div class="grid grid-cols-2 gap-4">
-                    <div v-for="lang in languages" :key="lang.code" @click="selectLanguage(lang.code)"
-                        class="p-2 text-center rounded-lg cursor-pointer">
-                        <p class="text-text">{{ lang.name }}</p>
-                    </div>
+                    <NuxtLink v-for="{ code, name } in locales"
+                        class="p-2 text-center text-black rounded-lg cursor-pointer bg-background hover:bg-background-alternatif"
+                        :key="code" :to="switchLocalePath(code)" @click="closeModal">{{ name }}
+                    </NuxtLink>
                 </div>
 
                 <button @click="closeModal"
@@ -34,25 +34,10 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useSwitchLocalePath } from '#i18n'
+const { locale, locales } = useI18n();
+const switchLocalePath = useSwitchLocalePath();
 
 const isModalOpen = ref(false)
 const openModal = () => isModalOpen.value = true
 const closeModal = () => isModalOpen.value = false
-
-// Available languages
-const languages = [
-    { name: "Français", code: "fr" },
-    { name: "English", code: "en" }
-]
-
-// Retrieve the `i18n` function from vue-i18n
-const { locale } = useI18n()
-
-// Change the language
-const selectLanguage = (code) => {
-    locale.value = code;
-    closeModal();
-};
 </script>
