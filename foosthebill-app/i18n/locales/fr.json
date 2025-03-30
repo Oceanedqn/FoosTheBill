@@ -75,6 +75,8 @@
   "optional": "Optionnel",
   "end_match": "Clôturer",
 
+  "planning": "Planning",
+
   "connection_ok": "Connexion réussie",
   "invalid_credentials": "Informations d'identification invalides",
   "register_ok": "Inscription réussie",

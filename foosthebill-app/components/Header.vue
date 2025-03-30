@@ -10,6 +10,9 @@
                     <NuxtLink :to="localePath('/tournaments')" :prefetch="false" class="hover:text-primary-dark"><i
                             class="pr-2 fa-solid fa-trophy"></i>{{ $t('tournament') }}
                     </NuxtLink>
+                    <NuxtLink :to="localePath('/planning')" :prefetch="false" class="hover:text-primary-dark"><i
+                            class="pr-2 fa-solid fa-calendar"></i>{{ $t('planning') }}
+                    </NuxtLink>
                 </nav>
             </div>
             <nav class="flex items-center space-x-4 text-primary">
