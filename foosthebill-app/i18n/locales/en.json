@@ -76,6 +76,7 @@
   "end_match": "Close",
 
   "planning": "Planning",
+  "no_tournament_day": "No tournament on this day.",
 
   "connection_ok": "Login successful",
   "invalid_credentials": "Invalid credentials",

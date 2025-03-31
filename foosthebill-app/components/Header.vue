@@ -19,7 +19,8 @@
                 <ThemeSwitcher />
                 <LanguageSwitcher />
                 <div class="h-5 border-r-3 border-blue"></div>
-                <button class="p-1 px-3 text-white cursor-pointer hover:bg-primary-dark rounded-4xl bg-primary"
+                <button
+                    class="flex items-center gap-2 px-3 py-1 text-white cursor-pointer hover:bg-primary-dark rounded-4xl bg-primary"
                     @click="logout">
                     {{ $t('logout') }} <i class="fa-solid fa-right-from-bracket"></i>
                 </button>

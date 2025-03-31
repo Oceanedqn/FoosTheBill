@@ -1,37 +1,70 @@
 <template>
-    <div class="calendar w-full text-center">
-        <div class="header flex justify-between items-center mb-2">
-            <button @click="changeMonth(-1)" class="px-4 py-2 border border-primary rounded-full cursor-pointer"> <i
-                    class="fa-solid fa-caret-left text-primary"></i> </button>
+    <div v-if="props.tournaments" class="w-full text-center calendar">
+        <div class="flex items-center justify-between mb-2 header">
+            <button @click="changeMonth(-1)" class="px-4 py-2 border rounded-full cursor-pointer border-primary">
+                <i class="fa-solid fa-caret-left text-primary"></i>
+            </button>
             <span class="text-lg font-semibold">{{ format(currentDate, 'MMMM yyyy', { locale: fr }) }}</span>
-            <button @click="changeMonth(1)" class="px-4 py-2 border border-primary rounded-full cursor-pointer">
-                <i class="fa-solid fa-caret-right text-primary"></i> </button>
+            <button @click="changeMonth(1)" class="px-4 py-2 border rounded-full cursor-pointer border-primary">
+                <i class="fa-solid fa-caret-right text-primary"></i>
+            </button>
         </div>
-        <div class="grid grid-cols-7 gap-2 w-full">
-            <div v-for="day in daysOfWeek" :key="day" class="day font-bold">
+
+        <div class="grid w-full grid-cols-7 gap-2">
+            <div v-for="day in daysOfWeek" :key="day" class="font-bold day">
                 {{ day }}
             </div>
             <div v-for="day in calendarDays" :key="day.toString()"
-                class="flex justify-center items-center p-2 border border-primary bg-primary text-white text-center cursor-pointer rounded-lg w-full h-24"
-                :class="{ 'border border-secondary-light bg-secondary-light': day.getMonth() !== currentDate.getMonth() }"
-                @click="openModal(day)">
-                <div class="w-full h-full flex justify-center items-center">
-                    {{ format(day, 'd') }}
+                class="flex flex-col items-center w-full h-24 p-2 text-center text-white rounded-lg cursor-pointer bg-primary/50"
+                :class="{ 'bg-secondary-light/50': day.getMonth() !== currentDate.getMonth() }"
+                @click="openTournamentsModal(day)">
+
+                <div class="w-full text-lg font-bold">{{ format(day, 'd') }}</div>
+                <div class="w-full overflow-auto">
+                    <div v-for="tournament in getTournamentsForDay(day)" :key="tournament.id"
+                        class="p-1 mt-1 text-xs bg-white rounded-md cursor-pointer text-primary"
+                        :class="{ 'text-secondary': day.getMonth() !== currentDate.getMonth() }"
+                        @click.stop="openTournamentDetails(tournament)">
+                        {{ tournament.name }}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div v-if="showModal"
-        class="modal fixed top-0 left-0 w-full h-full bg-black/50 bg-opacity-50 flex justify-center items-center">
-        <div class="modal-content bg-white p-6 rounded-lg text-center relative w-72">
-            <span class="close absolute top-2 right-3 cursor-pointer text-xl hover:text-primary"
-                @click="closeModal">&times;</span>
+    <!-- Modale pour afficher la liste des tournois d'un jour -->
+    <div v-if="showTournamentsModal"
+        class="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-black/50">
+        <div class="relative p-6 text-center bg-white rounded-lg w-96">
+            <span class="absolute text-xl cursor-pointer top-2 right-3 hover:text-primary"
+                @click="closeTournamentsModal">&times;</span>
             <h2 class="text-lg font-semibold">{{ format(selectedDate!, 'PPP', { locale: fr }) }}</h2>
-            <textarea v-model="note" placeholder="Ajouter une note..."
-                class="w-full h-24 mt-4 p-2 border rounded"></textarea>
-            <button @click="saveNote"
-                class="mt-4 px-4 py-2 bg-primary cursor-pointer hover:bg-primary-light text-white rounded">Valider</button>
+
+            <div v-if="selectedTournaments.length > 0">
+                <ul class="mt-4 space-y-2">
+                    <li v-for="tournament in selectedTournaments" :key="tournament.id"
+                        class="p-2 text-white cursor-pointer bg-primary hover:bg-primary-light rounded-xl"
+                        @click="openTournamentDetails(tournament)">
+                        {{ tournament.name }}
+                    </li>
+                </ul>
+            </div>
+            <p v-else class="mt-4 text-gray-500">{{ $t('no_tournament_day') }}</p>
+        </div>
+    </div>
+
+    <!-- Modale pour afficher les détails d'un tournoi -->
+    <div v-if="showTournamentDetails"
+        class="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-black/50">
+        <div class="relative p-6 text-center bg-white rounded-lg w-96">
+            <span class="absolute text-xl cursor-pointer top-2 right-3 hover:text-primary"
+                @click="closeTournamentDetails">&times;</span>
+            <h2 class="text-lg font-semibold">{{ selectedTournament?.name }}</h2>
+            <p class="mt-2 text-gray-600">{{ $t('date') }} : {{ format(selectedTournament?.startDate!, 'dd MMMM yyyy', {
+                locale: fr
+            }) }}</p>
+            <p class="mt-2 text-gray-600">{{ $t('description') }} :
+                {{ selectedTournament?.description }}</p>
         </div>
     </div>
 </template>
@@ -40,11 +73,21 @@
 import { ref, computed } from 'vue';
 import { addMonths, startOfMonth, endOfMonth, getDay, eachDayOfInterval, format } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
+import type { ITournament } from '~/models/Tournament';
+
+const props = defineProps({
+    tournaments: {
+        type: Array as () => ITournament[],
+        required: true,
+    },
+});
 
 const currentDate = ref(new Date());
 const selectedDate = ref<Date | null>(null);
-const note = ref('');
-const showModal = ref(false);
+const showTournamentsModal = ref(false);
+const showTournamentDetails = ref(false);
+const selectedTournaments = ref<ITournament[]>([]);
+const selectedTournament = ref<ITournament | null>(null);
 
 const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 
@@ -76,18 +119,33 @@ const changeMonth = (offset: number) => {
     currentDate.value = addMonths(currentDate.value, offset);
 };
 
-const openModal = (day: Date) => {
+// Ouvrir la modale avec les tournois du jour sélectionné
+const openTournamentsModal = (day: Date) => {
     selectedDate.value = day;
-    note.value = '';
-    showModal.value = true;
+    selectedTournaments.value = getTournamentsForDay(day);
+    showTournamentsModal.value = true;
 };
 
-const closeModal = () => {
-    showModal.value = false;
+// Fermer la modale de la liste des tournois
+const closeTournamentsModal = () => {
+    showTournamentsModal.value = false;
 };
 
-const saveNote = () => {
-    console.log(`Note saved for ${format(selectedDate.value!, 'PPP', { locale: fr })}:`, note.value);
-    closeModal();
+// Ouvrir la modale des détails d'un tournoi
+const openTournamentDetails = (tournament: ITournament) => {
+    selectedTournament.value = tournament;
+    showTournamentDetails.value = true;
+};
+
+// Fermer la modale des détails du tournoi
+const closeTournamentDetails = () => {
+    showTournamentDetails.value = false;
+};
+
+// Récupérer les tournois pour un jour donné
+const getTournamentsForDay = (day: Date) => {
+    return props.tournaments.filter(tournament =>
+        format(new Date(tournament.startDate), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+    );
 };
 </script>

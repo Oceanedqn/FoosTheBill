@@ -11,7 +11,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="tournament in tournaments" :key="tournament.id" class="border-b border-gray-300">
+        <tr v-for="tournament in props.tournaments" :key="tournament.id" class="border-b border-gray-300">
           <td class="px-4 py-2 ">{{ tournament.name }}</td>
           <td class="px-4 py-2">
             {{ formatDate(tournament.startDate) }}

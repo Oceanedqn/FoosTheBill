@@ -143,7 +143,7 @@ const fetchTournaments = async () => {
         filterTournaments();
     } catch (error) {
         console.error('Error fetching tournaments:', error);
-    }    
+    }
 };
 
 // Filter tournaments where the user is the organizer

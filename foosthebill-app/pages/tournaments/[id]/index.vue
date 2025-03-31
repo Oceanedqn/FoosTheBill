@@ -18,8 +18,9 @@
                 </div>
                 <div v-if="myTeam" class="md:w-1/3">
                     <TeamCard :team="myTeam" :isMyTeam="true" :handleJoinTeam="handleJoinTeam"
-                        :isRegister="tournamentDetails.tournament.isRegister" :isMatches="tournamentDetails.tournament.isMatches" 
-                        :handleQuitTeam="handleQuitTeam" :handleRemoveTeam="handleRemoveTeam" :isAdmin="isAdmin" />
+                        :isRegister="tournamentDetails.tournament.isRegister"
+                        :isMatches="tournamentDetails.tournament.isMatches" :handleQuitTeam="handleQuitTeam"
+                        :handleRemoveTeam="handleRemoveTeam" :isAdmin="isAdmin" />
                 </div>
             </div>
             <TeamManagement :tournamentDetails="tournamentDetails" :openModalTeam="openModalTeam"
@@ -40,12 +41,14 @@
         <div class="w-full max-w-6xl mb-4">
             <!-- Teams List Section - Grid View -->
             <TeamGridView v-if="isGridView && filteredTeams.length" :teams="filteredTeams"
-                :handleJoinTeam="handleJoinTeam" :isRegister="tournamentDetails.tournament.isRegister" :handleQuitTeam="handleQuitTeam"
-                :isMatches="tournamentDetails.tournament.isMatches" :handleRemoveTeam="handleRemoveTeam" :isAdmin="isAdmin" />
+                :handleJoinTeam="handleJoinTeam" :isRegister="tournamentDetails.tournament.isRegister"
+                :handleQuitTeam="handleQuitTeam" :isMatches="tournamentDetails.tournament.isMatches"
+                :handleRemoveTeam="handleRemoveTeam" :isAdmin="isAdmin" />
             <!-- Teams List Section - Table View -->
             <TeamTableView v-if="!isGridView" :teams="filteredTeams" :handleJoinTeam="handleJoinTeam"
-                :isMatches="tournamentDetails.tournament.isMatches" :handleRemoveTeam="handleRemoveTeam" :handleQuitTeam="handleQuitTeam"
-                :isRegister="tournamentDetails.tournament.isRegister" :isAdmin="isAdmin" />
+                :isMatches="tournamentDetails.tournament.isMatches" :handleRemoveTeam="handleRemoveTeam"
+                :handleQuitTeam="handleQuitTeam" :isRegister="tournamentDetails.tournament.isRegister"
+                :isAdmin="isAdmin" />
         </div>
 
         <!-- Modal Directement sur la Page -->
@@ -161,7 +164,7 @@ const fetchTournamentDetails = async () => {
     } catch (error) {
         console.error('Error fetching teams:', error);
     }
-    
+
 };
 
 const fetchMyTeam = () => {
