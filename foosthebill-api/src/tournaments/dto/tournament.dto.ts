@@ -28,8 +28,8 @@ export interface ITournamentMatches {
 export interface ICreateTournament {
   name: string;
   description: string;
-  start_date: Date;
-  admin_id: string;
+  startDate: Date;
+  adminId: string;
 }
 
 // TODO: Create functions

@@ -8,21 +8,25 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "start":"nuxt start"
+    "start": "nuxt start"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@nuxtjs/i18n": "^9.3.1",
     "@pinia/nuxt": "^0.10.1",
     "@tailwindcss/vite": "^4.0.14",
+    "date-fns": "^4.1.0",
+    "dotenv": "^16.4.7",
     "nuxt": "^3.16.0",
     "nuxt-auth-utils": "^0.5.16",
+    "ts-node": "^10.9.2",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
+    "@types/date-fns": "^2.5.3",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.22.0",
     "eslint-config-prettier": "^10.1.1",

@@ -12,6 +12,9 @@ Ce guide vous expliquera comment configurer le projet en local, y compris l'inst
 
    git clone (https://github.com/Oceanedqn/FoosTheBill.git)
 
+## Configuration de la base de données
+Sur postgreSQL, créer une base de données avec les informations souhaitées. (elles seront utiles par la suite)
+
 ## Configuration du Backend
 1. Allez dans le Répertoire Backend
 Allez dans le répertoire du backend :
@@ -24,16 +27,17 @@ Exécutez la commande suivante pour installer les dépendances nécessaires au b
 `npm install`
 
 3. Ajouter le fichier .env pour le Backend
-
+Voici le contenu du fichier .env :
 - JWT_SECRET=f0df89dbf02a87842ac513a79583467c0a4ad4c26023fa666ce6f11d1740045bce82d8e1b9b5a5cee72119e5411bb73dbe7c73d98fcc1d75aaabaa77c30b463d75f3cdb947f12749b166c7d5978423718707dd63da18901118563e8cedd5b522811f7f865af0c9bf5a98408dbfa4c6a98e7329f328cff0170d5ba8deb8c0307bfb104337f52abb03ccddda3e69dd27fbd0bdc16239f753cf895fa703ac095a31439f1be36b314fa9e9bf8237dc0557ae30de6fb2398d8e98db6d5da9e25e17af92bbb3ef71f6c8619c19eb6b9f0d68ca633f47a5e1bea9c392c4096a871a8503b57768e2e9575010502ec0ec384c7be04108c0992a3418b41813d27b72b2bc9c
 - DB_HOST=localhost
 - DB_PORT=5432
 - DB_USERNAME=postgres
 - DB_PASSWORD=admin
 - DB_NAME=foosthebill
-Voici le contenu du fichier .env :
 
-(ne pas oublier de créer la base de données et d'adapter le .ENV en fonction)
+
+
+(ne pas oublier de créer la base de données et d'adapter le .env en fonction)
 
 4. Démarrer le Serveur Backend
 Une fois les dépendances installées et le fichier .env configuré, lancez le serveur backend avec :
@@ -41,6 +45,7 @@ Une fois les dépendances installées et le fichier .env configuré, lancez le s
 `npm run start:dev`
   
 Cela démarrera le backend en mode développement, et il devrait être disponible à http://localhost:3001.
+Si la base de données a été crée avant le lancement du backend, les tables seront créées à son lancement.
 
 ## Configuration du Frontend
 1. Allez dans le Répertoire Frontend
@@ -54,9 +59,10 @@ Exécutez la commande suivante pour installer les dépendances nécessaires au f
 `npm install`
   
 3. Ajouter le fichier .env pour le Frontend
-Copiez le fichier d'exemple d'environnement et renommez-le en .env :
+Copiez le code d'exemple ci-dessous dans un fichier et nommez-le en .env :
 
-- NUXT_SESSION_PASSWORD=c999ff4c98f0420c9c8ab1893ae250f4
+- API_URL=http://localhost:3001
+
 
 4. Démarrer le Serveur Frontend
 Une fois les dépendances installées et le fichier .env configuré, lancez le serveur frontend avec :

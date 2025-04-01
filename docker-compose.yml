@@ -2,33 +2,31 @@
 services:
   frontend:
     build:
-      context: ./foosthebill-app/  # Répertoire où se trouve le Dockerfile de Nuxt.js
+      context: ./foosthebill-app/
     container_name: foosthebill-frontend
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     networks:
       - app-network
     environment:
       - NODE_ENV=production
-      - DB_HOST=db  # Utiliser le nom du service 'db' pour la connexion à la base de données
-      - DB_PORT=5432
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=admin
-      - DB_NAME=foosthebill
+      - API_URL=${API_URL}
     depends_on:
       - backend
 
   backend:
     build:
-      context: ./foosthebill-api/  # Répertoire où se trouve le Dockerfile de NestJS
-    container_name: localhost
+      context: ./foosthebill-api/
+    container_name: foosthebill-backend
     ports:
-      - "3002:3001"  # Si ton app NestJS écoute sur 3001, alors expose ce port sur 3002
+      - "3001:3001" 
     networks:
       - app-network
     environment:
       - NODE_ENV=production
-      - DB_HOST=db  # Utiliser le nom du service 'db' pour la connexion à la base de données
+      - DB_HOST=db
       - DB_PORT=5432
       - DB_USERNAME=postgres
       - DB_PASSWORD=admin

@@ -1,6 +1,5 @@
 import type { ApiResponse } from "~/models/Response";
 import type { ICreateTeam, ITeam } from "~/models/Team";
-import {API_URL} from "~/constants/url.constants"
 
 /**
  * Creates a new team by sending a POST request to the API.
@@ -72,7 +71,7 @@ export const joinExistingTeam = async (teamId: string): Promise<ITeam> => {
     }
 }
 
-export const quitTeam = async (teamId: string, ): Promise<ITeam> => {
+export const quitTeam = async (teamId: string,): Promise<ITeam> => {
     const authStore = useAuthStore();
     const token = authStore.accessToken;
 
@@ -92,7 +91,7 @@ export const quitTeam = async (teamId: string, ): Promise<ITeam> => {
     }
 }
 
-export const removeTeam = async (teamId: string, ): Promise<ITeam> => {
+export const removeTeam = async (teamId: string,): Promise<ITeam> => {
     const authStore = useAuthStore();
     const token = authStore.accessToken;
 

@@ -17,7 +17,9 @@
                     </p>
                 </div>
                 <div v-if="tournamentMatches?.myTeam" class="md:w-1/3">
-                    <TeamCard :team="tournamentMatches.myTeam" :isMatches="tournamentMatches.tournament.isMatches" :isMyTeam="true" :joinTeam="seeTeam" />
+                    <TeamCard :team="tournamentMatches.myTeam" :isMatches="tournamentMatches.tournament.isMatches"
+                        :isMyTeam="true" :joinTeam="seeTeam" :isAdmin="isAdmin" :handleJoinTeam="() => { }"
+                        :handleQuitTeam="() => { }" :handleRemoveTeam="() => { }" />
                 </div>
             </div>
             <button class="px-4 py-2 text-white rounded-lg cursor-pointer bg-secondary hover:bg-secondary-dark"

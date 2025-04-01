@@ -1,4 +1,4 @@
-import { API_URL } from "~/constants/url.constants";
+
 import type { ApiResponse } from "~/models/Response";
 import type { IUser } from "~/models/User";
 

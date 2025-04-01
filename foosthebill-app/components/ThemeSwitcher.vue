@@ -1,9 +1,8 @@
 <template>
     <div>
         <!-- Icône de sélection du thème -->
-        <button class="p-1 px-3 text-white cursor-pointer hover:bg-primary-dark rounded-4xl bg-primary"
-            @click="openModal">
-            <i class="fa-solid fa-palette"></i>
+        <button class="text-2xl" @click="openModal">
+            <i class="cursor-pointer fa-solid fa-palette text-primary hover:text-primary-dark"></i>
         </button>
         <!-- Modal d'options de thèmes -->
         <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">

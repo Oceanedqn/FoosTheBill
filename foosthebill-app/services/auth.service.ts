@@ -1,4 +1,4 @@
-import { API_URL } from "~/constants/url.constants";
+
 import type { LoginCredentials, RegisterCredentials } from "~/models/Authentication";
 import type { ApiResponse, AuthResponse } from "~/models/Response";
 import type { IUser } from "~/models/User";
