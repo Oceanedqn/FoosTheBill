@@ -8,7 +8,10 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());  // Applique le filtre globalement
 
   app.enableCors({
-    origin: 'http://localhost:3000', // Frontend sur localhost:3000
+    origin: [
+      'http://localhost:3000',
+      'http://foosthebill-frontend:3000',
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
     allowedHeaders: ['Content-Type', 'Authorization'], // En-têtes autorisés
     credentials: true, // Autoriser l'envoi de cookies et de headers d'authentification

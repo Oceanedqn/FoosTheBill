@@ -13,7 +13,8 @@ const props = defineProps({
     },
     isAdmin: {
         type: Boolean,
-        default: false
+        default: false,
+        required: true
     }
 });
 </script>

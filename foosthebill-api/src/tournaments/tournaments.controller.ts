@@ -35,7 +35,8 @@ export class TournamentsController {
     @Post()
     async create(@Body() createTournamentDto: ICreateTournament, @Request() req) {
         const userId = req.user.id;
-        createTournamentDto.admin_id = userId;
+        createTournamentDto.adminId = userId;
+        createTournamentDto.startDate = new Date(createTournamentDto.startDate);
 
         const createdTournament = await this.tournamentsService.create(createTournamentDto);
 
