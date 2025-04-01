@@ -63,6 +63,7 @@ Copiez le code d'exemple ci-dessous dans un fichier et nommez-le en .env :
 
 - API_URL=http://localhost:3001
 
+
 4. Démarrer le Serveur Frontend
 Une fois les dépendances installées et le fichier .env configuré, lancez le serveur frontend avec :
 
