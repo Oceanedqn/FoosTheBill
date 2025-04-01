@@ -52,6 +52,7 @@ export class TournamentsService {
         description: createTournament.description,
         start_date: createTournament.startDate,
         admin: user,
+        config: createTournament.config
       });
 
       await this.tournamentsRepository.save(tournament);

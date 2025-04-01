@@ -4,12 +4,22 @@
             <h2 class="mb-4 text-2xl font-bold">{{ $t('create_tournament') }}</h2>
             <form @submit.prevent="handleCreateTournament">
                 <div class="mb-4">
+                    <label for="config" class="block text-sm font-semibold text-gray-700">{{ $t('tournament_type') }}</label>
+                    <select v-model="newTournament.config" id="config"
+                        class="w-full p-2 border border-gray-300 rounded-lg cursor-pointer">
+                        <option v-for="type in TournamentConfig" :key="type" :value="type">
+                            {{ $t(type) }}
+                        </option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
                     <label for="name" class="block text-sm font-semibold text-gray-700">{{ $t('name') }}</label>
                     <input v-model="newTournament.name" id="name" type="text"
                         class="w-full p-2 border border-gray-300 rounded-lg" :placeholder="$t('name')" required />
                 </div>
 
-                <div class="mb-4">
+                <div class="mb-2">
                     <label for="description" class="block text-sm font-semibold text-gray-700">{{ $t('description')
                         }}</label>
                     <textarea v-model="newTournament.description" id="description"
@@ -41,7 +51,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { ICreateTournament } from '~/models/Tournament';
+import { TournamentConfig, type ICreateTournament } from '~/models/Tournament';
 import { createTournament } from '~/services/tournament.service'; // Service pour créer un tournoi
 
 const props = defineProps({
@@ -77,7 +87,8 @@ const formatDateTime = (date: Date): string => {
 const newTournament = ref<ICreateTournament>({
     name: '',
     description: '',
-    startDate: formatDateTime(props.selectedDate || new Date())
+    startDate: formatDateTime(props.selectedDate || new Date()),
+    config: TournamentConfig.BABYFOOT
 });
 
 watch(() => props.selectedDate, (newDate) => {
@@ -93,7 +104,8 @@ const handleCreateTournament = async () => {
         newTournament.value = {
             name: '',
             description: '',
-            startDate: formatDateTime(props.selectedDate || new Date())
+            startDate: formatDateTime(props.selectedDate || new Date()),
+            config: TournamentConfig.BABYFOOT
         };
         showSuccessToast('create_tournament_ok');
         await props.fetchTournaments();

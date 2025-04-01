@@ -1,6 +1,7 @@
 import { IRoundMatches } from 'src/matches/dto/match.dto';
 import { ITeam, ITeamRanking } from 'src/teams/dto/team.dto';
 import { IUser } from 'src/users/dto/user.dto';
+import { TournamentConfig } from '../tournament.entity';
 
 export interface ITournament {
   id: string;
@@ -11,6 +12,7 @@ export interface ITournament {
   isRegister: boolean;
   isMatches: boolean;
   adminId: string;
+  config: TournamentConfig;
 }
 
 export interface ITournamentDetails {
@@ -30,6 +32,7 @@ export interface ICreateTournament {
   description: string;
   startDate: Date;
   adminId: string;
+  config: TournamentConfig;
 }
 
 // TODO: Create functions

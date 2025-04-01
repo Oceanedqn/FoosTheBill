@@ -37,6 +37,7 @@
   "date": "Date",
   "actions": "Actions",
   "see_tournament":"Voir le tournoi",
+  "tournament_type": "Type de tournoi",
 
   "create_team": "Créer mon équipe",
   "create_matches": "Générer les matchs",
@@ -99,6 +100,9 @@
   "quit_team_ok": "Équipe quittée avec succès",
   "quit_team_error": "Impossible de quitter l'équipe en raison d'une erreur",
   "remove_team_ok": "Équipe suprimmée avec succès",
-  "remove_team_error": "Impossible de suprimmer l'équipe en raison d'une erreur"
+  "remove_team_error": "Impossible de suprimmer l'équipe en raison d'une erreur",
+
+  "billard":"Billard",
+  "babyfoot":"Babyfoot"
 
 }

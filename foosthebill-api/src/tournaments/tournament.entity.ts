@@ -4,6 +4,11 @@ import { User } from 'src/users/user.entity';
 import { Team } from 'src/teams/team.entity';
 import { Ranking } from 'src/rankings/ranking.entity';
 
+export enum TournamentConfig{
+    BABYFOOT = "babyfoot",
+    BILLARD = "billard",
+}
+
 @Entity()
 export class Tournament {
     @PrimaryGeneratedColumn('uuid')
@@ -20,6 +25,9 @@ export class Tournament {
 
     @CreateDateColumn()
     creation_date: Date;
+
+    @Column({ type: 'enum', enum: TournamentConfig })
+        config: TournamentConfig;
 
     @ManyToOne(() => User)
     @JoinColumn({ name: 'admin_id' })

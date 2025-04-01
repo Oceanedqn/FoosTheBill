@@ -19,7 +19,8 @@ export function mapToITournament(tournament: Tournament, isRegister: boolean, is
         isRegister: isRegister,
         isMatches: isMatches,
         participantNumber: participantNumber,
-        adminId: tournament.admin.id
+        adminId: tournament.admin.id,
+        config: tournament.config
     }
 }
 
