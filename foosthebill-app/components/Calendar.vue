@@ -36,14 +36,19 @@
     <div v-if="showTournamentsModal"
         class="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-black/50">
         <div class="relative p-6 text-center bg-white rounded-lg w-96">
-            <span class="absolute text-xl cursor-pointer top-2 right-3 hover:text-primary"
+            <span class="absolute text-xl cursor-pointer top-1 right-3 hover:text-primary"
                 @click="closeTournamentsModal">&times;</span>
             <h2 class="text-lg font-semibold">{{ format(selectedDate!, 'PPP', { locale: fr }) }}</h2>
 
+            <div v-if="isAdmin" class="flex mt-2">
+                <ButtonCreateTournament :fetchTournaments="fetchTournaments"
+                    :selectedDate="selectedDate || new Date()" />
+            </div>
+            <div class="mt-4">{{ $t('tournament_list') }}</div>
             <div v-if="selectedTournaments.length > 0">
-                <ul class="mt-4 space-y-2">
+                <ul class="mt-2 space-y-2">
                     <li v-for="tournament in selectedTournaments" :key="tournament.id"
-                        class="p-2 text-white cursor-pointer bg-primary hover:bg-primary-light rounded-xl"
+                        class="p-2 text-white rounded-lg cursor-pointer bg-primary hover:bg-primary-light"
                         @click="openTournamentDetails(tournament)">
                         {{ tournament.name }}
                     </li>
@@ -54,17 +59,17 @@
     </div>
 
     <!-- Modale pour afficher les détails d'un tournoi -->
-    <div v-if="showTournamentDetails"
+    <div v-if="showTournamentDetails && selectedTournament"
         class="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-black/50">
         <div class="relative p-6 text-center bg-white rounded-lg w-96">
-            <span class="absolute text-xl cursor-pointer top-2 right-3 hover:text-primary"
+            <span class="absolute text-xl cursor-pointer top-1 right-3 hover:text-primary"
                 @click="closeTournamentDetails">&times;</span>
-            <h2 class="text-lg font-semibold">{{ selectedTournament?.name }}</h2>
-            <p class="mt-2 text-gray-600">{{ $t('date') }} : {{ format(selectedTournament?.startDate!, 'dd MMMM yyyy', {
-                locale: fr
-            }) }}</p>
-            <p class="mt-2 text-gray-600">{{ $t('description') }} :
-                {{ selectedTournament?.description }}</p>
+            <TournamentDetails :tournament="selectedTournament" />
+            <button @click="joinTournament(selectedTournament)"
+                class="px-4 py-2 mt-auto text-white rounded-lg cursor-pointer bg-primary-light hover:bg-primary-dark">
+                {{ $t('see_tournament') }}
+                <i class="ml-1 fa-solid fa-trophy"></i>
+            </button>
         </div>
     </div>
 </template>
@@ -74,12 +79,28 @@ import { ref, computed } from 'vue';
 import { addMonths, startOfMonth, endOfMonth, getDay, eachDayOfInterval, format } from 'date-fns';
 import { fr } from 'date-fns/locale/fr';
 import type { ITournament } from '~/models/Tournament';
+import ButtonCreateTournament from '~/components/tournaments/ButtonCreateTournament.vue';
+import TournamentDetails from '~/components/tournaments/TournamentDetails.vue';
+import { useRouter } from "vue-router";
+
 
 const props = defineProps({
     tournaments: {
         type: Array as () => ITournament[],
         required: true,
     },
+    createTournament: {
+        type: Function as PropType<() => void>,
+        required: false
+    },
+    isAdmin: {
+        type: Boolean,
+        required: true
+    },
+    fetchTournaments: {
+        type: Function as PropType<() => void>,
+        required: true
+    }
 });
 
 const currentDate = ref(new Date());
@@ -88,6 +109,7 @@ const showTournamentsModal = ref(false);
 const showTournamentDetails = ref(false);
 const selectedTournaments = ref<ITournament[]>([]);
 const selectedTournament = ref<ITournament | null>(null);
+const router = useRouter();
 
 const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 
@@ -148,4 +170,8 @@ const getTournamentsForDay = (day: Date) => {
         format(new Date(tournament.startDate), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
     );
 };
+
+const joinTournament = (tournament: ITournament) => {
+    router.push(`/tournaments/${tournament.id}`);
+}
 </script>

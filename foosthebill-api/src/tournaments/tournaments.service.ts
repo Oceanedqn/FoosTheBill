@@ -40,17 +40,17 @@ export class TournamentsService {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      const startDate = new Date(createTournament.start_date);
+      const startDate = new Date(createTournament.startDate);
       if (startDate < today) {
         throw new BadRequestException("Start date cannot be in the past.");
       }
 
-      const user = await this.usersService.findOne(createTournament.admin_id);
+      const user = await this.usersService.findOne(createTournament.adminId);
 
       const tournament = this.tournamentsRepository.create({
         name: createTournament.name,
         description: createTournament.description,
-        start_date: createTournament.start_date,
+        start_date: createTournament.startDate,
         admin: user,
       });
 

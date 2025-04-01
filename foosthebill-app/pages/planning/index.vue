@@ -1,20 +1,13 @@
 <template>
     <div class="flex flex-col">
         <TournamentTitle :title="$t('planning')" :isAdmin="isAdmin" />
-        <div class="flex justify-end w-full mb-4">
-            <div v-if="isAdmin">
-                <button @click="openModal"
-                    class="px-4 py-2 text-white rounded-lg shadow-md cursor-pointer bg-secondary hover:bg-secondary-dark">
-                    <div class="flex items-center text-center">
-                        {{ $t('create_tournament') }} <i class="pl-2 fa-solid fa-futbol"></i>
-                    </div>
-                </button>
+        <div v-if="isAdmin" class="flex justify-end mb-4">
+            <div class="w-auto">
+                <ButtonCreateTournament :fetchTournaments="fetchTournaments"/>
             </div>
         </div>
 
-        <Calendar :tournaments="tournaments" />
-
-        <ModalCreateTournament :show="isModalOpen" :closeModal="closeModal" :fetchTournaments="fetchTournaments" />
+        <Calendar :tournaments="tournaments" :isAdmin="isAdmin" :fetchTournaments="fetchTournaments" />
     </div>
 </template>
 
@@ -25,10 +18,10 @@ import { Role } from '../../models/User';
 import { useAuthStore } from '../../stores/auth.store';
 import type { ITournament } from '~/models/Tournament';
 import { getTournaments } from '~/services/tournament.service';
-import ModalCreateTournament from '~/components/modals/ModalCreateTournament.vue';
+import ButtonCreateTournament from '~/components/tournaments/ButtonCreateTournament.vue';
+import Calendar from '~/components/Calendar.vue';
 
 const tournaments = ref<ITournament[]>([]);
-const isModalOpen = ref(false);
 const isAdmin = ref(false);
 const authStore = useAuthStore();
 
@@ -45,12 +38,5 @@ const fetchTournaments = async () => {
     } catch (error) {
         console.error('Error fetching tournaments:', error);
     }
-};
-
-const openModal = () => {
-    isModalOpen.value = true;
-};
-const closeModal = () => {
-    isModalOpen.value = false;
 };
 </script>

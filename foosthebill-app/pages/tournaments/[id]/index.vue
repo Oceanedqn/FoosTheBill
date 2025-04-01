@@ -8,11 +8,14 @@
                     <p class="mb-2 text-gray-600">{{ tournamentDetails?.tournament.description }}</p>
                     <p class="mb-4 text-sm text-gray-500">
                         <i class="pr-1 fa-solid fa-calendar-day"></i>
-                        {{ new Date(tournamentDetails?.tournament.startDate!).toLocaleDateString('fr-FR', {
+                        {{ new Date(tournamentDetails?.tournament.startDate!).toLocaleString('fr-FR', {
                             weekday: 'long',
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
                         }) }}
                     </p>
                 </div>

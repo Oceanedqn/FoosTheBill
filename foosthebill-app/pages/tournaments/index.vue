@@ -9,13 +9,8 @@
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg" @input="filterTournaments" />
             </div>
             <div class="flex justify-end w-full mt-4 space-x-2 sm:w-auto sm:mt-0 ">
-                <div v-if="isAdmin">
-                    <button @click="openModal"
-                        class="px-4 py-2 mr-10 text-white rounded-lg shadow-md cursor-pointer bg-secondary hover:bg-secondary-dark">
-                        <div class="flex items-center text-center">
-                            {{ $t('create_tournament') }} <i class="pl-2 fa-solid fa-futbol"></i>
-                        </div>
-                    </button>
+                <div class="w-auto">
+                    <ButtonCreateTournament v-if="isAdmin" :fetchTournaments="fetchTournaments"/>
                 </div>
                 <ViewToggleButton :isGridView="isGridView" @update:isGridView="setGridView" />
             </div>
@@ -94,6 +89,7 @@ import TournamentCard from '~/components/tournaments/TournamentCard.vue';
 import ModalCreateTournament from '~/components/modals/ModalCreateTournament.vue';
 import TournamentTableView from '~/components/tournaments/TournamentTableView.vue';
 import type { ITournament } from '~/models/Tournament';
+import ButtonCreateTournament from '~/components/tournaments/ButtonCreateTournament.vue';
 
 
 const authStore = useAuthStore();
@@ -104,7 +100,6 @@ const tournaments = ref<ITournament[]>([]);
 const filteredOrganizingTournaments = ref<ITournament[]>([]);
 const filteredParticipatingTournaments = ref<ITournament[]>([]);
 const filteredTournamentsList = ref<ITournament[]>([]);
-
 
 const isAdmin = ref(false);
 const userId = ref<string | null>(null);
