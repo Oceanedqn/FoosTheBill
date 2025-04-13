@@ -77,5 +77,6 @@ Vous devriez maintenant pouvoir accéder à votre application en allant à l'URL
 # Utiliser les fonctionnalités admin
 Une fois le compte crée, allez dans la base de données pour changer le role à "admin" dans la table user. 
 
-![image](https://github.com/user-attachments/assets/2934562e-ab27-42e6-a144-b1118ead197d)
+![image](https://github.com/user-attachments/assets/b51c18cb-1d6f-4c12-bae3-d1543ae35552)
+
 
